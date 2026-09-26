@@ -125,24 +125,6 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
 }
 
 .card-background{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;display:block !important;margin:0 !important;padding:0 !important;border:0 !important;z-index:0 !important;pointer-events:none !important;user-select:none !important;object-fit:cover;}
-
-/* ===== PRINT STYLESHEET ===== */
-@media print {
-    body * { visibility: hidden; }
-    .card-wrap, .card-wrap * { visibility: visible; }
-    .card-wrap {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
-    .card {
-        width: 100% !important;
-        max-width: none !important;
-    }
-}
 </style>
 </head>
 <body>
@@ -189,9 +171,8 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
   </div>
   <div class="actions">
-    <button class="primary" id="download">Download Single PDF</button>
+    <button class="primary" id="download">Download High-Resolution PDF</button>
     <button class="success" id="batchDownload">Download All ID Cards (Batch PDF)</button>
-    <button class="secondary" id="print">Print ID Card</button>
     <button class="secondary" id="clear">Clear</button>
   </div>
 </div>
@@ -393,7 +374,7 @@ const generatePDF = async () => {
     }
 
     try {
-        $('status').textContent = 'Preparing PDF...';
+        $('status').textContent = 'Preparing High-Resolution PDF...';
         await new Promise(resolve => setTimeout(resolve, 200));
 
         const canvas = await captureCardCanvas();
@@ -463,8 +444,7 @@ const generateBatchPDF = async () => {
     }
 };
 
-$('download').onclick = () => generatePDF();
-$('batchDownload').onclick = () => generateBatchPDF();$('print').onclick = () => window.print();
+$('download').onclick = () => generatePDF();$('batchDownload').onclick = () => generateBatchPDF();
 
 update();
 </script>
