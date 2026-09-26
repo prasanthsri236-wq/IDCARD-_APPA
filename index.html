@@ -393,7 +393,7 @@ const generatePDF = async () => {
         pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
 
         const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
-        pdf.save('Student_ID_Card_' + filename + '.pdf');
+        pdf.save('apaa_id_card_' + filename + '.pdf');
 
         $('status').textContent = 'Student ID Card PDF downloaded successfully.';
 
