@@ -1,0 +1,62 @@
+/* Custom Styles for Alagappa Performing Arts Academy ID Card Generator */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #0f172a;
+    color: #f1f5f9;
+}
+
+.font-cinzel {
+    font-family: 'Cinzel', serif;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ID Card Realistic Shadow */
+#idCardCanvas {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    background-color: #ffffff;
+    transition: transform 0.2s ease;
+}
+
+/* Table hover & active record states */
+.record-row {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.record-row:hover {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.record-row.active {
+    background-color: rgba(245, 158, 11, 0.2);
+    border-left: 3px solid #f59e0b;
+}
+
+/* File Upload Drag & Drop Hover States */
+.upload-dropzone {
+    transition: all 0.2s ease;
+}
+
+.upload-dropzone:hover {
+    border-color: #f59e0b;
+    background-color: rgba(15, 23, 42, 0.8);
+}

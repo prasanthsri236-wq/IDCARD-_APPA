@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alagappa Performing Arts Academy ID Card Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#eef1f5;font-family:Arial,Helvetica,sans-serif;color:#102f59}
+.wrap{max-width:1250px;margin:auto;padding:24px}
+h1{margin:0 0 6px;font-size:28px}
+.sub{margin:0 0 18px;color:#667085}
+.panel{background:#fff;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input,select,button{font:inherit}
+input[type=text],input[type=date],input[type=file],select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#172033}
+input:disabled{background:#f3f4f6;color:#667085}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
+.primary{background:#082d5c;color:#fff}
+.secondary{background:#e7ecf3;color:#102f59}
+.status{margin-top:10px;font-size:13px;color:#475467}
+.hint{font-size:12px;color:#667085;margin-top:6px}
+.card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
+
+.card {
+    position: relative;
+    display: block;
+    width: 1024px;
+    max-width: 100%;
+    aspect-ratio: 2048/1294;
+    overflow: hidden;
+    isolation: isolate;
+    contain: paint;
+    background: #fffdf6;
+    flex: none;
+}
+
+/* ===== STUDENT DETAILS POSITION & ALIGNMENT ===== */
+
+.card-fields {
+    left: 21% !important;
+    top: 39% !important;
+    width: 58% !important;
+    gap: 10px !important;
+    position: absolute !important;
+    z-index: 10 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    pointer-events: none !important;
+}
+
+.card-row {
+    grid-template-columns: 250px 25px minmax(0, 1fr) !important;
+    min-height: 30px !important;
+    font-size: 21px !important;
+    line-height: 1.25 !important;
+    display: grid !important;
+    align-items: center !important;
+    width: 100% !important;
+    font-family: "Trebuchet MS", Arial, sans-serif !important;
+    font-weight: 700 !important;
+    color: #062d5c !important;
+    white-space: nowrap !important;
+}
+
+#row-institute {
+    font-size: 19px !important;
+}
+
+.c-value {
+    font-size: 21px !important;
+    padding-left: 3px !important;
+    display: block !important;
+    text-align: left !important;
+    min-width: 0 !important;
+    color: #062d5c !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.c-label {
+    display: block !important;
+    text-align: left !important;
+}
+
+.c-colon {
+    display: block !important;
+    text-align: center !important;
+}
+
+.c-value:empty {
+    visibility: hidden !important;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 750px) {
+    .card-fields {
+        left: 21% !important;
+        top: 39% !important;
+        width: 58% !important;
+        gap: 6px !important;
+    }
+
+    .card-row {
+        grid-template-columns: 130px 15px minmax(0, 1fr) !important;
+        min-height: 20px !important;
+        font-size: 11px !important;
+    }
+
+    .c-value {
+        font-size: 11px !important;
+    }
+
+    #row-institute {
+        font-size: 10px !important;
+    }
+}
+
+.card-background{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;display:block !important;margin:0 !important;padding:0 !important;border:0 !important;z-index:0 !important;pointer-events:none !important;user-select:none !important;object-fit:cover;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
+<p class="sub">Create a premium APAA Grade Examination Student ID Card — high-resolution PDF export for printing.</p>
+
+<div class="panel">
+  <div class="grid">
+    <div>
+      <label>Excel / CSV File</label>
+      <input id="file" type="file" accept=".xlsx,.xls,.csv">
+      <div class="hint">The program automatically finds the row containing ENROLLMENT NO, NAME and GRADE.</div>
+    </div>
+    <div>
+      <label>Search Student</label>
+      <input id="search" type="text" placeholder="Type enrollment number or student name...">
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:14px">
+    <div>
+      <label>Select Student</label>
+      <select id="studentSelect"><option value="">Enter details below or upload Excel</option></select>
+    </div>
+    <div>
+      <label>Upload Card Background (card-bg.png)</label>
+      <input id="bgUpload" type="file" accept="image/*">
+      <div class="hint">Select <strong>card-bg.png</strong> to convert and render without security issues.</div>
+    </div>
+  </div>
+
+  <div id="status" class="status" style="margin-top:10px">Ready. You can type student details below.</div>
+</div>
+
+<div class="panel">
+  <div class="manual-title" style="font-weight:700;margin-bottom:10px">Student Details</div>
+  <div class="grid">
+    <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. 2026-001"></div>
+    <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
+    <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+    <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
+    <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
+    <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
+  </div>
+  <div class="actions">
+    <button class="primary" id="download">Download High-Resolution PDF</button>
+    <button class="secondary" id="print">Download PDF</button>
+    <button class="secondary" id="clear">Clear</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="card-wrap">
+    <div class="card" id="card">
+      <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png">
+      
+      <div class="card-fields" aria-label="Student information">
+        <div class="card-row" id="row-id">
+          <span class="c-label">Student ID</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vId"></span>
+        </div>
+        <div class="card-row" id="row-name">
+          <span class="c-label">Name</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vName"></span>
+        </div>
+        <div class="card-row" id="row-grade">
+          <span class="c-label">Grade</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vGrade"></span>
+        </div>
+        <div class="card-row" id="row-dob">
+          <span class="c-label">Date of Birth</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vDob"></span>
+        </div>
+        <div class="card-row" id="row-institute">
+          <span class="c-label">Name of the Institution</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vInstitute"></span>
+        </div>
+        <div class="card-row" id="row-joining">
+          <span class="c-label">Date of Joining</span>
+          <span class="c-colon">:</span>
+          <span class="c-value" id="vJoining"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let students=[];
+const fields=['id','name','grade','dob','institute','joining'];
+
+/* Convert uploaded image file directly into data URL using FileReader */
+function loadFileAsDataURL(file, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    callback(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Event handler for background file picker */
+$('bgUpload').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  loadFileAsDataURL(file, (dataUrl) => {
+    $('cardBgImg').src = dataUrl;
+    $('status').textContent = 'Background image loaded into memory successfully.';
+  });
+});
+
+function norm(v){return String(v??'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');}
+function val(row,names){
+  const keys=Object.keys(row);
+  for(const n of names){
+    const k=keys.find(x=>norm(x)===norm(n));
+    if(k!==undefined && row[k]!==undefined && String(row[k]).trim()!=='') return row[k];
+  }
+  return '';
+}
+function dateText(v){
+  if(v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
+  if(typeof v==='number'&&window.XLSX){
+    const d=XLSX.SSF.parse_date_code(v);
+    if(d) return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
+  }
+  return String(v??'').trim();
+}
+function mapRow(r){
+ return {
+  id:val(r,['ENROLLMENT NO','ENROLLMENTNO','Enrollment No','Student ID','StudentID','ID']),
+  name:val(r,['NAME','Student Name','StudentName','Student']),
+  grade:val(r,['GRADE','Grade','Class','Level']),
+  dob:dateText(val(r,['DATE OF BIRTH','DATEOFBIRTH','DOB','Date of Birth','Birth Date'])),
+  institute:val(r,['NAME OF THE INSTITUTE','NAMEOFTHEINSTITUTE','Name of the Institute','Institute Name','Institute','Institution Name','Institution']),
+  joining:dateText(val(r,['DATE OF JOINING','DATEOFJOINING','Date of joining','Joining Date','Date Joined']))||'Aug 2026'
+ };
+}
+function setForm(s){
+ if(!s)return;
+ $('id').value=s.id||'';$('name').value=s.name||'';$('grade').value=s.grade||'';
+ $('dob').value=s.dob||'';$('institute').value=s.institute||'';$('joining').value=s.joining||'Aug 2026';
+ update();
+}
+function current(){
+ return {
+   id:$('id').value.trim(),
+   name:$('name').value.trim(),
+   grade:$('grade').value.trim(),
+   dob:$('dob').value.trim(),
+   institute:$('institute').value.trim(),
+   joining:$('joining').value.trim()
+ };
+}
+
+const cardValueEls = Object.freeze({
+  vId: document.getElementById('vId'),
+  vName: document.getElementById('vName'),
+  vGrade: document.getElementById('vGrade'),
+  vDob: document.getElementById('vDob'),
+  vInstitute: document.getElementById('vInstitute'),
+  vJoining: document.getElementById('vJoining')
+});
+
+function update(){
+  const s=current();
+  cardValueEls.vId.textContent = s.id;
+  cardValueEls.vName.textContent = s.name;
+  cardValueEls.vGrade.textContent = s.grade;
+  cardValueEls.vDob.textContent = s.dob;
+  cardValueEls.vInstitute.textContent = s.institute;
+  cardValueEls.vJoining.textContent = s.joining;
+}
+
+fields.forEach(f=>$(''+f).addEventListener('input',update));
+
+$('clear').onclick=()=>{
+  fields.forEach(f=>$(''+f).value='');
+  $('joining').value='Aug 2026';
+  $('status').textContent='Cleared. You can type student details.';
+  update();
+};
+
+$('search').addEventListener('input',()=>{
+ const q=norm($('search').value);
+ const list=students.filter(s=>!q||norm(s.id).includes(q)||norm(s.name).includes(q)||norm(s.grade).includes(q));
+ const sel=$('studentSelect'); sel.innerHTML='';
+ if(!list.length){sel.innerHTML='<option value="">No matching student</option>';return;}
+ list.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');sel.appendChild(o);});
+ sel._list=list;
+ if(list.length) setForm(list[0]);
+});
+
+$('studentSelect').addEventListener('change',()=>{const list=$('studentSelect')._list||[];const s=list[Number($('studentSelect').value)];if(s)setForm(s);});
+
+$('file').addEventListener('change',e=>{
+ const file=e.target.files[0]; if(!file)return;
+ $('status').textContent='Reading '+file.name+'...';
+ if(!window.XLSX){
+   $('status').textContent='Excel reader could not load. You can still type student details manually.';
+   return;
+ }
+ const reader=new FileReader();
+ reader.onload=ev=>{
+  try{
+   const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+   const ws=wb.Sheets[wb.SheetNames[0]];
+   const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+   const hi=matrix.findIndex(r=>{const h=r.map(norm);return h.includes('enrollmentno')&&h.includes('name')&&h.includes('grade');});
+   if(hi<0) throw new Error('Header row not found');
+   const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true,range:hi});
+   students=rows.map(mapRow).filter(s=>s.id||s.name);
+   const sel=$('studentSelect');sel.innerHTML='';
+   students.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');sel.appendChild(o);});
+   sel._list=students;
+   if(students.length){sel.value=0;setForm(students[0]);}
+   $('status').textContent='Loaded '+students.length+' student(s).';
+  }catch(err){console.error(err);$('status').textContent='Could not read this file. You can still type details manually.';}
+ };
+ reader.readAsArrayBuffer(file);
+});
+
+const generatePDF = async () => {
+    const card = $('card');
+    const s = current();
+
+    if (!s.id && !s.name) {
+        alert('Please enter student details first.');
+        return;
+    }
+
+    try {
+        $('status').textContent = 'Preparing PDF...';
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const canvas = await html2canvas(card, {
+            scale: 4,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#fffdf6',
+            logging: false,
+            imageTimeout: 15000,
+            removeContainer: true
+        });
+
+        if (!canvas || canvas.width === 0 || canvas.height === 0) {
+            throw new Error('ID card could not be rendered.');
+        }
+
+        const imageData = canvas.toDataURL('image/png', 1.0);
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: [101.6, 63.8],
+            compress: false
+        });
+
+        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+
+        const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
+        pdf.save('Student_ID_Card_' + filename + '.pdf');
+
+        $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+
+    } catch (error) {
+        console.error('PDF ERROR:', error);
+        $('status').textContent = 'PDF generation failed.';
+        alert('Unable to generate PDF.\n\n' + error.message);
+    }
+};
+
+$('download').onclick = () => generatePDF();
+$('print').onclick = () => generatePDF();
+
+update();
+</script>
+</body>
+</html>
