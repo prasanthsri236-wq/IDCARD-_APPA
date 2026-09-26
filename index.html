@@ -150,9 +150,13 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
       <select id="studentSelect"><option value="">Enter details below or upload Excel</option></select>
     </div>
     <div>
-      <label>Upload Card Background (card-bg.png)</label>
-      <input id="bgUpload" type="file" accept="image/*">
-      <div class="hint">Select <strong>card-bg.png</strong> to convert and render without security issues.</div>
+      <label>Select Card Background Template</label>
+      <select id="bgThemeSelect">
+        <option value="card-bg.png">Standard ID Card (card-bg.png)</option>
+        <option value="card-bg-gold.png">Gold Honors Template</option>
+        <option value="card-bg-exam.png">Examination Special Card</option>
+      </select>
+      <div class="hint">Choose from pre-set background designs.</div>
     </div>
   </div>
 
@@ -222,23 +226,10 @@ const $=id=>document.getElementById(id);
 let students=[];
 const fields=['id','name','grade','dob','institute','joining'];
 
-/* Convert uploaded image file directly into data URL using FileReader */
-function loadFileAsDataURL(file, callback) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    callback(e.target.result);
-  };
-  reader.readAsDataURL(file);
-}
-
-/* Event handler for background file picker */
-$('bgUpload').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  loadFileAsDataURL(file, (dataUrl) => {
-    $('cardBgImg').src = dataUrl;
-    $('status').textContent = 'Background image loaded into memory successfully.';
-  });
+/* Switch background image on dropdown change */
+$('bgThemeSelect').addEventListener('change', e => {
+  $('cardBgImg').src = e.target.value;
+  $('status').textContent = 'Changed card background template.';
 });
 
 function norm(v){return String(v??'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');}
