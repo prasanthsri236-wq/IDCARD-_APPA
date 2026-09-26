@@ -23,7 +23,6 @@ input:disabled{background:#f3f4f6;color:#667085}
 button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
 .primary{background:#082d5c;color:#fff}
 .secondary{background:#e7ecf3;color:#102f59}
-.success{background:#059669;color:#fff}
 .status{margin-top:10px;font-size:13px;color:#475467}
 .hint{font-size:12px;color:#667085;margin-top:6px}
 .card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
@@ -66,6 +65,7 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     font-family: "Trebuchet MS", Arial, sans-serif !important;
     font-weight: 700 !important;
     color: #062d5c !important;
+    white-space: nowrap !important;
 }
 
 #row-institute {
@@ -79,15 +79,14 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     text-align: left !important;
     min-width: 0 !important;
     color: #062d5c !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
 }
 
 .c-label {
     display: block !important;
     text-align: left !important;
-    white-space: nowrap !important;
 }
 
 .c-colon {
@@ -172,7 +171,6 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
   </div>
   <div class="actions">
     <button class="primary" id="download">Download High-Resolution PDF</button>
-    <button class="success" id="batchDownload">Download All ID Cards (Batch PDF)</button>
     <button class="secondary" id="clear">Clear</button>
   </div>
 </div>
@@ -254,7 +252,7 @@ function val(row,names){
 }
 function dateText(v){
   if(v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
-  if(typeof v==='number'&&window.XLSX&&XLSX.SSF){
+  if(typeof v==='number'&&window.XLSX){
     const d=XLSX.SSF.parse_date_code(v);
     if(d) return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
   }
@@ -272,7 +270,8 @@ function mapRow(r){
 }
 function setForm(s){
  if(!s)return;
- $('id').value=s.id\vert{}\vert{}'';$('name').value=s.name||'';$('grade').value=s.grade\vert{}\vert{}'';$('dob').value=s.dob||'';$('institute').value=s.institute\vert{}\vert{}'';$('joining').value=s.joining||'Aug 2026';
+ $('id').value=s.id||'';$('name').value=s.name||'';$('grade').value=s.grade||'';
+ $('dob').value=s.dob||'';$('institute').value=s.institute||'';$('joining').value=s.joining||'Aug 2026';
  update();
 }
 function current(){
@@ -309,7 +308,8 @@ fields.forEach(f=>$(''+f).addEventListener('input',update));
 
 $('clear').onclick=()=>{
   fields.forEach(f=>$(''+f).value='');
-  $('joining').value='Aug 2026';$('status').textContent='Cleared. You can type student details.';
+  $('joining').value='Aug 2026';
+  $('status').textContent='Cleared. You can type student details.';
   update();
 };
 
@@ -323,7 +323,7 @@ $('search').addEventListener('input',()=>{
  if(list.length) setForm(list[0]);
 });
 
-$('studentSelect').addEventListener('change',()=>{const list=$('studentSelect')._list\vert{}\vert{}[];const s=list[Number($('studentSelect').value)];if(s)setForm(s);});
+$('studentSelect').addEventListener('change',()=>{const list=$('studentSelect')._list||[];const s=list[Number($('studentSelect').value)];if(s)setForm(s);});
 
 $('file').addEventListener('change',e=>{
  const file=e.target.files[0]; if(!file)return;
@@ -352,20 +352,8 @@ $('file').addEventListener('change',e=>{
  reader.readAsArrayBuffer(file);
 });
 
-async function captureCardCanvas() {
-    const card = $('card');
-    return await html2canvas(card, {
-        scale: 4,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#fffdf6',
-        logging: false,
-        imageTimeout: 15000,
-        removeContainer: true
-    });
-}
-
 const generatePDF = async () => {
+    const card = $('card');
     const s = current();
 
     if (!s.id && !s.name) {
@@ -374,10 +362,20 @@ const generatePDF = async () => {
     }
 
     try {
-        $('status').textContent = 'Preparing High-Resolution PDF...';
-        await new Promise(resolve => setTimeout(resolve, 200));
+        $('status').textContent = 'Preparing PDF...';
 
-        const canvas = await captureCardCanvas();
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const canvas = await html2canvas(card, {
+            scale: 4,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#fffdf6',
+            logging: false,
+            imageTimeout: 15000,
+            removeContainer: true
+        });
+
         if (!canvas || canvas.width === 0 || canvas.height === 0) {
             throw new Error('ID card could not be rendered.');
         }
@@ -406,45 +404,7 @@ const generatePDF = async () => {
     }
 };
 
-const generateBatchPDF = async () => {
-    if (!students || students.length === 0) {
-        alert('Please upload an Excel/CSV file with student records first.');
-        return;
-    }
-
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: [101.6, 63.8],
-            compress: false
-        });
-
-        for (let i = 0; i < students.length; i++) {
-            const st = students[i];
-            $('status').textContent = `Generating card ${i + 1} of ${students.length}: ${st.name || st.id}...`;
-            setForm(st);
-            await new Promise(resolve => setTimeout(resolve, 150));
-
-            const canvas = await captureCardCanvas();
-            const imageData = canvas.toDataURL('image/png', 1.0);
-
-            if (i > 0) pdf.addPage([101.6, 63.8], 'landscape');
-            pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
-        }
-
-        pdf.save(`APAA_ID_Cards_Batch_${students.length}_Students.pdf`);
-        $('status').textContent = `Batch PDF export completed successfully (${students.length} cards).`;
-
-    } catch (error) {
-        console.error('BATCH PDF ERROR:', error);
-        $('status').textContent = 'Batch PDF generation failed.';
-        alert('Unable to generate batch PDF.\n\n' + error.message);
-    }
-};
-
-$('download').onclick = () => generatePDF();$('batchDownload').onclick = () => generateBatchPDF();
+$('download').onclick = () => generatePDF();
 
 update();
 </script>
