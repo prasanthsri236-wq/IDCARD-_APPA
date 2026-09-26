@@ -158,7 +158,7 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     </div>
   </div>
 
-  <div id="status" class="status">Status: Waiting for file upload or manual entry.</div>
+  <div id="status" class="status">Status: Ready. Upload Excel or fill out student details manually.</div>
 </div>
 
 <div class="panel">
@@ -266,15 +266,17 @@ function renderDropdown(list) {
     return;
   }
 
+  const fragment = document.createDocumentFragment();
   list.forEach((s, i) => {
     const o = document.createElement('option');
     o.value = i;
     const labelId = s.id ? s.id : 'No ID';
     const labelName = s.name ? s.name : 'Unnamed';
     o.textContent = `${labelId} — ${labelName}`;
-    sel.appendChild(o);
+    fragment.appendChild(o);
   });
   
+  sel.appendChild(fragment);
   sel._list = list;
 }
 
@@ -318,7 +320,7 @@ fields.forEach(f=>$(''+f).addEventListener('input',update));
 
 $('clear').onclick=()=>{
   fields.forEach(f=>$(''+f).value='');
-  $('joining').value='Aug 2026';$('status').textContent='Status: Cleared. Form is ready for manual entry.';
+  $('joining').value='Aug 2026';$('status').textContent='Status: Form reset.';
   update();
 };
 
@@ -337,12 +339,7 @@ $('studentSelect').addEventListener('change',()=>{
 
 $('file').addEventListener('change',e=>{
  const file=e.target.files[0]; if(!file)return;
- $('status').textContent='Reading file '+file.name+'...';
- 
- if(!window.XLSX){
-   $('status').textContent='Error: Excel reader script failed to load.';
-   return;
- }
+ $('status').textContent='Processing file...';
  
  const reader=new FileReader();
  reader.onload=ev=>{
@@ -367,31 +364,30 @@ $('file').addEventListener('change',e=>{
      renderDropdown(students);
      setForm(students[0]);
      $('bulkDownload').disabled = false;
-     $('status').textContent=`Successfully loaded ${students.length} student(s) from "${file.name}".`;
+     $('status').textContent=`Loaded ${students.length} student(s) successfully.`;
    } else {
-     $('status').textContent='No valid student rows found in the uploaded file.';$('bulkDownload').disabled = true;
+     $('status').textContent='No valid student records found.';$('bulkDownload').disabled = true;
    }
   }catch(err){
     console.error(err);
-    $('status').textContent='Error reading Excel file. Please ensure it is a valid .xlsx or .csv document.';
-    $('bulkDownload').disabled = true;
+    $('status').textContent='Error reading Excel file.';$('bulkDownload').disabled = true;
   }
  };
  reader.readAsArrayBuffer(file);
 });
 
-const generateSingleCardCanvas = async () => {
+const generateSingleCardCanvas = async (scale = 2) => {
     const card = $('card');
     const canvas = await html2canvas(card, {
-        scale: 4,
+        scale: scale,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#fffdf6',
         logging: false,
-        imageTimeout: 15000,
+        imageTimeout: 3000,
         removeContainer: true
     });
-    return canvas.toDataURL('image/png', 1.0);
+    return canvas.toDataURL('image/jpeg', 0.92);
 };
 
 const generatePDF = async () => {
@@ -403,30 +399,28 @@ const generatePDF = async () => {
     }
 
     try {
-        $('status').textContent = 'Preparing single PDF export...';
-        await new Promise(resolve => setTimeout(resolve, 300));
+        $('status').textContent = 'Generating PDF...';
+        await new Promise(r => setTimeout(r, 50));
 
-        const imageData = await generateSingleCardCanvas();
+        const imageData = await generateSingleCardCanvas(3);
         const { jsPDF } = window.jspdf;
 
         const pdf = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
-            format: [101.6, 63.8],
-            compress: false
+            format: [101.6, 63.8]
         });
 
-        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+        pdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
 
         const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
         pdf.save('apaa_id_card_' + filename + '.pdf');
 
-        $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+        $('status').textContent = 'PDF downloaded.';
 
     } catch (error) {
         console.error('PDF ERROR:', error);
         $('status').textContent = 'PDF generation failed.';
-        alert('Unable to generate PDF.\n\n' + error.message);
     }
 };
 
@@ -440,30 +434,29 @@ const generateBatchPDF = async () => {
     const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: [101.6, 63.8],
-        compress: false
+        format: [101.6, 63.8]
     });
 
     $('bulkDownload').disabled = true;
 
     for (let i = 0; i < students.length; i++) {
         const student = students[i];
-        $('status').textContent = `Exporting ${i + 1} of ${students.length}: ${student.name || student.id}...`;
+        $('status').textContent = `Fast processing ${i + 1}/${students.length}: ${student.name || student.id}...`;
         
         setForm(student);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(r => setTimeout(r, 20));
 
-        const imageData = await generateSingleCardCanvas();
+        const imageData = await generateSingleCardCanvas(2);
 
         if (i > 0) {
             pdf.addPage([101.6, 63.8], 'landscape');
         }
 
-        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+        pdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
     }
 
     pdf.save('apaa_id_cards_batch_all.pdf');
-    $('status').textContent = `Batch export complete! All ${students.length} ID card(s) saved into PDF.`;
+    $('status').textContent = `Done! Exported ${students.length} cards to PDF.`;
     $('bulkDownload').disabled = false;
 };
 
