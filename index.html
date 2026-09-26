@@ -23,6 +23,8 @@ input:disabled{background:#f3f4f6;color:#667085}
 button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
 .primary{background:#082d5c;color:#fff}
 .secondary{background:#e7ecf3;color:#102f59}
+.batch-btn{background:#1570ef;color:#fff;width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:8px}
+.batch-btn:disabled{background:#94a3b8;cursor:not-allowed}
 .status{margin-top:10px;font-size:13px;color:#475467}
 .hint{font-size:12px;color:#667085;margin-top:6px}
 .card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
@@ -150,13 +152,9 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
       <select id="studentSelect"><option value="">Enter details below or upload Excel</option></select>
     </div>
     <div>
-      <label>Select Card Background Template</label>
-      <select id="bgThemeSelect">
-        <option value="card-bg.png">Standard ID Card (card-bg.png)</option>
-        <option value="card-bg-gold.png">Gold Honors Template</option>
-        <option value="card-bg-exam.png">Examination Special Card</option>
-      </select>
-      <div class="hint">Choose from pre-set background designs.</div>
+      <label>Bulk Actions</label>
+      <button class="batch-btn" id="bulkDownload" disabled>Download All ID Cards (Batch PDF)</button>
+      <div class="hint">Upload an Excel sheet to export all student ID cards as a single multi-page PDF.</div>
     </div>
   </div>
 
@@ -226,12 +224,6 @@ const $=id=>document.getElementById(id);
 let students=[];
 const fields=['id','name','grade','dob','institute','joining'];
 
-/* Switch background image on dropdown change */
-$('bgThemeSelect').addEventListener('change', e => {
-  $('cardBgImg').src = e.target.value;
-  $('status').textContent = 'Changed card background template.';
-});
-
 function norm(v){return String(v??'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');}
 function val(row,names){
   const keys=Object.keys(row);
@@ -261,8 +253,7 @@ function mapRow(r){
 }
 function setForm(s){
  if(!s)return;
- $('id').value=s.id||'';$('name').value=s.name||'';$('grade').value=s.grade||'';
- $('dob').value=s.dob||'';$('institute').value=s.institute||'';$('joining').value=s.joining||'Aug 2026';
+ $('id').value=s.id\vert{}\vert{}'';$('name').value=s.name||'';$('grade').value=s.grade\vert{}\vert{}'';$('dob').value=s.dob||'';$('institute').value=s.institute\vert{}\vert{}'';$('joining').value=s.joining||'Aug 2026';
  update();
 }
 function current(){
@@ -299,8 +290,7 @@ fields.forEach(f=>$(''+f).addEventListener('input',update));
 
 $('clear').onclick=()=>{
   fields.forEach(f=>$(''+f).value='');
-  $('joining').value='Aug 2026';
-  $('status').textContent='Cleared. You can type student details.';
+  $('joining').value='Aug 2026';$('status').textContent='Cleared. You can type student details.';
   update();
 };
 
@@ -314,7 +304,7 @@ $('search').addEventListener('input',()=>{
  if(list.length) setForm(list[0]);
 });
 
-$('studentSelect').addEventListener('change',()=>{const list=$('studentSelect')._list||[];const s=list[Number($('studentSelect').value)];if(s)setForm(s);});
+$('studentSelect').addEventListener('change',()=>{const list=$('studentSelect')._list\vert{}\vert{}[];const s=list[Number($('studentSelect').value)];if(s)setForm(s);});
 
 $('file').addEventListener('change',e=>{
  const file=e.target.files[0]; if(!file)return;
@@ -336,15 +326,36 @@ $('file').addEventListener('change',e=>{
    const sel=$('studentSelect');sel.innerHTML='';
    students.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');sel.appendChild(o);});
    sel._list=students;
-   if(students.length){sel.value=0;setForm(students[0]);}
-   $('status').textContent='Loaded '+students.length+' student(s).';
-  }catch(err){console.error(err);$('status').textContent='Could not read this file. You can still type details manually.';}
+   if(students.length){
+     sel.value=0;
+     setForm(students[0]);
+     $('bulkDownload').disabled = false;
+   }
+   $('status').textContent='Loaded '+students.length+' student(s). Batch PDF export enabled.';
+  }catch(err){
+    console.error(err);
+    $('status').textContent='Could not read this file. You can still type details manually.';
+    $('bulkDownload').disabled = true;
+  }
  };
  reader.readAsArrayBuffer(file);
 });
 
-const generatePDF = async () => {
+const generateSingleCardCanvas = async () => {
     const card = $('card');
+    const canvas = await html2canvas(card, {
+        scale: 4,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#fffdf6',
+        logging: false,
+        imageTimeout: 15000,
+        removeContainer: true
+    });
+    return canvas.toDataURL('image/png', 1.0);
+};
+
+const generatePDF = async () => {
     const s = current();
 
     if (!s.id && !s.name) {
@@ -354,24 +365,9 @@ const generatePDF = async () => {
 
     try {
         $('status').textContent = 'Preparing PDF...';
-
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        const canvas = await html2canvas(card, {
-            scale: 4,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#fffdf6',
-            logging: false,
-            imageTimeout: 15000,
-            removeContainer: true
-        });
-
-        if (!canvas || canvas.width === 0 || canvas.height === 0) {
-            throw new Error('ID card could not be rendered.');
-        }
-
-        const imageData = canvas.toDataURL('image/png', 1.0);
+        const imageData = await generateSingleCardCanvas();
         const { jsPDF } = window.jspdf;
 
         const pdf = new jsPDF({
@@ -395,7 +391,44 @@ const generatePDF = async () => {
     }
 };
 
-$('download').onclick = () => generatePDF();
+const generateBatchPDF = async () => {
+    if (!students.length) {
+        alert('Please upload an Excel or CSV file first.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [101.6, 63.8],
+        compress: false
+    });
+
+    $('bulkDownload').disabled = true;
+
+    for (let i = 0; i < students.length; i++) {
+        const student = students[i];
+        $('status').textContent = `Processing ${i + 1} of ${students.length}: ${student.name || student.id}...`;
+        
+        setForm(student);
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        const imageData = await generateSingleCardCanvas();
+
+        if (i > 0) {
+            pdf.addPage([101.6, 63.8], 'landscape');
+        }
+
+        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+    }
+
+    pdf.save('apaa_id_cards_batch_all.pdf');
+    $('status').textContent = `Batch export complete! ${students.length} ID card(s) saved to PDF.`;
+    $('bulkDownload').disabled = false;
+};
+
+$('download').onclick = () => generatePDF();$('bulkDownload').onclick = () => generateBatchPDF();
 
 update();
 </script>
