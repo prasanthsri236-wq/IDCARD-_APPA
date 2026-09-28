@@ -2,32 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Alagappa Performing Arts Academy ID Card Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alagappa Performing Arts Academy — ID Card Generator</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#eef1f5;font-family:Arial,Helvetica,sans-serif;color:#102f59}
-.wrap{max-width:1250px;margin:auto;padding:24px}
-h1{margin:0 0 6px;font-size:28px}
-.sub{margin:0 0 18px;color:#667085}
-.panel{background:#fff;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
-input,select,button{font:inherit}
-input[type=text],input[type=date],input[type=file],select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#172033}
-input:disabled{background:#f3f4f6;color:#667085}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
-.primary{background:#082d5c;color:#fff}
-.secondary{background:#e7ecf3;color:#102f59}
-.status{margin-top:10px;font-size:13px;color:#475467}
-.hint{font-size:12px;color:#667085;margin-top:6px}
-.card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
+  :root {
+    --primary: #082d5c;
+    --primary-hover: #061f42;
+    --bg-main: #f4f6f9;
+    --panel-bg: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --radius: 12px;
+  }
 
-.card {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.5;
+    padding-bottom: 40px;
+  }
+
+  /* Header Bar */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 20px 0;
+    box-shadow: 0 4px 12px rgba(8, 45, 92, 0.15);
+    margin-bottom: 28px;
+  }
+  
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-title h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .header-title p {
+    font-size: 13px;
+    color: #93c5fd;
+    margin-top: 2px;
+  }
+
+  /* Main Wrap */
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Panel Cards */
+  .panel {
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  input[type=text], input[type=file], select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #f8fafc;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  input[type=text]:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(8, 45, 92, 0.1);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  .status-bar {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 12px;
+  }
+
+  /* Buttons */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  button {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  button.primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(8, 45, 92, 0.2);
+  }
+
+  button.primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+  }
+
+  button.secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid var(--border-color);
+  }
+
+  button.secondary:hover {
+    background: #e2e8f0;
+  }
+
+  /* ID Card Stage */
+  .preview-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    background: #e2e8f0;
+    padding: 24px;
+    border-radius: 12px;
+    overflow: auto;
+  }
+
+  .card {
     position: relative;
     display: block;
     width: 1024px;
@@ -38,11 +210,12 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     contain: paint;
     background: #fffdf6;
     flex: none;
-}
+    border-radius: 6px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+  }
 
-/* ===== STUDENT DETAILS POSITION & ALIGNMENT ===== */
-
-.card-fields {
+  /* Dynamic Card Fields Positioning */
+  .card-fields {
     left: 21% !important;
     top: 39% !important;
     width: 58% !important;
@@ -52,9 +225,9 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     display: flex !important;
     flex-direction: column !important;
     pointer-events: none !important;
-}
+  }
 
-.card-row {
+  .card-row {
     grid-template-columns: 250px 25px minmax(0, 1fr) !important;
     min-height: 30px !important;
     font-size: 21px !important;
@@ -66,13 +239,11 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     font-weight: 700 !important;
     color: #062d5c !important;
     white-space: nowrap !important;
-}
+  }
 
-#row-institute {
-    font-size: 19px !important;
-}
+  #row-institute { font-size: 19px !important; }
 
-.c-value {
+  .c-value {
     font-size: 21px !important;
     padding-left: 3px !important;
     display: block !important;
@@ -82,139 +253,139 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-}
+  }
 
-.c-label {
+  .c-label { display: block !important; text-align: left !important; }
+  .c-colon { display: block !important; text-align: center !important; }
+  .c-value:empty { visibility: hidden !important; }
+
+  @media (max-width: 750px) {
+    .card-fields { left: 21% !important; top: 39% !important; width: 58% !important; gap: 6px !important; }
+    .card-row { grid-template-columns: 130px 15px minmax(0, 1fr) !important; min-height: 20px !important; font-size: 11px !important; }
+    .c-value { font-size: 11px !important; }
+    #row-institute { font-size: 10px !important; }
+  }
+
+  .card-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
     display: block !important;
-    text-align: left !important;
-}
-
-.c-colon {
-    display: block !important;
-    text-align: center !important;
-}
-
-.c-value:empty {
-    visibility: hidden !important;
-}
-
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 750px) {
-    .card-fields {
-        left: 21% !important;
-        top: 39% !important;
-        width: 58% !important;
-        gap: 6px !important;
-    }
-
-    .card-row {
-        grid-template-columns: 130px 15px minmax(0, 1fr) !important;
-        min-height: 20px !important;
-        font-size: 11px !important;
-    }
-
-    .c-value {
-        font-size: 11px !important;
-    }
-
-    #row-institute {
-        font-size: 10px !important;
-    }
-}
-
-.card-background{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;display:block !important;margin:0 !important;padding:0 !important;border:0 !important;z-index:0 !important;pointer-events:none !important;user-select:none !important;object-fit:cover;}
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    object-fit: cover;
+  }
 </style>
 </head>
 <body>
+
+<header>
+  <div class="header-container">
+    <div class="header-title">
+      <h1>Alagappa Performing Arts Academy</h1>
+      <p>Official Grade Examination ID Card Generator</p>
+    </div>
+  </div>
+</header>
+
 <div class="wrap">
-<h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
-<p class="sub">Create a premium APAA Grade Examination Student ID Card — high-resolution PDF export for printing.</p>
 
-<div class="panel">
-  <div class="grid">
-    <div>
-      <label>Excel / CSV File</label>
-      <input id="file" type="file" accept=".xlsx,.xls,.csv">
-      <div class="hint">The program automatically finds the row containing ENROLLMENT NO, NAME and GRADE.</div>
+  <!-- Step 1: File & Search Controls -->
+  <div class="panel">
+    <div class="panel-title">1. Data Import & Settings</div>
+    <div class="grid">
+      <div>
+        <label>Excel / CSV Spreadsheet</label>
+        <input id="file" type="file" accept=".xlsx,.xls,.csv">
+        <div class="hint">Auto-detects ENROLLMENT NO, NAME, and GRADE columns.</div>
+      </div>
+      <div>
+        <label>Search Student</label>
+        <input id="search" type="text" placeholder="Type enrollment no. or student name...">
+      </div>
     </div>
-    <div>
-      <label>Search Student</label>
-      <input id="search" type="text" placeholder="Type enrollment number or student name...">
+
+    <div class="grid" style="margin-top:16px">
+      <div>
+        <label>Select Loaded Student</label>
+        <select id="studentSelect"><option value="">Manual Entry / Upload Excel above</option></select>
+      </div>
+      <div>
+        <label>Card Background (card-bg.png)</label>
+        <input id="bgUpload" type="file" accept="image/*">
+        <div class="hint">Upload custom template image if needed.</div>
+      </div>
+    </div>
+
+    <div id="status" class="status-bar">Ready. Enter student details below or upload a sheet.</div>
+  </div>
+
+  <!-- Step 2: Student Details Form -->
+  <div class="panel">
+    <div class="panel-title">2. Student Details</div>
+    <div class="grid">
+      <div><label>Enrollment No. / ID</label><input id="id" type="text" placeholder="e.g. 2026-001"></div>
+      <div><label>Student Name</label><input id="name" type="text" placeholder="Full Name"></div>
+      <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+      <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
+      <div><label>Institution Name</label><input id="institute" type="text" placeholder="Alagappa School"></div>
+      <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
+    </div>
+    
+    <div class="actions">
+      <button class="primary" id="download">Download High-Resolution PDF</button>
+      <button class="secondary" id="clear">Clear Form</button>
     </div>
   </div>
 
-  <div class="grid" style="margin-top:14px">
-    <div>
-      <label>Select Student</label>
-      <select id="studentSelect"><option value="">Enter details below or upload Excel</option></select>
-    </div>
-    <div>
-      <label>Upload Card Background (card-bg.png)</label>
-      <input id="bgUpload" type="file" accept="image/*">
-      <div class="hint">Select <strong>card-bg.png</strong> to convert and render without security issues.</div>
-    </div>
-  </div>
-
-  <div id="status" class="status" style="margin-top:10px">Ready. You can type student details below.</div>
-</div>
-
-<div class="panel">
-  <div class="manual-title" style="font-weight:700;margin-bottom:10px">Student Details</div>
-  <div class="grid">
-    <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. 2026-001"></div>
-    <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
-    <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
-    <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-    <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
-    <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
-  </div>
-  <div class="actions">
-    <button class="primary" id="download">Download High-Resolution PDF</button>
-    <button class="secondary" id="clear">Clear</button>
-  </div>
-</div>
-
-<div class="panel">
-  <div class="card-wrap">
-    <div class="card" id="card">
-      <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png">
-      
-      <div class="card-fields" aria-label="Student information">
-        <div class="card-row" id="row-id">
-          <span class="c-label">Student ID</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vId"></span>
-        </div>
-        <div class="card-row" id="row-name">
-          <span class="c-label">Name</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vName"></span>
-        </div>
-        <div class="card-row" id="row-grade">
-          <span class="c-label">Grade</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vGrade"></span>
-        </div>
-        <div class="card-row" id="row-dob">
-          <span class="c-label">Date of Birth</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vDob"></span>
-        </div>
-        <div class="card-row" id="row-institute">
-          <span class="c-label">Name of the Institution</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vInstitute"></span>
-        </div>
-        <div class="card-row" id="row-joining">
-          <span class="c-label">Date of Joining</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vJoining"></span>
+  <!-- Step 3: Card Live Preview -->
+  <div class="panel preview-panel">
+    <div class="panel-title" style="width: 100%;">3. Live Card Canvas</div>
+    <div class="card-wrap">
+      <div class="card" id="card">
+        <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png">
+        
+        <div class="card-fields" aria-label="Student information">
+          <div class="card-row" id="row-id">
+            <span class="c-label">Student ID</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vId"></span>
+          </div>
+          <div class="card-row" id="row-name">
+            <span class="c-label">Name</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vName"></span>
+          </div>
+          <div class="card-row" id="row-grade">
+            <span class="c-label">Grade</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vGrade"></span>
+          </div>
+          <div class="card-row" id="row-dob">
+            <span class="c-label">Date of Birth</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vDob"></span>
+          </div>
+          <div class="card-row" id="row-institute">
+            <span class="c-label">Name of the Institution</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vInstitute"></span>
+          </div>
+          <div class="card-row" id="row-joining">
+            <span class="c-label">Date of Joining</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vJoining"></span>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
 </div>
 
 <script>
@@ -222,16 +393,12 @@ const $=id=>document.getElementById(id);
 let students=[];
 const fields=['id','name','grade','dob','institute','joining'];
 
-/* Convert uploaded image file directly into data URL using FileReader */
 function loadFileAsDataURL(file, callback) {
   const reader = new FileReader();
-  reader.onload = function(e) {
-    callback(e.target.result);
-  };
+  reader.onload = function(e) { callback(e.target.result); };
   reader.readAsDataURL(file);
 }
 
-/* Event handler for background file picker */
 $('bgUpload').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -309,7 +476,7 @@ fields.forEach(f=>$(''+f).addEventListener('input',update));
 $('clear').onclick=()=>{
   fields.forEach(f=>$(''+f).value='');
   $('joining').value='Aug 2026';
-  $('status').textContent='Cleared. You can type student details.';
+  $('status').textContent='Form cleared. Ready for entry.';
   update();
 };
 
@@ -329,7 +496,7 @@ $('file').addEventListener('change',e=>{
  const file=e.target.files[0]; if(!file)return;
  $('status').textContent='Reading '+file.name+'...';
  if(!window.XLSX){
-   $('status').textContent='Excel reader could not load. You can still type student details manually.';
+   $('status').textContent='Excel reader unavailable. Try manual entry.';
    return;
  }
  const reader=new FileReader();
@@ -346,8 +513,8 @@ $('file').addEventListener('change',e=>{
    students.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');sel.appendChild(o);});
    sel._list=students;
    if(students.length){sel.value=0;setForm(students[0]);}
-   $('status').textContent='Loaded '+students.length+' student(s).';
-  }catch(err){console.error(err);$('status').textContent='Could not read this file. You can still type details manually.';}
+   $('status').textContent='Successfully loaded '+students.length+' student record(s).';
+  }catch(err){console.error(err);$('status').textContent='Unable to parse file. Verify file structure or enter manually.';}
  };
  reader.readAsArrayBuffer(file);
 });
@@ -362,7 +529,7 @@ const generatePDF = async () => {
     }
 
     try {
-        $('status').textContent = 'Preparing PDF...';
+        $('status').textContent = 'Rendering High-Resolution PDF...';
 
         await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -377,7 +544,7 @@ const generatePDF = async () => {
         });
 
         if (!canvas || canvas.width === 0 || canvas.height === 0) {
-            throw new Error('ID card could not be rendered.');
+            throw new Error('ID card canvas failed to render.');
         }
 
         const imageData = canvas.toDataURL('image/png', 1.0);
@@ -395,11 +562,11 @@ const generatePDF = async () => {
         const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
         pdf.save('Student_ID_Card_' + filename + '.pdf');
 
-        $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+        $('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
 
     } catch (error) {
-        console.error('PDF ERROR:', error);
-        $('status').textContent = 'PDF generation failed.';
+        console.error('PDF Generation Error:', error);
+        $('status').textContent = 'Error during PDF generation.';
         alert('Unable to generate PDF.\n\n' + error.message);
     }
 };
