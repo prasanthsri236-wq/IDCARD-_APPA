@@ -171,7 +171,6 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
   </div>
   <div class="actions">
     <button class="primary" id="download">Download High-Resolution PDF</button>
-    <button class="secondary" id="print">Download PDF</button>
     <button class="secondary" id="clear">Clear</button>
   </div>
 </div>
@@ -406,7 +405,6 @@ const generatePDF = async () => {
 };
 
 $('download').onclick = () => generatePDF();
-$('print').onclick = () => generatePDF();
 
 update();
 </script>
