@@ -33,7 +33,7 @@
   header {
     background: var(--primary);
     color: #fff;
-    padding: 20px 0;
+    padding: 18px 0;
     box-shadow: 0 4px 12px rgba(8, 45, 92, 0.15);
     margin-bottom: 28px;
   }
@@ -45,6 +45,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-logo {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
   }
 
   .header-title h1 {
@@ -286,9 +298,12 @@
 
 <header>
   <div class="header-container">
-    <div class="header-title">
-      <h1>Alagappa Performing Arts Academy</h1>
-      <p>Official Grade Examination ID Card Generator</p>
+    <div class="header-brand">
+      <img src="APAA_blue logo.png" alt="APAA Logo" class="header-logo">
+      <div class="header-title">
+        <h1>Alagappa Performing Arts Academy</h1>
+        <p>Official Grade Examination ID Card Generator</p>
+      </div>
     </div>
   </div>
 </header>
