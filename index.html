@@ -2,229 +2,146 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alagappa Performing Arts Academy ID Card Generator</title>
+<!-- External Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#eef1f5;font-family:Arial,Helvetica,sans-serif;color:#102f59}
-.wrap{max-width:1250px;margin:auto;padding:24px}
-h1{margin:0 0 6px;font-size:28px}
-.sub{margin:0 0 18px;color:#667085}
-.panel{background:#fff;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
-input,select,button{font:inherit}
-input[type=text],input[type=date],input[type=file],select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#172033}
-input:disabled{background:#f3f4f6;color:#667085}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
-.primary{background:#082d5c;color:#fff}
-.secondary{background:#e7ecf3;color:#102f59}
-.batch-btn{background:#1570ef;color:#fff;width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:8px}
-.batch-btn:disabled{background:#94a3b8;cursor:not-allowed}
-.status{margin-top:10px;font-size:13px;color:#475467;font-weight:600}
-.hint{font-size:12px;color:#667085;margin-top:6px}
-.card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
+  :root {
+    --primary: #082d5c;
+    --primary-hover: #062042;
+    --accent: #1570ef;
+    --bg-main: #f4f6f9;
+    --card-bg: #fffdf6;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #cbd5e1;
+    --radius: 12px;
+  }
 
-.card {
-    position: relative;
-    display: block;
-    width: 1024px;
-    max-width: 100%;
-    aspect-ratio: 2048/1294;
-    overflow: hidden;
-    isolation: isolate;
-    contain: paint;
-    background: #fffdf6;
-    flex: none;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-main); color: var(--text-dark); padding: 24px 16px; }
+  
+  .container { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  
+  header { margin-bottom: 8px; }
+  header h1 { font-size: 26px; color: var(--primary); font-weight: 800; letter-spacing: -0.02em; }
+  header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
-/* ===== STUDENT DETAILS POSITION & ALIGNMENT ===== */
+  .panel { background: #ffffff; border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+  
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 13px; font-weight: 600; color: #334155; }
+  
+  input[type="text"], input[type="file"], select {
+    width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border-color);
+    border-radius: 8px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: #fff;
+  }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(21, 112, 239, 0.15); }
+  
+  .hint { font-size: 12px; color: var(--text-muted); }
 
-.card-fields {
-    left: 21% !important;
-    top: 39% !important;
-    width: 58% !important;
-    gap: 10px !important;
-    position: absolute !important;
-    z-index: 10 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    pointer-events: none !important;
-}
+  .btn-group { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  button {
+    padding: 10px 18px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background-color 0.2s, transform 0.1s; display: inline-flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+  button:active { transform: scale(0.98); }
+  
+  .btn-primary { background: var(--primary); color: #ffffff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-batch { background: var(--accent); color: #ffffff; }
+  .btn-batch:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
 
-.card-row {
-    grid-template-columns: 250px 25px minmax(0, 1fr) !important;
-    min-height: 30px !important;
-    font-size: 21px !important;
-    line-height: 1.25 !important;
-    display: grid !important;
-    align-items: center !important;
-    width: 100% !important;
-    font-family: "Trebuchet MS", Arial, sans-serif !important;
-    font-weight: 700 !important;
-    color: #062d5c !important;
-    white-space: nowrap !important;
-}
+  .status-bar { font-size: 13px; font-weight: 600; color: #475467; margin-top: 14px; padding: 10px 14px; background: #f8fafc; border-radius: 6px; border-left: 4px solid var(--accent); }
 
-#row-institute {
-    font-size: 19px !important;
-}
-
-.c-value {
-    font-size: 21px !important;
-    padding-left: 3px !important;
-    display: block !important;
-    text-align: left !important;
-    min-width: 0 !important;
-    color: #062d5c !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-.c-label {
-    display: block !important;
-    text-align: left !important;
-}
-
-.c-colon {
-    display: block !important;
-    text-align: center !important;
-}
-
-.c-value:empty {
-    visibility: hidden !important;
-}
-
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 750px) {
-    .card-fields {
-        left: 21% !important;
-        top: 39% !important;
-        width: 58% !important;
-        gap: 6px !important;
-    }
-
-    .card-row {
-        grid-template-columns: 130px 15px minmax(0, 1fr) !important;
-        min-height: 20px !important;
-        font-size: 11px !important;
-    }
-
-    .c-value {
-        font-size: 11px !important;
-    }
-
-    #row-institute {
-        font-size: 10px !important;
-    }
-}
-
-.card-background{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;display:block !important;margin:0 !important;padding:0 !important;border:0 !important;z-index:0 !important;pointer-events:none !important;user-select:none !important;object-fit:cover;}
+  /* Card Preview Area */
+  .card-container { display: flex; justify-content: center; padding: 12px 0; overflow-x: auto; }
+  canvas { background: var(--card-bg); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-<div class="wrap">
-<h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
-<p class="sub">Create a premium APAA Grade Examination Student ID Card — high-resolution PDF export for printing.</p>
 
-<div class="panel">
-  <div class="grid">
-    <div>
-      <label>Excel / CSV File</label>
-      <input id="file" type="file" accept=".xlsx,.xls,.csv">
-      <div class="hint">Upload your Excel or CSV sheet to automatically populate students.</div>
-    </div>
-    <div>
-      <label>Search Student</label>
-      <input id="search" type="text" placeholder="Type enrollment number or student name...">
-    </div>
-  </div>
+<div class="container">
+  <header>
+    <h1>ALAGAPPA PERFORMING ARTS ACADEMY</h1>
+    <p>Student ID Card Generator & High-Resolution Vector PDF Exporter</p>
+  </header>
 
-  <div class="grid" style="margin-top:14px">
-    <div>
-      <label>Select Student</label>
-      <select id="studentSelect"><option value="">Upload an Excel file to enable student selection</option></select>
-    </div>
-    <div>
-      <label>Bulk Actions</label>
-      <button class="batch-btn" id="bulkDownload" disabled>Download All ID Cards (Batch PDF)</button>
-      <div class="hint">Export all student ID cards as a single multi-page PDF document.</div>
-    </div>
-  </div>
-
-  <div id="status" class="status">Status: Ready. Upload Excel or fill out student details manually.</div>
-</div>
-
-<div class="panel">
-  <div class="manual-title" style="font-weight:700;margin-bottom:10px">Student Details</div>
-  <div class="grid">
-    <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. 2026-001"></div>
-    <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
-    <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
-    <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-    <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
-    <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
-  </div>
-  <div class="actions">
-    <button class="primary" id="download">Download High-Resolution PDF</button>
-    <button class="secondary" id="clear">Clear</button>
-  </div>
-</div>
-
-<div class="panel">
-  <div class="card-wrap">
-    <div class="card" id="card">
-      <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png">
-      
-      <div class="card-fields" aria-label="Student information">
-        <div class="card-row" id="row-id">
-          <span class="c-label">Student ID</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vId"></span>
-        </div>
-        <div class="card-row" id="row-name">
-          <span class="c-label">Name</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vName"></span>
-        </div>
-        <div class="card-row" id="row-grade">
-          <span class="c-label">Grade</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vGrade"></span>
-        </div>
-        <div class="card-row" id="row-dob">
-          <span class="c-label">Date of Birth</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vDob"></span>
-        </div>
-        <div class="card-row" id="row-institute">
-          <span class="c-label">Name of the Institution</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vInstitute"></span>
-        </div>
-        <div class="card-row" id="row-joining">
-          <span class="c-label">Date of Joining</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vJoining"></span>
-        </div>
+  <!-- Data Upload & Selection Panel -->
+  <div class="panel">
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Upload Excel / CSV File</label>
+        <input id="file" type="file" accept=".xlsx,.xls,.csv">
+        <div class="hint">Upload spreadsheet to load multiple students automatically.</div>
+      </div>
+      <div class="form-group">
+        <label>Search Student</label>
+        <input id="search" type="text" placeholder="Search by name, ID, or grade...">
       </div>
     </div>
+
+    <div class="grid-2" style="margin-top: 16px;">
+      <div class="form-group">
+        <label>Select Loaded Student</label>
+        <select id="studentSelect"><option value="">Upload an Excel file to enable selection</option></select>
+      </div>
+      <div class="form-group">
+        <label>Batch Actions</label>
+        <button id="bulkDownload" class="btn-batch" disabled>Download All ID Cards (Batch PDF)</button>
+        <div class="hint">Generates a multi-page PDF containing all students.</div>
+      </div>
+    </div>
+
+    <div id="status" class="status-bar">Status: Ready. Upload a file or fill in details manually below.</div>
   </div>
-</div>
+
+  <!-- Student Form & Controls Panel -->
+  <div class="panel">
+    <h3 style="margin-bottom: 14px; font-size: 16px; font-weight: 700; color: var(--primary);">Student Details</h3>
+    <div class="grid-3">
+      <div class="form-group"><label>Student ID / Reg No.</label><input id="id" type="text" placeholder="e.g. APAA-2026-001"></div>
+      <div class="form-group"><label>Student Name</label><input id="name" type="text" placeholder="Full Student Name"></div>
+      <div class="form-group"><label>Grade / Examination</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+      <div class="form-group"><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
+      <div class="form-group"><label>Institution Name</label><input id="institute" type="text" placeholder="Alagappa School"></div>
+      <div class="form-group"><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026"></div>
+    </div>
+
+    <div class="btn-group">
+      <button id="download" class="btn-primary">Download Single Vector PDF</button>
+      <button id="clear" class="btn-secondary">Clear Fields</button>
+    </div>
+  </div>
+
+  <!-- Card Canvas Preview Panel -->
+  <div class="panel" style="text-align: center;">
+    <h3 style="margin-bottom: 12px; font-size: 15px; text-align: left; color: var(--text-muted);">ID Card Preview</h3>
+    <div class="card-container">
+      <canvas id="cardCanvas" width="1024" height="647"></canvas>
+    </div>
+  </div>
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-let students=[];
-const fields=['id','name','grade','dob','institute','joining'];
+const $ = id => document.getElementById(id);
+let students = [];
+const fields = ['id', 'name', 'grade', 'dob', 'institute', 'joining'];
 
-function norm(v){return String(v??'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');}
+// Preload Background Image safely
+const bgImg = new Image();
+bgImg.src = 'card-bg.png';
+bgImg.onload = () => drawPreview();
+
+function norm(v) { return String(v ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
 function val(row, names) {
   const keys = Object.keys(row);
@@ -237,239 +154,239 @@ function val(row, names) {
   return '';
 }
 
-function dateText(v){
-  if(v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
-  if(typeof v==='number'&&window.XLSX){
-    const d=XLSX.SSF.parse_date_code(v);
-    if(d) return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
+function dateText(v) {
+  if (v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
+  if (typeof v === 'number' && window.XLSX) {
+    const d = XLSX.SSF.parse_date_code(v);
+    if (d) return String(d.d).padStart(2, '0') + '/' + String(d.m).padStart(2, '0') + '/' + d.y;
   }
-  return String(v??'').trim();
+  return String(v ?? '').trim();
 }
 
-function mapRow(r){
- return {
-  id: val(r, ['enrollmentno', 'studentid', 'id', 'enrollment', 'regno', 'slno']),
-  name: val(r, ['studentname', 'name', 'student', 'candidate']),
-  grade: val(r, ['grade', 'class', 'level', 'standard']),
-  dob: dateText(val(r, ['dateofbirth', 'dob', 'birthdate'])),
-  institute: val(r, ['nameoftheinstitute', 'institute', 'institution', 'school', 'academy']),
-  joining: dateText(val(r, ['dateofjoining', 'joiningdate', 'joining', 'doj'])) || 'Aug 2026'
- };
+function mapRow(r) {
+  return {
+    id: val(r, ['enrollmentno', 'studentid', 'id', 'enrollment', 'regno', 'slno']),
+    name: val(r, ['studentname', 'name', 'student', 'candidate']),
+    grade: val(r, ['grade', 'class', 'level', 'standard']),
+    dob: dateText(val(r, ['dateofbirth', 'dob', 'birthdate'])),
+    institute: val(r, ['nameoftheinstitute', 'institute', 'institution', 'school', 'academy']),
+    joining: dateText(val(r, ['dateofjoining', 'joiningdate', 'joining', 'doj'])) || 'Aug 2026'
+  };
+}
+
+function current() {
+  return {
+    id: $('id').value.trim(),
+    name: $('name').value.trim(),
+    grade: $('grade').value.trim(),
+    dob: $('dob').value.trim(),
+    institute: $('institute').value.trim(),
+    joining: $('joining').value.trim()
+  };
+}
+
+// Draw HTML Canvas Preview
+function drawPreview() {
+  const canvas = $('cardCanvas');
+  const ctx = canvas.getContext('2d');
+  const s = current();
+
+  ctx.fillStyle = '#fffdf6';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (bgImg.complete && bgImg.naturalWidth !== 0) {
+    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  }
+
+  // Draw Field Text on Canvas
+  const startX = 215;
+  const colonX = 430;
+  const valX = 450;
+  let startY = 255;
+  const lineGap = 42;
+
+  ctx.fillStyle = '#062d5c';
+  ctx.font = 'bold 21px "Trebuchet MS", Arial, sans-serif';
+  ctx.textBaseline = 'middle';
+
+  const items = [
+    { label: 'Student ID', value: s.id },
+    { label: 'Name', value: s.name },
+    { label: 'Grade', value: s.grade },
+    { label: 'Date of Birth', value: s.dob },
+    { label: 'Name of Institution', value: s.institute },
+    { label: 'Date of Joining', value: s.joining }
+  ];
+
+  items.forEach((item, index) => {
+    const y = startY + (index * lineGap);
+    ctx.font = (index === 4) ? 'bold 19px "Trebuchet MS", Arial, sans-serif' : 'bold 21px "Trebuchet MS", Arial, sans-serif';
+    ctx.fillText(item.label, startX, y);
+    ctx.fillText(':', colonX, y);
+    ctx.fillText(item.value, valX, y);
+  });
+}
+
+// Bind live updates to input fields
+fields.forEach(f => $(f).addEventListener('input', drawPreview));
+
+function setForm(s) {
+  if (!s) return;
+  $('id').value = s.id \vert{}\vert{} '';$('name').value = s.name || '';
+  $('grade').value = s.grade \vert{}\vert{} '';$('dob').value = s.dob || '';
+  $('institute').value = s.institute \vert{}\vert{} '';$('joining').value = s.joining || 'Aug 2026';
+  drawPreview();
 }
 
 function renderDropdown(list) {
   const sel = $('studentSelect');
   sel.innerHTML = '';
-  
   if (!list || list.length === 0) {
-    const o = document.createElement('option');
-    o.value = '';
-    o.textContent = 'No matching students found';
-    sel.appendChild(o);
+    sel.innerHTML = '<option value="">No matching students found</option>';
     return;
   }
-
-  const fragment = document.createDocumentFragment();
+  const frag = document.createDocumentFragment();
   list.forEach((s, i) => {
     const o = document.createElement('option');
     o.value = i;
-    const labelId = s.id ? s.id : 'No ID';
-    const labelName = s.name ? s.name : 'Unnamed';
-    o.textContent = `${labelId} — ${labelName}`;
-    fragment.appendChild(o);
+    o.textContent = `${s.id || 'No ID'} — ${s.name || 'Unnamed'}`;
+    frag.appendChild(o);
   });
-  
-  sel.appendChild(fragment);
+  sel.appendChild(frag);
   sel._list = list;
 }
 
-function setForm(s){
- if(!s) return;
- $('id').value = s.id \vert{}\vert{} '';$('name').value = s.name || '';
- $('grade').value = s.grade \vert{}\vert{} '';$('dob').value = s.dob || '';
- $('institute').value = s.institute \vert{}\vert{} '';$('joining').value = s.joining || 'Aug 2026';
- update();
-}
+// File Upload Handler
+$('file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  $('status').textContent = 'Processing spreadsheet file...';
 
-function current(){
- return {
-   id:$('id').value.trim(),
-   name:$('name').value.trim(),
-   grade:$('grade').value.trim(),
-   dob:$('dob').value.trim(),
-   institute:$('institute').value.trim(),
-   joining:$('joining').value.trim()
- };
-}
-
-const cardValueEls = Object.freeze({
-  vId: document.getElementById('vId'),
-  vName: document.getElementById('vName'),
-  vGrade: document.getElementById('vGrade'),
-  vDob: document.getElementById('vDob'),
-  vInstitute: document.getElementById('vInstitute'),
-  vJoining: document.getElementById('vJoining')
-});
-
-function update(){
-  const s=current();
-  cardValueEls.vId.textContent = s.id;
-  cardValueEls.vName.textContent = s.name;
-  cardValueEls.vGrade.textContent = s.grade;
-  cardValueEls.vDob.textContent = s.dob;
-  cardValueEls.vInstitute.textContent = s.institute;
-  cardValueEls.vJoining.textContent = s.joining;
-}
-
-fields.forEach(f=>$(''+f).addEventListener('input',update));
-
-$('clear').onclick=()=>{
-  fields.forEach(f=>$(''+f).value='');
-  $('joining').value='Aug 2026';$('status').textContent='Status: Form reset.';
-  update();
-};
-
-$('search').addEventListener('input',()=>{
- const q=norm($('search').value);
- const list=students.filter(s=>!q||norm(s.id).includes(q)||norm(s.name).includes(q)||norm(s.grade).includes(q));
- renderDropdown(list);
- if(list.length) setForm(list[0]);
-});
-
-$('studentSelect').addEventListener('change',()=>{
-  const list=$('studentSelect')._list || students;
-  const s=list[Number($('studentSelect').value)];
-  if(s) setForm(s);
-});
-
-$('file').addEventListener('change',e=>{
- const file=e.target.files[0]; if(!file)return;
- $('status').textContent='Processing file...';
- 
- const reader=new FileReader();
- reader.onload=ev=>{
-  try{
-   const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
-   const sheetName=wb.SheetNames[0];
-   const ws=wb.Sheets[sheetName];
-   
-   let rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
-
-   if (!rows.length) {
-     const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-     const hi=matrix.findIndex(r=>r.some(cell=>norm(cell).includes('name')||norm(cell).includes('id')||norm(cell).includes('enroll')));
-     if(hi>=0){
-       rows=XLSX.utils.sheet_to_json(ws,{defval:'',range:hi});
-     }
-   }
-
-   students=rows.map(mapRow).filter(s=>s.id || s.name || s.grade);
-   
-   if(students.length > 0){
-     renderDropdown(students);
-     setForm(students[0]);
-     $('bulkDownload').disabled = false;
-     $('status').textContent=`Loaded ${students.length} student(s) successfully.`;
-   } else {
-     $('status').textContent='No valid student records found.';$('bulkDownload').disabled = true;
-   }
-  }catch(err){
-    console.error(err);
-    $('status').textContent='Error reading Excel file.';$('bulkDownload').disabled = true;
-  }
- };
- reader.readAsArrayBuffer(file);
-});
-
-const generateSingleCardCanvas = async (scale = 2) => {
-    const card = $('card');
-    const canvas = await html2canvas(card, {
-        scale: scale,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#fffdf6',
-        logging: false,
-        imageTimeout: 3000,
-        removeContainer: true
-    });
-    return canvas.toDataURL('image/jpeg', 0.92);
-};
-
-const generatePDF = async () => {
-    const s = current();
-
-    if (!s.id && !s.name) {
-        alert('Please enter student details first.');
-        return;
-    }
-
+  const reader = new FileReader();
+  reader.onload = ev => {
     try {
-        $('status').textContent = 'Generating PDF...';
-        await new Promise(r => setTimeout(r, 50));
+      const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      let rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
 
-        const imageData = await generateSingleCardCanvas(3);
-        const { jsPDF } = window.jspdf;
+      if (!rows.length) {
+        const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const hi = matrix.findIndex(r => r.some(cell => norm(cell).includes('name') || norm(cell).includes('id')));
+        if (hi >= 0) rows = XLSX.utils.sheet_to_json(ws, { defval: '', range: hi });
+      }
 
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: [101.6, 63.8]
-        });
-
-        pdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
-
-        const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
-        pdf.save('apaa_id_card_' + filename + '.pdf');
-
-        $('status').textContent = 'PDF downloaded.';
-
-    } catch (error) {
-        console.error('PDF ERROR:', error);
-        $('status').textContent = 'PDF generation failed.';
+      students = rows.map(mapRow).filter(s => s.id || s.name || s.grade);
+      if (students.length > 0) {
+        renderDropdown(students);
+        setForm(students[0]);
+        $('bulkDownload').disabled = false;
+        $('status').textContent = `Loaded ${students.length} student(s) successfully.`;
+      } else {
+        $('status').textContent = 'No valid student records found.';$('bulkDownload').disabled = true;
+      }
+    } catch (err) {
+      console.error(err);
+      $('status').textContent = 'Error parsing Excel file.';$('bulkDownload').disabled = true;
     }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+// Search Filter
+$('search').addEventListener('input', () => {
+  const q = norm($('search').value);
+  const list = students.filter(s => !q || norm(s.id).includes(q) || norm(s.name).includes(q));
+  renderDropdown(list);
+  if (list.length) setForm(list[0]);
+});
+
+$('studentSelect').addEventListener('change', () => {
+  const list = $('studentSelect')._list || students;
+  const s = list[Number($('studentSelect').value)];
+  if (s) setForm(s);
+});
+
+$('clear').onclick = () => {
+  fields.forEach(f => $(f).value = '');
+  $('joining').value = 'Aug 2026';$('status').textContent = 'Status: Form cleared.';
+  drawPreview();
 };
 
-const generateBatchPDF = async () => {
-    if (!students.length) {
-        alert('Please upload an Excel or CSV file first.');
-        return;
-    }
+// Pure Vector PDF Page Builder
+function addStudentPageToPDF(doc, s) {
+  const width = 101.6;
+  const height = 63.8;
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: [101.6, 63.8]
-    });
+  // Background
+  if (bgImg.complete && bgImg.naturalWidth !== 0) {
+    doc.addImage(bgImg, 'PNG', 0, 0, width, height);
+  } else {
+    doc.setFillColor(255, 253, 246);
+    doc.rect(0, 0, width, height, 'F');
+  }
 
-    $('bulkDownload').disabled = true;
+  doc.setTextColor(6, 45, 92);
+  doc.setFont('helvetica', 'bold');
 
-    for (let i = 0; i < students.length; i++) {
-        const student = students[i];
-        $('status').textContent = `Processing ${i + 1}/${students.length}: ${student.name || student.id}...`;
-        
-        setForm(student);
-        
-        // Ensure browser paints the DOM update before canvas render
-        await new Promise(r => requestAnimationFrame(() => setTimeout(r, 40)));
+  const startX = 21.5;
+  const colonX = 42.5;
+  const valX = 44.5;
+  let startY = 25.5;
+  const lineGap = 4.2;
 
-        const imageData = await generateSingleCardCanvas(2);
+  const items = [
+    { label: 'Student ID', value: s.id },
+    { label: 'Name', value: s.name },
+    { label: 'Grade', value: s.grade },
+    { label: 'Date of Birth', value: s.dob },
+    { label: 'Name of Institution', value: s.institute },
+    { label: 'Date of Joining', value: s.joining }
+  ];
 
-        if (i > 0) {
-            pdf.addPage([101.6, 63.8], 'landscape');
-        }
+  items.forEach((item, index) => {
+    const y = startY + (index * lineGap);
+    doc.setFontSize(index === 4 ? 6.5 : 7.2);
+    doc.text(item.label, startX, y);
+    doc.text(':', colonX, y);
+    doc.text(item.value || '', valX, y);
+  });
+}
 
-        pdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
-    }
-
-    pdf.save('apaa_id_cards_batch_all.pdf');
-    $('status').textContent = `Done! Exported ${students.length} cards to PDF.`;
-    $('bulkDownload').disabled = false;
+// Generate Single Card PDF
+$('download').onclick = () => {
+  const s = current();
+  if (!s.id && !s.name) {
+    alert('Please enter student details first.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [101.6, 63.8] });
+  addStudentPageToPDF(pdf, s);
+  const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
+  pdf.save(`apaa_id_card_${filename}.pdf`);
+  $('status').textContent = 'Single PDF downloaded successfully.';
 };
 
-$('download').onclick = () => generatePDF();$('bulkDownload').onclick = () => generateBatchPDF();
+// Generate Batch Multi-Page PDF
+$('bulkDownload').onclick = async () => {
+  if (!students.length) return;
+  $('status').textContent = 'Generating batch PDF...';$('bulkDownload').disabled = true;
 
-update();
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [101.6, 63.8] });
+
+  for (let i = 0; i < students.length; i++) {
+    if (i > 0) pdf.addPage([101.6, 63.8], 'landscape');
+    addStudentPageToPDF(pdf, students[i]);
+  }
+
+  pdf.save('apaa_id_cards_batch_all.pdf');
+  $('status').textContent = `Done! Exported ${students.length} cards to PDF.`;
+  $('bulkDownload').disabled = false;
+};
+
+// Initial Draw
+drawPreview();
 </script>
 </body>
 </html>
