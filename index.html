@@ -587,18 +587,21 @@ const $ = id => document.getElementById(id);
 let students = [];
 const fields = ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'];
 
-/* String Cleaners */
 function norm(val) {
-  return String(val ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return String(val || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function getValue(row, possibleNames) {
-  const keys = Object.keys(row);
-  for (const name of possibleNames) {
-    const targetNorm = norm(name);
-    const key = keys.find(k => norm(k) === targetNorm);
-    if (key !== undefined && row[key] !== undefined && String(row[key]).trim() !== '') {
-      return String(row[key]).trim();
+  const keys = Object.keys(row || {});
+  for (let i = 0; i < possibleNames.length; i++) {
+    const targetNorm = norm(possibleNames[i]);
+    for (let j = 0; j < keys.length; j++) {
+      if (norm(keys[j]) === targetNorm) {
+        const val = row[keys[j]];
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+          return String(val).trim();
+        }
+      }
     }
   }
   return '';
@@ -612,27 +615,47 @@ function dateText(value) {
   if (typeof value === 'number' && window.XLSX) {
     const d = XLSX.SSF.parse_date_code(value);
     if (d) {
-      return `${String(d.d).padStart(2, '0')}/${String(d.m).padStart(2, '0')}/${d.y}`;
+      const day = String(d.d).padStart(2, '0');
+      const month = String(d.m).padStart(2, '0');
+      return `${day}/${month}/${d.y}`;
     }
   }
   return String(value).trim();
 }
 
 function mapRow(row, index) {
-  let id = getValue(row, ['ENROLLMENT NO', 'ENROLLMENT NO.', 'ENROLLMENTNO', 'ENROLLMENT NO / ID', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'NO', 'S.NO', 'SNO']);
+  let id = getValue(row, ['ENROLLMENT NO', 'ENROLLMENTNO', 'ENROLLMENT NO.', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'S.NO', 'NO']);
   if (!id) {
     id = 'ALGBIN' + String(index + 1).padStart(4, '0');
   }
 
+  const name = getValue(row, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'CANDIDATE NAME']);
+  const grade = getValue(row, ['GRADE', 'CLASS', 'LEVEL']);
+  const dobRaw = getValue(row, ['DATE OF BIRTH', 'DOB', 'DATEOFBIRTH', 'BIRTH DATE']);
+  const phone = getValue(row, ['MOBILE NO', 'MOBILE', 'PHONE NUMBER', 'PHONE', 'CONTACT NUMBER']);
+  const institute = getValue(row, ['NAME OF THE INSTITUTE', 'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'NAME OF THE INSTITUTION']);
+  const joiningRaw = getValue(row, ['DATE OF JOINING', 'JOINING DATE', 'DATEOFJOINING']);
+
   return {
     id: id,
-    name: getValue(row, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'STUDENT', 'CANDIDATE NAME']),
-    grade: getValue(row, ['GRADE', 'CLASS', 'LEVEL']),
-    dob: dateText(getValue(row, ['DATE OF BIRTH', 'DATE OF BIRTH.', 'DATEOFBIRTH', 'DOB', 'BIRTH DATE'])),
-    institute: getValue(row, ['NAME OF THE INSTITUTE', 'NAME OF THE INSTITUTION', 'NAMEOFTHEINSTITUTE', 'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'INSTITUTION', 'CENTRE']),
-    joining: dateText(getValue(row, ['DATE OF JOINING', 'DATEOFJOINING', 'JOINING DATE', 'DATE JOINED'])) || 'Aug 2026',
-    phone: getValue(row, ['MOBILE NO', 'MOBILE NO.', 'MOBILE', 'PHONE NUMBER', 'PHONE NO', 'PHONE', 'CONTACT NUMBER', 'CONTACT'])
+    name: name,
+    grade: grade,
+    dob: dateText(dobRaw),
+    institute: institute,
+    joining: dateText(joiningRaw) || 'Aug 2026',
+    phone: phone
   };
+}
+
+function setForm(student) {
+  if (!student) return;
+
+  $('id').value = student.id || '';
+  $('name').value = student.name \vert{}\vert{} '';$('grade').value = student.grade || '';
+  $('dob').value = student.dob \vert{}\vert{} '';$('institute').value = student.institute || '';
+  $('joining').value = student.joining \vert{}\vert{} 'Aug 2026';$('phone').value = student.phone || '';
+
+  update();
 }
 
 function populateStudentDropdown(list) {
@@ -659,33 +682,38 @@ function populateStudentDropdown(list) {
 }
 
 function filterStudents() {
-  const searchValue = norm($('search').value);
+  const query = norm($('search').value);
   const filtered = students.filter(s => {
-    if (!searchValue) return true;
-    return norm(s.id).includes(searchValue) ||
-           norm(s.name).includes(searchValue) ||
-           norm(s.phone).includes(searchValue) ||
-           norm(s.grade).includes(searchValue);
+    if (!query) return true;
+    return norm(s.id).includes(query) ||
+           norm(s.name).includes(query) ||
+           norm(s.phone).includes(query) ||
+           norm(s.grade).includes(query);
   });
 
   populateStudentDropdown(filtered);
   if (filtered.length > 0) {
-    $('studentSelect').value = '0';
+    $('studentSelect').selectedIndex = 0;
     setForm(filtered[0]);
+  } else {
+    fields.forEach(f => {
+      if (f !== 'joining') $('' + f).value = '';
+    });
+    update();
   }
 }
 
 $('search').addEventListener('input', filterStudents);
 
 $('studentSelect').addEventListener('change', function () {
-  const idx = Number(this.value);
-  const list = this._studentList || [];
-  if (Number.isInteger(idx) && list[idx]) {
+  const idx = parseInt(this.value, 10);
+  const list = this._studentList || students;
+  if (!isNaN(idx) && list[idx]) {
     setForm(list[idx]);
   }
 });
 
-/* Excel File Processing */
+/* CSV / Excel Reader */
 $('file').addEventListener('change', function (event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -696,7 +724,7 @@ $('file').addEventListener('change', function (event) {
 
   if (typeof XLSX === 'undefined') {
     status.className = 'status-bar flash-error';
-    status.textContent = 'Error: XLSX library failed to load. Check internet connection.';
+    status.textContent = 'File Load Error: SheetJS library failed to load.';
     return;
   }
 
@@ -707,52 +735,49 @@ $('file').addEventListener('change', function (event) {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
-      if (!workbook.SheetNames.length) {
-        throw new Error('No worksheets found in this Excel file.');
+      if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('No worksheets found in file.');
       }
 
-      let validRows = [];
-      let detectedSheetName = '';
+      let targetSheet = null;
+      let headerIdx = -1;
 
-      // Scan all sheets in case student data is on a non-first tab
-      for (const name of workbook.SheetNames) {
-        const sheet = workbook.Sheets[name];
+      for (let s = 0; s < workbook.SheetNames.length; s++) {
+        const sheetName = workbook.SheetNames[s];
+        const sheet = workbook.Sheets[sheetName];
         if (!sheet) continue;
 
         const rawMatrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-        if (!rawMatrix.length) continue;
+        if (!rawMatrix || rawMatrix.length === 0) continue;
 
-        // Find header row containing NAME and (GRADE or MOBILE or DOB)
-        let headerIdx = -1;
-        for (let i = 0; i < Math.min(rawMatrix.length, 40); i++) {
-          const rowText = rawMatrix[i].map(c => norm(c)).join(' ');
-          if (rowText.includes('name') && (rowText.includes('grade') || rowText.includes('mobile') || rowText.includes('dob') || rowText.includes('birth'))) {
+        for (let i = 0; i < Math.min(rawMatrix.length, 50); i++) {
+          const rowString = rawMatrix[i].map(c => norm(c)).join(' ');
+          if (rowString.includes('name') && (rowString.includes('enrollment') || rowString.includes('grade') || rowString.includes('mobile') || rowString.includes('sno'))) {
             headerIdx = i;
+            targetSheet = sheet;
             break;
           }
         }
-
-        if (headerIdx !== -1) {
-          const rows = XLSX.utils.sheet_to_json(sheet, { range: headerIdx, defval: '', raw: true });
-          if (rows.length > 0) {
-            validRows = rows;
-            detectedSheetName = name;
-            break;
-          }
-        }
+        if (targetSheet) break;
       }
 
-      if (!validRows.length) {
-        throw new Error('Could not find header row (NAME, GRADE, MOBILE NO, DOB) in any worksheet tab.');
+      if (!targetSheet) {
+        targetSheet = workbook.Sheets[workbook.SheetNames[0]];
+        headerIdx = 0;
       }
 
-      // Map rows to student objects
-      students = validRows
-        .map((r, i) => mapRow(r, i))
+      const rawRows = XLSX.utils.sheet_to_json(targetSheet, { range: headerIdx, defval: '', raw: true });
+
+      if (!rawRows || rawRows.length === 0) {
+        throw new Error('No data rows found in spreadsheet.');
+      }
+
+      students = rawRows
+        .map((row, idx) => mapRow(row, idx))
         .filter(s => s.name && norm(s.name) !== 'name' && norm(s.name) !== 'studentname');
 
-      if (!students.length) {
-        throw new Error('Header row detected, but no valid student rows were found underneath it.');
+      if (students.length === 0) {
+        throw new Error('No valid student entries found under table headers.');
       }
 
       $('search').value = '';
@@ -761,47 +786,40 @@ $('file').addEventListener('change', function (event) {
       setForm(students[0]);
 
       status.className = 'status-bar flash-confirm';
-      status.textContent = `Loaded ${students.length} student record(s) from sheet "${detectedSheetName}".`;
+      status.textContent = `Loaded ${students.length} student record(s) from sheet "${file.name}".`;
 
       setTimeout(() => { status.classList.remove('flash-confirm'); }, 2000);
 
     } catch (err) {
-      console.error('File Parse Error:', err);
+      console.error('Spreadsheet parse exception:', err);
       students = [];
       populateStudentDropdown([]);
       status.className = 'status-bar flash-error';
-      status.textContent = `File Load Error: ${err.message}`;
+      status.textContent = `File Load Error: ${err.message || 'Unable to parse spreadsheet structure.'}`;
     }
   };
 
   reader.onerror = function () {
     status.className = 'status-bar flash-error';
-    status.textContent = 'Error reading file from disk.';
+    status.textContent = 'File Load Error: Failed to read file from disk.';
   };
 
   reader.readAsArrayBuffer(file);
 });
 
-/* Custom Background Image Handler */
-$('bgUpload').addEventListener('change', e => {
+/* Card Background Upload */
+$('bgUpload').addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (!file) return;
+
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = function (ev) {
     $('cardBgImg').src = ev.target.result;
-    $('status').textContent = 'Background image loaded into canvas successfully.';
+    $('status').className = 'status-bar flash-confirm';$('status').textContent = 'Custom card background image updated.';
+    setTimeout(() => { $('status').classList.remove('flash-confirm'); }, 1500);
   };
   reader.readAsDataURL(file);
 });
-
-function setForm(student) {
-  if (!student) return;
-  $('id').value = student.id || '';
-  $('name').value = student.name \vert{}\vert{} '';$('grade').value = student.grade || '';
-  $('dob').value = student.dob \vert{}\vert{} '';$('institute').value = student.institute || '';
-  $('joining').value = student.joining \vert{}\vert{} 'Aug 2026';$('phone').value = student.phone || '';
-  update();
-}
 
 function current() {
   return {
@@ -815,7 +833,7 @@ function current() {
   };
 }
 
-const cardValueEls = Object.freeze({
+const cardValueEls = {
   vId: $('vId'),
   vName: $('vName'),
   vGrade: $('vGrade'),
@@ -823,7 +841,7 @@ const cardValueEls = Object.freeze({
   vInstitute: $('vInstitute'),
   vJoining: $('vJoining'),
   vPhone: $('vPhone')
-});
+};
 
 function update() {
   const s = current();
@@ -838,8 +856,11 @@ function update() {
 
 fields.forEach(f => $('' + f).addEventListener('input', update));
 
-$('clear').onclick = () => {
-  fields.forEach(f => $('' + f).value = '');$('joining').value = 'Aug 2026';
+$('clear').onclick = function () {
+  fields.forEach(f => {
+    if (f !== 'joining') $('' + f).value = '';
+  });
+  $('joining').value = 'Aug 2026';
   const statusEl = $('status');
   statusEl.className = 'status-bar flash-confirm';
   statusEl.textContent = 'Form cleared successfully.';
@@ -847,7 +868,7 @@ $('clear').onclick = () => {
   update();
 };
 
-/* PDF Generator */
+/* PDF Export */
 const generatePDF = async () => {
   const card = $('card');
   const btn = $('download');
@@ -892,7 +913,8 @@ const generatePDF = async () => {
     const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
     pdf.save('Student_ID_Card_' + filename + '.pdf');
 
-    $('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
+    $('status').className = 'status-bar flash-confirm';$('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
+    setTimeout(() => $('status').classList.remove('flash-confirm'), 2000);
   } catch (error) {
     console.error('PDF Generation Error:', error);
     $('status').className = 'status-bar flash-error';$('status').textContent = 'Error generating PDF.';
@@ -905,7 +927,7 @@ const generatePDF = async () => {
 
 $('download').onclick = () => generatePDF();
 
-// Initial draw
+// Initial Card Render
 update();
 </script>
 </body>
