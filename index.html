@@ -713,20 +713,22 @@ function dateText(v){
 
 function mapRow(r){
  return {
-  id:val(r,['ENROLLMENT NO','ENROLLMENTNO','Enrollment No','Student ID','StudentID','ID']),
-  name:val(r,['NAME','Student Name','StudentName','Student']),
+  id:val(r,['ENROLLMENT NO','ENROLLMENTNO','Enrollment No','Student ID','StudentID','ID','SL NO','NO']),
+  name:val(r,['NAME','Student Name','StudentName','Student','CANDIDATE NAME']),
   grade:val(r,['GRADE','Grade','Class','Level']),
   dob:dateText(val(r,['DATE OF BIRTH','DATEOFBIRTH','DOB','Date of Birth','Birth Date'])),
-  institute:val(r,['NAME OF THE INSTITUTE','NAMEOFTHEINSTITUTE','Name of the Institute','Institute Name','Institute','Institution Name','Institution']),
+  institute:val(r,['NAME OF THE INSTITUTE','NAMEOFTHEINSTITUTE','Name of the Institute','Institute Name','Institute','Institution Name','Institution','CENTRE']),
   joining:dateText(val(r,['DATE OF JOINING','DATEOFJOINING','Date of joining','Joining Date','Date Joined']))||'Aug 2026',
-  phone:val(r,['PHONE NUMBER','PHONE','MOBILE NUMBER','MOBILE','CONTACT NUMBER','CONTACT'])
+  phone:val(r,['PHONE NUMBER','PHONE','MOBILE NUMBER','MOBILE','CONTACT NUMBER','CONTACT','PHONE NO'])
  };
 }
 
 function setForm(s){
  if(!s)return;
- $('id').value=s.id||'';$('name').value=s.name\vert{}\vert{}'';$('grade').value=s.grade||'';
- $('dob').value=s.dob\vert{}\vert{}'';$('institute').value=s.institute||'';$('joining').value=s.joining\vert{}\vert{}'Aug 2026';$('phone').value=s.phone||'';
+ $('id').value=s.id||'';
+ $('name').value=s.name\vert{}\vert{}'';$('grade').value=s.grade||'';
+ $('dob').value=s.dob\vert{}\vert{}'';$('institute').value=s.institute||'';
+ $('joining').value=s.joining\vert{}\vert{}'Aug 2026';$('phone').value=s.phone||'';
  update();
 }
 
@@ -846,7 +848,7 @@ $('file').addEventListener('change', e => {
   $('status').textContent = 'Reading ' + file.name + '...';
 
   if (!window.XLSX) {
-    $('status').textContent = 'Unable to load CSV: XLSX library not available.';
+    $('status').textContent = 'Unable to load CSV/Excel: XLSX library not available.';
     return;
   }
 
@@ -858,24 +860,28 @@ $('file').addEventListener('change', e => {
       
       const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
       
-      const hi = matrix.findIndex(r => {
-        const h = r.map(norm);
-        return h.some(k => k.includes('enrollment') || k.includes('studentid') || k === 'id') || 
-               h.some(k => k.includes('name')) || 
-               h.some(k => k.includes('grade') || k.includes('class'));
-      });
-
-      let rows = [];
-      if (hi >= 0) {
-        rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: hi });
-      } else {
-        rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+      let headerRowIdx = -1;
+      for (let i = 0; i < Math.min(matrix.length, 25); i++) {
+        const rowStr = matrix[i].map(norm).join(' ');
+        if (rowStr.includes('enrollment') || rowStr.includes('name') || rowStr.includes('grade') || rowStr.includes('student') || rowStr.includes('id')) {
+          headerRowIdx = i;
+          break;
+        }
       }
 
-      students = rows.map(mapRow).filter(s => s.id || s.name || s.phone);
+      let rawRows = [];
+      if (headerRowIdx >= 0) {
+        rawRows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: headerRowIdx });
+      } else {
+        rawRows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+      }
+
+      students = rawRows
+        .map(mapRow)
+        .filter(s => (s.id && s.id !== 'ENROLLMENT NO') || (s.name && s.name !== 'NAME') || s.phone);
 
       if (students.length === 0) {
-        $('status').textContent = 'Unable to load CSV: Header row not found or file has no valid student records.';
+        $('status').textContent = 'Unable to load file: Header row or student records not found.';
         renderDropdownOptions([]);
         return;
       }
@@ -887,13 +893,13 @@ $('file').addEventListener('change', e => {
 
     } catch (err) {
       console.error(err);
-      $('status').textContent = 'Unable to load CSV: ' + (err.message || 'Error processing file structure.');
+      $('status').textContent = 'Unable to load file: ' + (err.message || 'Error processing spreadsheet structure.');
       renderDropdownOptions([]);
     }
   };
 
   reader.onerror = () => {
-    $('status').textContent = 'Unable to load CSV: File reading failed.';
+    $('status').textContent = 'Unable to load file: File reading failed.';
     renderDropdownOptions([]);
   };
 
