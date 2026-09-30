@@ -56,7 +56,6 @@
     width: 100%;
   }
 
-  /* Compact Balanced White Rounded Logo Box */
   .header-logos-wrap {
     width: 315px;
     height: 100px;
@@ -119,63 +118,27 @@
     letter-spacing: 0.2px;
   }
 
-  /* Responsive Behavior */
   @media (max-width: 900px) {
-    .header-brand {
-      gap: 16px;
-    }
-    .header-title h1 {
-      font-size: 20px;
-    }
-    .header-title p {
-      font-size: 13px;
-    }
+    .header-brand { gap: 16px; }
+    .header-title h1 { font-size: 20px; }
+    .header-title p { font-size: 13px; }
   }
 
   @media (max-width: 768px) {
-    header {
-      padding: 14px 0;
-    }
-    .header-brand {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 14px;
-    }
+    header { padding: 14px 0; }
+    .header-brand { flex-direction: column; align-items: flex-start; gap: 14px; }
   }
 
   @media (max-width: 480px) {
-    .header-brand {
-      align-items: center;
-      text-align: center;
-    }
-    .header-logos-wrap {
-      width: 285px;
-      height: 90px;
-      padding: 6px 10px;
-      gap: 10px;
-    }
-    .university-logo {
-      width: 76px;
-      height: 76px;
-      flex: 0 0 76px;
-    }
-    .apaa-logo {
-      width: 118px;
-      height: 72px;
-      flex: 0 0 118px;
-    }
-    .logo-divider {
-      height: 58px;
-    }
-    .header-title h1 {
-      font-size: 18px;
-    }
-    .header-title p {
-      font-size: 12px;
-    }
+    .header-brand { align-items: center; text-align: center; }
+    .header-logos-wrap { width: 285px; height: 90px; padding: 6px 10px; gap: 10px; }
+    .university-logo { width: 76px; height: 76px; flex: 0 0 76px; }
+    .apaa-logo { width: 118px; height: 72px; flex: 0 0 118px; }
+    .logo-divider { height: 58px; }
+    .header-title h1 { font-size: 18px; }
+    .header-title p { font-size: 12px; }
   }
 
-  /* Main Wrap */
   .wrap {
     max-width: 1200px;
     margin: 0 auto;
@@ -185,7 +148,6 @@
     gap: 20px;
   }
 
-  /* Panel Cards & Entrance Animations */
   .panel {
     background: var(--panel-bg);
     border-radius: var(--radius);
@@ -232,14 +194,10 @@
     gap: 16px;
   }
 
-  .grid > div {
-    min-width: 0;
-  }
+  .grid > div { min-width: 0; }
 
   @media (max-width: 640px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
+    .grid { grid-template-columns: 1fr; }
   }
 
   label {
@@ -496,30 +454,6 @@
     user-select: none !important;
     object-fit: cover;
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    header, .panel {
-      animation: none !important;
-      opacity: 1 !important;
-      transform: none !important;
-    }
-
-    button {
-      transition: none !important;
-    }
-
-    button:hover, button:active, button.is-pressing {
-      transform: none !important;
-    }
-
-    .btn-ripple {
-      display: none !important;
-    }
-
-    input[type=text], input[type=file], select#studentSelect, .status-bar {
-      transition: none !important;
-    }
-  }
 </style>
 </head>
 <body>
@@ -549,7 +483,7 @@
       <div>
         <label>Excel / CSV Spreadsheet</label>
         <input id="file" type="file" accept=".xlsx,.xls,.csv">
-        <div class="hint">Auto-detects ENROLLMENT NO, NAME, GRADE, DOB, INSTITUTE, JOINING, and PHONE columns.</div>
+        <div class="hint">Auto-detects NAME, GRADE, DOB, MOBILE NO, INSTITUTE, etc.</div>
       </div>
       <div>
         <label>Search Student</label>
@@ -644,93 +578,23 @@
 <script>
 const $ = id => document.getElementById(id);
 
-function createRipple(e) {
-  const btn = e.currentTarget;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const circle = document.createElement('span');
-  const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-  const radius = diameter / 2;
-
-  const rect = btn.getBoundingClientRect();
-  const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : rect.left + rect.width / 2);
-  const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.top + rect.height / 2);
-
-  circle.style.width = circle.style.height = `${diameter}px`;
-  circle.style.left = `${clientX - rect.left - radius}px`;
-  circle.style.top = `${clientY - rect.top - radius}px`;
-  circle.classList.add('btn-ripple');
-
-  const existingRipple = btn.querySelector('.btn-ripple');
-  if (existingRipple) existingRipple.remove();
-
-  btn.appendChild(circle);
-
-  btn.classList.add('is-pressing');
-  setTimeout(() => btn.classList.remove('is-pressing'), 200);
-}
-
-document.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('pointerdown', createRipple);
-});
-
-function loadFileAsDataURL(file, callback) {
-  const reader = new FileReader();
-  reader.onload = function(e) { callback(e.target.result); };
-  reader.readAsDataURL(file);
-}
-
-$('bgUpload').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  loadFileAsDataURL(file, (dataUrl) => {
-    $('cardBgImg').src = dataUrl;
-    $('status').textContent = 'Background image loaded into memory successfully.';
-  });
-});
-
-/* ==========================================================================
-   STUDENT DATA LOADING & PARSING LOGIC
-   ========================================================================== */
-
 let students = [];
 
-const fields = [
-  'id',
-  'name',
-  'grade',
-  'dob',
-  'institute',
-  'joining',
-  'phone'
-];
+const fields = ['id','name','grade','dob','institute','joining','phone'];
 
 function norm(value) {
-  return String(value ?? '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function getValue(row, possibleNames) {
   const keys = Object.keys(row);
-
   for (const name of possibleNames) {
     const normalizedName = norm(name);
-
-    const key = keys.find(
-      k => norm(k) === normalizedName
-    );
-
-    if (
-      key !== undefined &&
-      row[key] !== undefined &&
-      String(row[key]).trim() !== ''
-    ) {
+    const key = keys.find(k => norm(k) === normalizedName);
+    if (key !== undefined && row[key] !== undefined && String(row[key]).trim() !== '') {
       return row[key];
     }
   }
-
   return '';
 }
 
@@ -738,117 +602,56 @@ function dateText(value) {
   if (value instanceof Date && !isNaN(value)) {
     return value.toLocaleDateString('en-GB');
   }
-
-  if (
-    typeof value === 'number' &&
-    window.XLSX
-  ) {
+  if (typeof value === 'number' && window.XLSX) {
     const d = XLSX.SSF.parse_date_code(value);
-
     if (d) {
       return `${String(d.d).padStart(2, '0')}/${String(d.m).padStart(2, '0')}/${d.y}`;
     }
   }
-
   return String(value ?? '').trim();
 }
 
-function mapRow(row) {
+function mapRow(row, index) {
+  let detectedId = getValue(row, [
+    'ENROLLMENT NO', 'ENROLLMENT NO.', 'ENROLLMENTNO', 'ENROLLMENT NO / ID',
+    'ENROLLMENT', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'NO', 'S.NO', 'SNO'
+  ]);
+
+  if (!detectedId) {
+    detectedId = 'ALGBIN' + String(index + 1).padStart(4, '0');
+  }
+
   return {
-    id: getValue(row, [
-      'ENROLLMENT NO',
-      'ENROLLMENT NO.',
-      'ENROLLMENTNO',
-      'ENROLLMENT NO / ID',
-      'ENROLLMENT',
-      'STUDENT ID',
-      'STUDENTID',
-      'ID',
-      'SL NO',
-      'NO'
-    ]),
-
-    name: getValue(row, [
-      'NAME',
-      'STUDENT NAME',
-      'STUDENTNAME',
-      'STUDENT',
-      'CANDIDATE NAME'
-    ]),
-
-    grade: getValue(row, [
-      'GRADE',
-      'CLASS',
-      'LEVEL'
-    ]),
-
-    dob: dateText(getValue(row, [
-      'DATE OF BIRTH',
-      'DATE OF BIRTH.',
-      'DATEOFBIRTH',
-      'DOB',
-      'BIRTH DATE'
-    ])),
-
+    id: detectedId,
+    name: getValue(row, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'STUDENT', 'CANDIDATE NAME']),
+    grade: getValue(row, ['GRADE', 'CLASS', 'LEVEL']),
+    dob: dateText(getValue(row, ['DATE OF BIRTH', 'DATE OF BIRTH.', 'DATEOFBIRTH', 'DOB', 'BIRTH DATE'])),
     institute: getValue(row, [
-      'NAME OF THE INSTITUTE',
-      'NAME OF THE INSTITUTION',
-      'NAMEOFTHEINSTITUTE',
-      'INSTITUTE NAME',
-      'INSTITUTE',
-      'INSTITUTION NAME',
-      'INSTITUTION',
-      'CENTRE'
+      'NAME OF THE INSTITUTE', 'NAME OF THE INSTITUTION', 'NAMEOFTHEINSTITUTE',
+      'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'INSTITUTION', 'CENTRE'
     ]),
-
-    joining:
-      dateText(getValue(row, [
-        'DATE OF JOINING',
-        'DATEOFJOINING',
-        'JOINING DATE',
-        'DATE JOINED'
-      ])) || 'Aug 2026',
-
-    phone: getValue(row, [
-      'PHONE NUMBER',
-      'PHONE NO',
-      'PHONE',
-      'MOBILE NUMBER',
-      'MOBILE',
-      'CONTACT NUMBER',
-      'CONTACT'
-    ])
+    joining: dateText(getValue(row, ['DATE OF JOINING', 'DATEOFJOINING', 'JOINING DATE', 'DATE JOINED'])) || 'Aug 2026',
+    phone: getValue(row, ['MOBILE NO', 'MOBILE NO.', 'MOBILE', 'PHONE NUMBER', 'PHONE NO', 'PHONE', 'CONTACT NUMBER', 'CONTACT'])
   };
 }
 
 function populateStudentDropdown(list) {
   const select = document.getElementById('studentSelect');
-
   select.innerHTML = '';
 
   if (!list || list.length === 0) {
     const option = document.createElement('option');
-
     option.value = '';
-    option.textContent = students.length
-      ? 'No students found'
-      : 'Manual Entry / Upload Excel above';
-
+    option.textContent = students.length ? 'No students found' : 'Manual Entry / Upload Excel above';
     select.appendChild(option);
-
     select._studentList = [];
-
     return;
   }
 
   list.forEach((student, index) => {
     const option = document.createElement('option');
-
     option.value = index;
-
-    option.textContent =
-      `${student.id || 'No ID'} — ${student.name || 'Unnamed Student'}`;
-
+    option.textContent = `${student.id || 'No ID'} — ${student.name || 'Unnamed Student'}`;
     select.appendChild(option);
   });
 
@@ -856,15 +659,10 @@ function populateStudentDropdown(list) {
 }
 
 function filterStudents() {
-  const searchValue =
-    norm(document.getElementById('search').value);
+  const searchValue = norm(document.getElementById('search').value);
 
   const filteredStudents = students.filter(student => {
-
-    if (!searchValue) {
-      return true;
-    }
-
+    if (!searchValue) return true;
     return (
       norm(student.id).includes(searchValue) ||
       norm(student.name).includes(searchValue) ||
@@ -876,288 +674,139 @@ function filterStudents() {
   populateStudentDropdown(filteredStudents);
 
   if (filteredStudents.length > 0) {
-
     document.getElementById('studentSelect').value = '0';
-
     setForm(filteredStudents[0]);
   }
 }
 
-document.getElementById('search').addEventListener(
-  'input',
-  filterStudents
-);
+document.getElementById('search').addEventListener('input', filterStudents);
 
-document.getElementById('studentSelect').addEventListener(
-  'change',
-  function () {
-
-    const selectedIndex = Number(this.value);
-
-    const list = this._studentList || [];
-
-    if (
-      Number.isInteger(selectedIndex) &&
-      list[selectedIndex]
-    ) {
-      setForm(list[selectedIndex]);
-    }
+document.getElementById('studentSelect').addEventListener('change', function () {
+  const selectedIndex = Number(this.value);
+  const list = this._studentList || [];
+  if (Number.isInteger(selectedIndex) && list[selectedIndex]) {
+    setForm(list[selectedIndex]);
   }
-);
+});
 
-document.getElementById('file').addEventListener(
-  'change',
-  function (event) {
+document.getElementById('file').addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-    const file = event.target.files[0];
+  const status = document.getElementById('status');
+  status.textContent = `Reading ${file.name}...`;
 
-    if (!file) {
-      return;
-    }
+  if (!window.XLSX) {
+    status.textContent = 'Unable to load CSV/Excel: XLSX library not available.';
+    return;
+  }
 
-    const status = document.getElementById('status');
+  const reader = new FileReader();
 
-    status.textContent =
-      `Reading ${file.name}...`;
+  reader.onload = function (event) {
+    try {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
-    if (!window.XLSX) {
+      if (!workbook.SheetNames.length) throw new Error('No worksheet found.');
 
-      status.textContent =
-        'Unable to load CSV/Excel: XLSX library not available.';
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      if (!worksheet) throw new Error('Unable to read the first worksheet.');
 
-      return;
-    }
+      const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: true });
 
-    const reader = new FileReader();
+      if (!matrix.length) throw new Error('The uploaded file is empty.');
 
-    reader.onload = function (event) {
+      let headerRowIndex = -1;
 
-      try {
+      for (let i = 0; i < Math.min(matrix.length, 30); i++) {
+        const row = matrix[i] || [];
+        const normalizedRow = row.map(norm).join(' ');
 
-        const data = new Uint8Array(event.target.result);
+        const looksLikeHeader =
+          normalizedRow.includes('name') ||
+          normalizedRow.includes('grade') ||
+          normalizedRow.includes('dateofbirth') ||
+          normalizedRow.includes('dob') ||
+          normalizedRow.includes('mobileno') ||
+          normalizedRow.includes('phone') ||
+          normalizedRow.includes('institute') ||
+          normalizedRow.includes('enrollment');
 
-        const workbook = XLSX.read(data, {
-          type: 'array',
-          cellDates: true
-        });
-
-        if (!workbook.SheetNames.length) {
-          throw new Error('No worksheet found.');
+        if (looksLikeHeader) {
+          headerRowIndex = i;
+          break;
         }
-
-        const worksheet =
-          workbook.Sheets[workbook.SheetNames[0]];
-
-        if (!worksheet) {
-          throw new Error('Unable to read the first worksheet.');
-        }
-
-        /*
-         * First read the sheet as a matrix.
-         * This allows us to locate the actual header row.
-         */
-        const matrix =
-          XLSX.utils.sheet_to_json(
-            worksheet,
-            {
-              header: 1,
-              defval: '',
-              raw: true
-            }
-          );
-
-        if (!matrix.length) {
-          throw new Error('The uploaded file is empty.');
-        }
-
-        /*
-         * Find the header row.
-         */
-        let headerRowIndex = -1;
-
-        for (
-          let i = 0;
-          i < Math.min(matrix.length, 30);
-          i++
-        ) {
-
-          const row = matrix[i] || [];
-
-          const normalizedRow =
-            row.map(norm).join(' ');
-
-          const looksLikeHeader =
-            normalizedRow.includes('enrollment') ||
-            normalizedRow.includes('studentid') ||
-            normalizedRow.includes('studentname') ||
-            normalizedRow.includes('name') ||
-            normalizedRow.includes('grade') ||
-            normalizedRow.includes('dob') ||
-            normalizedRow.includes('phone') ||
-            normalizedRow.includes('mobile');
-
-          if (looksLikeHeader) {
-
-            headerRowIndex = i;
-
-            break;
-          }
-        }
-
-        if (headerRowIndex === -1) {
-
-          throw new Error(
-            'Header row not found. Please check the column names in the CSV/Excel file.'
-          );
-        }
-
-        /*
-         * Convert the worksheet into objects using
-         * the detected header row.
-         */
-        const rows =
-          XLSX.utils.sheet_to_json(
-            worksheet,
-            {
-              range: headerRowIndex,
-              defval: '',
-              raw: true
-            }
-          );
-
-        if (!rows.length) {
-
-          throw new Error(
-            'No student records were found below the header row.'
-          );
-        }
-
-        /*
-         * Convert every row into our standard student object.
-         */
-        students = rows
-          .map(mapRow)
-          .filter(student => {
-
-            return (
-              String(student.id || '').trim() !== '' ||
-              String(student.name || '').trim() !== '' ||
-              String(student.phone || '').trim() !== ''
-            );
-          });
-
-        if (!students.length) {
-
-          throw new Error(
-            'Student records could not be detected. Please check the column names.'
-          );
-        }
-
-        /*
-         * Clear previous search.
-         */
-        document.getElementById('search').value = '';
-
-        /*
-         * Populate ALL students.
-         */
-        populateStudentDropdown(students);
-
-        /*
-         * Automatically select the first student.
-         */
-        const select =
-          document.getElementById('studentSelect');
-
-        select.selectedIndex = 0;
-
-        setForm(students[0]);
-
-        /*
-         * Success message.
-         */
-        status.textContent =
-          `Successfully loaded ${students.length} student record(s).`;
-
-        status.classList.add('flash-confirm');
-
-        setTimeout(() => {
-          status.classList.remove('flash-confirm');
-        }, 1200);
-
-      } catch (error) {
-
-        console.error(
-          'Excel/CSV loading error:',
-          error
-        );
-
-        students = [];
-
-        populateStudentDropdown([]);
-
-        status.textContent =
-          `Unable to load file: ${error.message}`;
-
       }
-    };
 
-    reader.onerror = function () {
+      if (headerRowIndex === -1) {
+        throw new Error('Header row not found. Please check column headers.');
+      }
 
+      const rows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: '', raw: true });
+
+      if (!rows.length) {
+        throw new Error('No student records were found below the header row.');
+      }
+
+      students = rows
+        .map((row, idx) => mapRow(row, idx))
+        .filter(student => String(student.name || '').trim() !== '' || String(student.phone || '').trim() !== '');
+
+      if (!students.length) {
+        throw new Error('Student records could not be detected. Please check the sheet contents.');
+      }
+
+      document.getElementById('search').value = '';
+      populateStudentDropdown(students);
+
+      const select = document.getElementById('studentSelect');
+      select.selectedIndex = 0;
+      setForm(students[0]);
+
+      status.textContent = `Successfully loaded ${students.length} student record(s).`;
+      status.classList.add('flash-confirm');
+      setTimeout(() => status.classList.remove('flash-confirm'), 1200);
+
+    } catch (error) {
+      console.error('Excel/CSV loading error:', error);
       students = [];
-
       populateStudentDropdown([]);
+      status.textContent = `Unable to load file: ${error.message}`;
+    }
+  };
 
-      status.textContent =
-        'Unable to load file: File reading failed.';
-    };
+  reader.onerror = function () {
+    students = [];
+    populateStudentDropdown([]);
+    status.textContent = 'Unable to load file: File reading failed.';
+  };
 
-    reader.readAsArrayBuffer(file);
-  }
-);
+  reader.readAsArrayBuffer(file);
+});
 
 function setForm(student) {
-
   if (!student) return;
-
-  document.getElementById('id').value =
-    student.id || '';
-
-  document.getElementById('name').value =
-    student.name || '';
-
-  document.getElementById('grade').value =
-    student.grade || '';
-
-  document.getElementById('dob').value =
-    student.dob || '';
-
-  document.getElementById('institute').value =
-    student.institute || '';
-
-  document.getElementById('joining').value =
-    student.joining || 'Aug 2026';
-
-  document.getElementById('phone').value =
-    student.phone || '';
-
+  document.getElementById('id').value = student.id || '';
+  document.getElementById('name').value = student.name || '';
+  document.getElementById('grade').value = student.grade || '';
+  document.getElementById('dob').value = student.dob || '';
+  document.getElementById('institute').value = student.institute || '';
+  document.getElementById('joining').value = student.joining || 'Aug 2026';
+  document.getElementById('phone').value = student.phone || '';
   update();
 }
 
-/* ==========================================================================
-   FORM & CARD LIVE PREVIEW LOGIC
-   ========================================================================== */
-
-function current(){
- return {
-   id:$('id').value.trim(),
-   name:$('name').value.trim(),
-   grade:$('grade').value.trim(),
-   dob:$('dob').value.trim(),
-   institute:$('institute').value.trim(),
-   joining:$('joining').value.trim(),
-   phone:$('phone').value.trim()
- };
+function current() {
+  return {
+    id: $('id').value.trim(),
+    name: $('name').value.trim(),
+    grade: $('grade').value.trim(),
+    dob: $('dob').value.trim(),
+    institute: $('institute').value.trim(),
+    joining: $('joining').value.trim(),
+    phone: $('phone').value.trim()
+  };
 }
 
 const cardValueEls = Object.freeze({
@@ -1170,8 +819,8 @@ const cardValueEls = Object.freeze({
   vPhone: document.getElementById('vPhone')
 });
 
-function update(){
-  const s=current();
+function update() {
+  const s = current();
   cardValueEls.vId.textContent = s.id;
   cardValueEls.vName.textContent = s.name;
   cardValueEls.vGrade.textContent = s.grade;
@@ -1181,75 +830,71 @@ function update(){
   cardValueEls.vPhone.textContent = s.phone;
 }
 
-fields.forEach(f=>$(''+f).addEventListener('input',update));
+fields.forEach(f => $('' + f).addEventListener('input', update));
 
-$('clear').onclick=()=>{
-  fields.forEach(f=>$(''+f).value='');$('joining').value='Aug 2026';
-  
+$('clear').onclick = () => {
+  fields.forEach(f => $('' + f).value = '');$('joining').value = 'Aug 2026';
   const statusEl = $('status');
   statusEl.textContent = 'Form cleared successfully.';
   statusEl.classList.add('flash-confirm');
   setTimeout(() => statusEl.classList.remove('flash-confirm'), 1200);
-  
   update();
 };
 
 const generatePDF = async () => {
-    const card = $('card');
-    const btn = $('download');
-    const s = current();
+  const card = $('card');
+  const btn = $('download');
+  const s = current();
 
-    if (!s.id && !s.name) {
-        alert('Please enter student details first.');
-        return;
+  if (!s.id && !s.name) {
+    alert('Please enter student details first.');
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Generating PDF...';
+    $('status').textContent = 'Rendering High-Resolution PDF...';
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const canvas = await html2canvas(card, {
+      scale: 4,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#fffdf6',
+      logging: false,
+      imageTimeout: 15000,
+      removeContainer: true
+    });
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      throw new Error('ID card canvas failed to render.');
     }
 
-    try {
-        btn.disabled = true;
-        btn.textContent = 'Generating PDF...';
-        $('status').textContent = 'Rendering High-Resolution PDF...';
+    const imageData = canvas.toDataURL('image/png', 1.0);
+    const { jsPDF } = window.jspdf;
 
-        await new Promise(resolve => setTimeout(resolve, 300));
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: [101.6, 63.8],
+      compress: false
+    });
 
-        const canvas = await html2canvas(card, {
-            scale: 4,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#fffdf6',
-            logging: false,
-            imageTimeout: 15000,
-            removeContainer: true
-        });
+    pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+    const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
+    pdf.save('Student_ID_Card_' + filename + '.pdf');
 
-        if (!canvas || canvas.width === 0 || canvas.height === 0) {
-            throw new Error('ID card canvas failed to render.');
-        }
-
-        const imageData = canvas.toDataURL('image/png', 1.0);
-        const { jsPDF } = window.jspdf;
-
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: [101.6, 63.8],
-            compress: false
-        });
-
-        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
-
-        const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
-        pdf.save('Student_ID_Card_' + filename + '.pdf');
-
-        $('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
-
-    } catch (error) {
-        console.error('PDF Generation Error:', error);
-        $('status').textContent = 'Error during PDF generation.';
-        alert('Unable to generate PDF.\n\n' + error.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Download High-Resolution PDF';
-    }
+    $('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
+  } catch (error) {
+    console.error('PDF Generation Error:', error);
+    $('status').textContent = 'Error during PDF generation.';
+    alert('Unable to generate PDF.\n\n' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Download High-Resolution PDF';
+  }
 };
 
 $('download').onclick = () => generatePDF();
