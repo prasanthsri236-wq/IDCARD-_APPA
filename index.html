@@ -331,12 +331,12 @@
     box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
   }
 
-  /* Dynamic Card Fields Positioning */
+  /* Dynamic Card Fields Positioning - Adjusted gap for 7 rows */
   .card-fields {
     left: 21% !important;
-    top: 39% !important;
+    top: 38.5% !important;
     width: 58% !important;
-    gap: 10px !important;
+    gap: 6px !important;
     position: absolute !important;
     z-index: 10 !important;
     display: flex !important;
@@ -346,9 +346,9 @@
 
   .card-row {
     grid-template-columns: 250px 25px minmax(0, 1fr) !important;
-    min-height: 30px !important;
+    min-height: 26px !important;
     font-size: 21px !important;
-    line-height: 1.25 !important;
+    line-height: 1.2 !important;
     display: grid !important;
     align-items: center !important;
     width: 100% !important;
@@ -377,8 +377,8 @@
   .c-value:empty { visibility: hidden !important; }
 
   @media (max-width: 750px) {
-    .card-fields { left: 21% !important; top: 39% !important; width: 58% !important; gap: 6px !important; }
-    .card-row { grid-template-columns: 130px 15px minmax(0, 1fr) !important; min-height: 20px !important; font-size: 11px !important; }
+    .card-fields { left: 21% !important; top: 38.5% !important; width: 58% !important; gap: 4px !important; }
+    .card-row { grid-template-columns: 130px 15px minmax(0, 1fr) !important; min-height: 18px !important; font-size: 11px !important; }
     .c-value { font-size: 11px !important; }
     #row-institute { font-size: 10px !important; }
   }
@@ -426,11 +426,11 @@
       <div>
         <label>Excel / CSV Spreadsheet</label>
         <input id="file" type="file" accept=".xlsx,.xls,.csv">
-        <div class="hint">Auto-detects ENROLLMENT NO, NAME, and GRADE columns.</div>
+        <div class="hint">Auto-detects ENROLLMENT NO, NAME, GRADE, and PHONE columns.</div>
       </div>
       <div>
         <label>Search Student</label>
-        <input id="search" type="text" placeholder="Type enrollment no. or student name...">
+        <input id="search" type="text" placeholder="Type enrollment no., name, or phone...">
       </div>
     </div>
 
@@ -453,12 +453,13 @@
   <div class="panel">
     <div class="panel-title">2. Student Details</div>
     <div class="grid">
-      <div><label>Enrollment No. / ID</label><input id="id" type="text" placeholder="e.g. 2026-001"></div>
+      <div><label>Enrollment No. / ID</label><input id="id" type="text" placeholder="e.g. ALGBIN0011"></div>
       <div><label>Student Name</label><input id="name" type="text" placeholder="Full Name"></div>
-      <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+      <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. 1 - Grade"></div>
       <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-      <div><label>Institution Name</label><input id="institute" type="text" placeholder="Alagappa School"></div>
+      <div><label>Institution Name</label><input id="institute" type="text" placeholder="SRI BALAMBIGAI NATYALAYA"></div>
       <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
+      <div><label>Phone Number</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
     </div>
     
     <div class="actions">
@@ -505,6 +506,11 @@
             <span class="c-colon">:</span>
             <span class="c-value" id="vJoining"></span>
           </div>
+          <div class="card-row" id="row-phone">
+            <span class="c-label">Phone Number</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vPhone"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -515,7 +521,7 @@
 <script>
 const $=id=>document.getElementById(id);
 let students=[];
-const fields=['id','name','grade','dob','institute','joining'];
+const fields=['id','name','grade','dob','institute','joining','phone'];
 
 function loadFileAsDataURL(file, callback) {
   const reader = new FileReader();
@@ -556,13 +562,15 @@ function mapRow(r){
   grade:val(r,['GRADE','Grade','Class','Level']),
   dob:dateText(val(r,['DATE OF BIRTH','DATEOFBIRTH','DOB','Date of Birth','Birth Date'])),
   institute:val(r,['NAME OF THE INSTITUTE','NAMEOFTHEINSTITUTE','Name of the Institute','Institute Name','Institute','Institution Name','Institution']),
-  joining:dateText(val(r,['DATE OF JOINING','DATEOFJOINING','Date of joining','Joining Date','Date Joined']))||'Aug 2026'
+  joining:dateText(val(r,['DATE OF JOINING','DATEOFJOINING','Date of joining','Joining Date','Date Joined']))||'Aug 2026',
+  phone:val(r,['PHONE NUMBER','PHONENUMBER','Phone Number','PHONE','Phone','MOBILE NUMBER','MOBILENUMBER','Mobile Number','MOBILE','Mobile','CONTACT NUMBER','CONTACTNUMBER','Contact Number','CONTACT','Contact'])
  };
 }
 function setForm(s){
  if(!s)return;
  $('id').value=s.id||'';$('name').value=s.name||'';$('grade').value=s.grade||'';
  $('dob').value=s.dob||'';$('institute').value=s.institute||'';$('joining').value=s.joining||'Aug 2026';
+ $('phone').value=s.phone||'';
  update();
 }
 function current(){
@@ -572,7 +580,8 @@ function current(){
    grade:$('grade').value.trim(),
    dob:$('dob').value.trim(),
    institute:$('institute').value.trim(),
-   joining:$('joining').value.trim()
+   joining:$('joining').value.trim(),
+   phone:$('phone').value.trim()
  };
 }
 
@@ -582,7 +591,8 @@ const cardValueEls = Object.freeze({
   vGrade: document.getElementById('vGrade'),
   vDob: document.getElementById('vDob'),
   vInstitute: document.getElementById('vInstitute'),
-  vJoining: document.getElementById('vJoining')
+  vJoining: document.getElementById('vJoining'),
+  vPhone: document.getElementById('vPhone')
 });
 
 function update(){
@@ -593,6 +603,7 @@ function update(){
   cardValueEls.vDob.textContent = s.dob;
   cardValueEls.vInstitute.textContent = s.institute;
   cardValueEls.vJoining.textContent = s.joining;
+  cardValueEls.vPhone.textContent = s.phone;
 }
 
 fields.forEach(f=>$(''+f).addEventListener('input',update));
@@ -606,7 +617,7 @@ $('clear').onclick=()=>{
 
 $('search').addEventListener('input',()=>{
  const q=norm($('search').value);
- const list=students.filter(s=>!q||norm(s.id).includes(q)||norm(s.name).includes(q)||norm(s.grade).includes(q));
+ const list=students.filter(s=>!q||norm(s.id).includes(q)||norm(s.name).includes(q)||norm(s.grade).includes(q)||norm(s.phone).includes(q));
  const sel=$('studentSelect'); sel.innerHTML='';
  if(!list.length){sel.innerHTML='<option value="">No matching student</option>';return;}
  list.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');sel.appendChild(o);});
