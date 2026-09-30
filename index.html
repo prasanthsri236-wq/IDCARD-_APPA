@@ -195,11 +195,14 @@
     opacity: 0;
     transform: translateY(10px);
     animation: panelFadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: visible; /* Prevents dropdown options clipping */
+    position: relative;
+    z-index: 1;
   }
 
-  .panel:nth-child(1) { animation-delay: 0.1s; }
-  .panel:nth-child(2) { animation-delay: 0.22s; }
-  .panel:nth-child(3) { animation-delay: 0.34s; }
+  .panel:nth-child(1) { animation-delay: 0.1s; z-index: 3; }
+  .panel:nth-child(2) { animation-delay: 0.22s; z-index: 2; }
+  .panel:nth-child(3) { animation-delay: 0.34s; z-index: 1; }
 
   @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-10px); }
@@ -225,8 +228,18 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+  }
+
+  .grid > div {
+    min-width: 0;
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   label {
@@ -240,10 +253,11 @@
   }
 
   /* Smooth Input Transitions */
-  input[type=text], input[type=file], select {
+  input[type=text], input[type=file] {
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border-color);
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #dbe3ed;
     border-radius: 8px;
     background: #f8fafc;
     color: var(--text-dark);
@@ -251,11 +265,34 @@
     transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
   }
 
-  input[type=text]:focus, select:focus {
+  input[type=file] {
+    padding: 8px 14px;
+    line-height: 26px;
+  }
+
+  /* Specific Refined Styling for Select Dropdown */
+  select#studentSelect {
+    width: 100%;
+    height: 44px;
+    padding: 0 40px 0 16px;
+    border: 1px solid #dbe3ed;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 44px;
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  input[type=text]:focus, input[type=file]:focus, select#studentSelect:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: #082d5c;
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(8, 45, 92, 0.08);
+    box-shadow: 0 0 0 3px rgba(8, 45, 92, 0.10);
   }
 
   .hint {
@@ -489,7 +526,7 @@
       display: none !important;
     }
 
-    input[type=text], input[type=file], select, .status-bar {
+    input[type=text], input[type=file], select#studentSelect, .status-bar {
       transition: none !important;
     }
   }
