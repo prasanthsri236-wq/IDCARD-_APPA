@@ -777,18 +777,24 @@ $('clear').onclick=()=>{
 };
 
 function renderDropdownOptions(studentList) {
-  const studentSelect = $('studentSelect');
-  studentSelect.innerHTML = '';
+  const sel = $('studentSelect');
+  sel.innerHTML = '';
 
   if (!students.length) {
-    studentSelect.innerHTML = '<option value="">Manual Entry / Upload Excel above</option>';
-    studentSelect._list = [];
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'Manual Entry / Upload Excel above';
+    sel.appendChild(option);
+    sel._list = [];
     return;
   }
 
   if (!studentList.length) {
-    studentSelect.innerHTML = '<option value="">No students found</option>';
-    studentSelect._list = [];
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No students found';
+    sel.appendChild(option);
+    sel._list = [];
     return;
   }
 
@@ -796,10 +802,10 @@ function renderDropdownOptions(studentList) {
     const option = document.createElement('option');
     option.value = index;
     option.textContent = `${student.id || 'No ID'} — ${student.name || 'Unnamed'}`;
-    studentSelect.appendChild(option);
+    sel.appendChild(option);
   });
 
-  studentSelect._list = studentList;
+  sel._list = studentList;
 }
 
 function filterAndPopulate() {
@@ -823,9 +829,9 @@ function filterAndPopulate() {
 $('search').addEventListener('input', filterAndPopulate);
 
 $('studentSelect').addEventListener('change', () => {
-  const studentSelect = $('studentSelect');
-  const activeList = studentSelect._list || [];
-  const selectedIndex = Number(studentSelect.value);
+  const sel = $('studentSelect');
+  const activeList = sel._list || [];
+  const selectedIndex = Number(sel.value);
 
   if (!isNaN(selectedIndex) && activeList[selectedIndex]) {
     const student = activeList[selectedIndex];
@@ -840,7 +846,7 @@ $('file').addEventListener('change', e => {
   $('status').textContent = 'Reading ' + file.name + '...';
 
   if (!window.XLSX) {
-    $('status').textContent = 'Excel reader unavailable. Try manual entry.';
+    $('status').textContent = 'Unable to load CSV: XLSX library not available.';
     return;
   }
 
@@ -849,33 +855,48 @@ $('file').addEventListener('change', e => {
     try {
       const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
+      
       const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
       
       const hi = matrix.findIndex(r => {
         const h = r.map(norm);
-        return h.some(k => k.includes('enrollment') || k.includes('studentid') || k === 'id') && 
-               h.some(k => k.includes('name')) && 
+        return h.some(k => k.includes('enrollment') || k.includes('studentid') || k === 'id') || 
+               h.some(k => k.includes('name')) || 
                h.some(k => k.includes('grade') || k.includes('class'));
       });
 
-      const startRange = hi >= 0 ? hi : 0;
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: startRange });
-      
-      students = rows.map(mapRow).filter(s => s.id || s.name);
+      let rows = [];
+      if (hi >= 0) {
+        rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: hi });
+      } else {
+        rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+      }
+
+      students = rows.map(mapRow).filter(s => s.id || s.name || s.phone);
+
+      if (students.length === 0) {
+        $('status').textContent = 'Unable to load CSV: Header row not found or file has no valid student records.';
+        renderDropdownOptions([]);
+        return;
+      }
 
       $('search').value = '';
       filterAndPopulate();
 
-      if (students.length > 0) {
-        $('status').textContent = `Successfully loaded ${students.length} student record(s).`;
-      } else {
-        $('status').textContent = 'No valid student records found in file.';
-      }
+      $('status').textContent = `Successfully loaded ${students.length} student record(s).`;
+
     } catch (err) {
       console.error(err);
-      $('status').textContent = 'Unable to parse file. Verify file structure or enter manually.';
+      $('status').textContent = 'Unable to load CSV: ' + (err.message || 'Error processing file structure.');
+      renderDropdownOptions([]);
     }
   };
+
+  reader.onerror = () => {
+    $('status').textContent = 'Unable to load CSV: File reading failed.';
+    renderDropdownOptions([]);
+  };
+
   reader.readAsArrayBuffer(file);
 });
 
