@@ -29,11 +29,11 @@
     padding-bottom: 40px;
   }
 
-  /* Redesigned Header Bar */
+  /* Refined Header Bar */
   header {
     background: var(--primary);
     color: #ffffff;
-    padding: 18px 0;
+    padding: 16px 0;
     box-shadow: 0 4px 14px rgba(8, 45, 92, 0.18);
     margin-bottom: 28px;
     width: 100%;
@@ -51,16 +51,17 @@
   .header-brand {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 18px;
     width: 100%;
   }
 
-  /* Single White Rounded Logo Box */
+  /* Compact White Rounded Logo Box */
   .header-logos-wrap {
     background: #ffffff;
-    width: 330px;
-    height: 105px;
-    padding: 8px 16px;
+    width: 315px;
+    height: 100px;
+    padding: 7px 14px;
+    gap: 14px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -71,16 +72,16 @@
   }
 
   .university-logo {
-    width: 72px;
-    height: 82px;
+    width: 78px;
+    height: 84px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
   }
 
   .apaa-logo {
-    width: 135px;
-    height: 82px;
+    width: 140px;
+    height: 84px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
@@ -88,7 +89,7 @@
 
   .logo-divider {
     width: 1px;
-    height: 68px;
+    height: 66px;
     background: #cbd5e1;
     flex-shrink: 0;
   }
@@ -115,10 +116,10 @@
     letter-spacing: 0.2px;
   }
 
-  /* Header Responsive Behavior */
+  /* Responsive Behavior */
   @media (max-width: 900px) {
     .header-brand {
-      gap: 18px;
+      gap: 16px;
     }
     .header-title h1 {
       font-size: 20px;
@@ -130,12 +131,12 @@
 
   @media (max-width: 768px) {
     header {
-      padding: 16px 0;
+      padding: 14px 0;
     }
     .header-brand {
       flex-direction: column;
       align-items: flex-start;
-      gap: 16px;
+      gap: 14px;
     }
   }
 
@@ -145,20 +146,21 @@
       text-align: center;
     }
     .header-logos-wrap {
-      width: 290px;
-      height: 95px;
-      padding: 6px 12px;
+      width: 285px;
+      height: 90px;
+      padding: 6px 10px;
+      gap: 10px;
     }
     .university-logo {
-      width: 62px;
-      height: 72px;
+      width: 68px;
+      height: 74px;
     }
     .apaa-logo {
-      width: 118px;
-      height: 72px;
+      width: 122px;
+      height: 74px;
     }
     .logo-divider {
-      height: 58px;
+      height: 56px;
     }
     .header-title h1 {
       font-size: 18px;
