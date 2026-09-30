@@ -29,7 +29,7 @@
     padding-bottom: 40px;
   }
 
-  /* Header Bar */
+  /* Redesigned Header Bar */
   header {
     background: var(--primary);
     color: #ffffff;
@@ -55,34 +55,32 @@
     width: 100%;
   }
 
-  /* White Rounded Logo Container - Fixed Dimensions & No Clipping */
+  /* Single White Rounded Logo Box */
   .header-logos-wrap {
     background: #ffffff;
+    width: 330px;
     height: 105px;
-    min-width: 310px;
-    width: 310px;
-    padding: 10px 16px;
-    border-radius: 14px;
+    padding: 8px 16px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     flex-shrink: 0;
-    overflow: visible;
+    overflow: hidden;
   }
 
-  .logo-alagappa {
-    width: 80px;
-    height: 85px;
+  .university-logo {
+    width: 72px;
+    height: 82px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
   }
 
-  .logo-apaa {
-    width: 150px;
-    height: 85px;
+  .apaa-logo {
+    width: 135px;
+    height: 82px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
@@ -90,8 +88,8 @@
 
   .logo-divider {
     width: 1px;
-    height: 65px;
-    background-color: #d1d5db;
+    height: 68px;
+    background: #cbd5e1;
     flex-shrink: 0;
   }
 
@@ -117,7 +115,7 @@
     letter-spacing: 0.2px;
   }
 
-  /* Header Responsive Tweaks */
+  /* Header Responsive Behavior */
   @media (max-width: 900px) {
     .header-brand {
       gap: 18px;
@@ -137,27 +135,30 @@
     .header-brand {
       flex-direction: column;
       align-items: flex-start;
-      gap: 14px;
+      gap: 16px;
     }
   }
 
   @media (max-width: 480px) {
+    .header-brand {
+      align-items: center;
+      text-align: center;
+    }
     .header-logos-wrap {
-      width: 270px;
-      min-width: 270px;
-      height: 90px;
-      padding: 8px 12px;
+      width: 290px;
+      height: 95px;
+      padding: 6px 12px;
     }
-    .logo-alagappa {
-      width: 65px;
-      height: 70px;
+    .university-logo {
+      width: 62px;
+      height: 72px;
     }
-    .logo-apaa {
-      width: 125px;
-      height: 70px;
+    .apaa-logo {
+      width: 118px;
+      height: 72px;
     }
     .logo-divider {
-      height: 50px;
+      height: 58px;
     }
     .header-title h1 {
       font-size: 18px;
@@ -322,7 +323,7 @@
     box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
   }
 
-  /* Card Text Fields Grid - Compacted slightly for 7 rows */
+  /* Card Text Fields Grid */
   .card-fields {
     left: 21% !important;
     top: 38.5% !important;
@@ -396,9 +397,9 @@
   <div class="header-container">
     <div class="header-brand">
       <div class="header-logos-wrap">
-        <img src="logo2 - Copy.png" alt="Alagappa Crest Logo" class="logo-alagappa">
+        <img src="logo2 - Copy.png" alt="Alagappa Emblem" class="university-logo">
         <div class="logo-divider"></div>
-        <img src="APAA_blue logo.png" alt="APAA Logo" class="logo-apaa">
+        <img src="APAA_blue logo.png" alt="APAA Logo" class="apaa-logo">
       </div>
       <div class="header-title">
         <h1>Alagappa Performing Arts Academy</h1>
