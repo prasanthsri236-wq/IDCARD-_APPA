@@ -29,7 +29,7 @@
     padding-bottom: 40px;
   }
 
-  /* Header Bar - Refined & Balanced */
+  /* Header Bar */
   header {
     background: var(--primary);
     color: #ffffff;
@@ -55,34 +55,36 @@
     width: 100%;
   }
 
-  /* Premium Rounded White Logo Container */
+  /* White Rounded Logo Container - Fixed Dimensions & No Clipping */
   .header-logos-wrap {
     background: #ffffff;
-    height: 110px;
-    padding: 10px 22px;
+    height: 105px;
+    min-width: 310px;
+    width: 310px;
+    padding: 10px 16px;
     border-radius: 14px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    justify-content: space-between;
+    gap: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     flex-shrink: 0;
+    overflow: visible;
   }
 
   .logo-alagappa {
-    height: 82px;
-    width: auto;
-    max-width: 90px;
+    width: 80px;
+    height: 85px;
     object-fit: contain;
-    image-rendering: auto;
+    flex-shrink: 0;
     display: block;
   }
 
   .logo-apaa {
+    width: 150px;
     height: 85px;
-    width: auto;
-    max-width: 165px;
     object-fit: contain;
-    image-rendering: auto;
+    flex-shrink: 0;
     display: block;
   }
 
@@ -115,7 +117,7 @@
     letter-spacing: 0.2px;
   }
 
-  /* Header Responsive Breakpoints */
+  /* Header Responsive Tweaks */
   @media (max-width: 900px) {
     .header-brand {
       gap: 18px;
@@ -137,36 +139,25 @@
       align-items: flex-start;
       gap: 14px;
     }
-    .header-logos-wrap {
-      height: 95px;
-      padding: 8px 16px;
-      gap: 14px;
-    }
-    .logo-alagappa {
-      height: 70px;
-    }
-    .logo-apaa {
-      height: 72px;
-    }
-    .logo-divider {
-      height: 52px;
-    }
   }
 
   @media (max-width: 480px) {
     .header-logos-wrap {
-      height: 82px;
-      padding: 6px 12px;
-      gap: 10px;
+      width: 270px;
+      min-width: 270px;
+      height: 90px;
+      padding: 8px 12px;
     }
     .logo-alagappa {
-      height: 60px;
+      width: 65px;
+      height: 70px;
     }
     .logo-apaa {
-      height: 62px;
+      width: 125px;
+      height: 70px;
     }
     .logo-divider {
-      height: 42px;
+      height: 50px;
     }
     .header-title h1 {
       font-size: 18px;
@@ -331,7 +322,7 @@
     box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
   }
 
-  /* Dynamic Card Fields Positioning - Adjusted gap for 7 rows */
+  /* Card Text Fields Grid - Compacted slightly for 7 rows */
   .card-fields {
     left: 21% !important;
     top: 38.5% !important;
