@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alagappa Performing Arts Academy — ID Card Generator</title>
+<!-- External Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -29,7 +30,7 @@
     padding-bottom: 40px;
   }
 
-  /* Refined Header Bar */
+  /* Header Bar */
   header {
     background: var(--primary);
     color: #ffffff;
@@ -276,6 +277,12 @@
     transform: scale(1.005);
   }
 
+  .status-bar.flash-error {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+  }
+
   .actions {
     display: flex;
     gap: 12px;
@@ -292,7 +299,6 @@
     cursor: pointer;
     overflow: hidden;
     user-select: none;
-    -webkit-tap-highlight-color: transparent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -476,14 +482,14 @@
 
 <div class="wrap">
 
-  <!-- Step 1: File & Search Controls -->
+  <!-- Panel 1: Import -->
   <div class="panel">
     <div class="panel-title">1. Data Import & Settings</div>
     <div class="grid">
       <div>
         <label>Excel / CSV Spreadsheet</label>
         <input id="file" type="file" accept=".xlsx,.xls,.csv">
-        <div class="hint">Auto-detects NAME, GRADE, DOB, MOBILE NO, INSTITUTE, etc.</div>
+        <div class="hint">Auto-detects NAME, GRADE, DATE OF BIRTH, MOBILE NO, INSTITUTE, etc.</div>
       </div>
       <div>
         <label>Search Student</label>
@@ -499,14 +505,14 @@
       <div>
         <label>Card Background (card-bg.png)</label>
         <input id="bgUpload" type="file" accept="image/*">
-        <div class="hint">Upload custom template image if needed.</div>
+        <div class="hint">Upload custom template background image if needed.</div>
       </div>
     </div>
 
     <div id="status" class="status-bar">Ready. Enter student details below or upload a sheet.</div>
   </div>
 
-  <!-- Step 2: Student Details Form -->
+  <!-- Panel 2: Form -->
   <div class="panel">
     <div class="panel-title">2. Student Details</div>
     <div class="grid">
@@ -525,7 +531,7 @@
     </div>
   </div>
 
-  <!-- Step 3: Card Live Preview -->
+  <!-- Panel 3: Live Canvas -->
   <div class="panel preview-panel">
     <div class="panel-title" style="width: 100%;">3. Live Card Canvas</div>
     <div class="card-wrap">
@@ -579,26 +585,27 @@
 const $ = id => document.getElementById(id);
 
 let students = [];
+const fields = ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'];
 
-const fields = ['id','name','grade','dob','institute','joining','phone'];
-
-function norm(value) {
-  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+/* String Cleaners */
+function norm(val) {
+  return String(val ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function getValue(row, possibleNames) {
   const keys = Object.keys(row);
   for (const name of possibleNames) {
-    const normalizedName = norm(name);
-    const key = keys.find(k => norm(k) === normalizedName);
+    const targetNorm = norm(name);
+    const key = keys.find(k => norm(k) === targetNorm);
     if (key !== undefined && row[key] !== undefined && String(row[key]).trim() !== '') {
-      return row[key];
+      return String(row[key]).trim();
     }
   }
   return '';
 }
 
 function dateText(value) {
+  if (!value) return '';
   if (value instanceof Date && !isNaN(value)) {
     return value.toLocaleDateString('en-GB');
   }
@@ -608,41 +615,34 @@ function dateText(value) {
       return `${String(d.d).padStart(2, '0')}/${String(d.m).padStart(2, '0')}/${d.y}`;
     }
   }
-  return String(value ?? '').trim();
+  return String(value).trim();
 }
 
 function mapRow(row, index) {
-  let detectedId = getValue(row, [
-    'ENROLLMENT NO', 'ENROLLMENT NO.', 'ENROLLMENTNO', 'ENROLLMENT NO / ID',
-    'ENROLLMENT', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'NO', 'S.NO', 'SNO'
-  ]);
-
-  if (!detectedId) {
-    detectedId = 'ALGBIN' + String(index + 1).padStart(4, '0');
+  let id = getValue(row, ['ENROLLMENT NO', 'ENROLLMENT NO.', 'ENROLLMENTNO', 'ENROLLMENT NO / ID', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'NO', 'S.NO', 'SNO']);
+  if (!id) {
+    id = 'ALGBIN' + String(index + 1).padStart(4, '0');
   }
 
   return {
-    id: detectedId,
+    id: id,
     name: getValue(row, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'STUDENT', 'CANDIDATE NAME']),
     grade: getValue(row, ['GRADE', 'CLASS', 'LEVEL']),
     dob: dateText(getValue(row, ['DATE OF BIRTH', 'DATE OF BIRTH.', 'DATEOFBIRTH', 'DOB', 'BIRTH DATE'])),
-    institute: getValue(row, [
-      'NAME OF THE INSTITUTE', 'NAME OF THE INSTITUTION', 'NAMEOFTHEINSTITUTE',
-      'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'INSTITUTION', 'CENTRE'
-    ]),
+    institute: getValue(row, ['NAME OF THE INSTITUTE', 'NAME OF THE INSTITUTION', 'NAMEOFTHEINSTITUTE', 'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'INSTITUTION', 'CENTRE']),
     joining: dateText(getValue(row, ['DATE OF JOINING', 'DATEOFJOINING', 'JOINING DATE', 'DATE JOINED'])) || 'Aug 2026',
     phone: getValue(row, ['MOBILE NO', 'MOBILE NO.', 'MOBILE', 'PHONE NUMBER', 'PHONE NO', 'PHONE', 'CONTACT NUMBER', 'CONTACT'])
   };
 }
 
 function populateStudentDropdown(list) {
-  const select = document.getElementById('studentSelect');
+  const select = $('studentSelect');
   select.innerHTML = '';
 
   if (!list || list.length === 0) {
     const option = document.createElement('option');
     option.value = '';
-    option.textContent = students.length ? 'No students found' : 'Manual Entry / Upload Excel above';
+    option.textContent = students.length ? 'No matching students found' : 'Manual Entry / Upload Excel above';
     select.appendChild(option);
     select._studentList = [];
     return;
@@ -659,141 +659,147 @@ function populateStudentDropdown(list) {
 }
 
 function filterStudents() {
-  const searchValue = norm(document.getElementById('search').value);
-
-  const filteredStudents = students.filter(student => {
+  const searchValue = norm($('search').value);
+  const filtered = students.filter(s => {
     if (!searchValue) return true;
-    return (
-      norm(student.id).includes(searchValue) ||
-      norm(student.name).includes(searchValue) ||
-      norm(student.phone).includes(searchValue) ||
-      norm(student.grade).includes(searchValue)
-    );
+    return norm(s.id).includes(searchValue) ||
+           norm(s.name).includes(searchValue) ||
+           norm(s.phone).includes(searchValue) ||
+           norm(s.grade).includes(searchValue);
   });
 
-  populateStudentDropdown(filteredStudents);
-
-  if (filteredStudents.length > 0) {
-    document.getElementById('studentSelect').value = '0';
-    setForm(filteredStudents[0]);
+  populateStudentDropdown(filtered);
+  if (filtered.length > 0) {
+    $('studentSelect').value = '0';
+    setForm(filtered[0]);
   }
 }
 
-document.getElementById('search').addEventListener('input', filterStudents);
+$('search').addEventListener('input', filterStudents);
 
-document.getElementById('studentSelect').addEventListener('change', function () {
-  const selectedIndex = Number(this.value);
+$('studentSelect').addEventListener('change', function () {
+  const idx = Number(this.value);
   const list = this._studentList || [];
-  if (Number.isInteger(selectedIndex) && list[selectedIndex]) {
-    setForm(list[selectedIndex]);
+  if (Number.isInteger(idx) && list[idx]) {
+    setForm(list[idx]);
   }
 });
 
-document.getElementById('file').addEventListener('change', function (event) {
+/* Excel File Processing */
+$('file').addEventListener('change', function (event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const status = document.getElementById('status');
+  const status = $('status');
+  status.className = 'status-bar';
   status.textContent = `Reading ${file.name}...`;
 
-  if (!window.XLSX) {
-    status.textContent = 'Unable to load CSV/Excel: XLSX library not available.';
+  if (typeof XLSX === 'undefined') {
+    status.className = 'status-bar flash-error';
+    status.textContent = 'Error: XLSX library failed to load. Check internet connection.';
     return;
   }
 
   const reader = new FileReader();
 
-  reader.onload = function (event) {
+  reader.onload = function (e) {
     try {
-      const data = new Uint8Array(event.target.result);
+      const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
-      if (!workbook.SheetNames.length) throw new Error('No worksheet found.');
+      if (!workbook.SheetNames.length) {
+        throw new Error('No worksheets found in this Excel file.');
+      }
 
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      if (!worksheet) throw new Error('Unable to read the first worksheet.');
+      let validRows = [];
+      let detectedSheetName = '';
 
-      const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: true });
+      // Scan all sheets in case student data is on a non-first tab
+      for (const name of workbook.SheetNames) {
+        const sheet = workbook.Sheets[name];
+        if (!sheet) continue;
 
-      if (!matrix.length) throw new Error('The uploaded file is empty.');
+        const rawMatrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        if (!rawMatrix.length) continue;
 
-      let headerRowIndex = -1;
+        // Find header row containing NAME and (GRADE or MOBILE or DOB)
+        let headerIdx = -1;
+        for (let i = 0; i < Math.min(rawMatrix.length, 40); i++) {
+          const rowText = rawMatrix[i].map(c => norm(c)).join(' ');
+          if (rowText.includes('name') && (rowText.includes('grade') || rowText.includes('mobile') || rowText.includes('dob') || rowText.includes('birth'))) {
+            headerIdx = i;
+            break;
+          }
+        }
 
-      for (let i = 0; i < Math.min(matrix.length, 30); i++) {
-        const row = matrix[i] || [];
-        const normalizedRow = row.map(norm).join(' ');
-
-        const looksLikeHeader =
-          normalizedRow.includes('name') ||
-          normalizedRow.includes('grade') ||
-          normalizedRow.includes('dateofbirth') ||
-          normalizedRow.includes('dob') ||
-          normalizedRow.includes('mobileno') ||
-          normalizedRow.includes('phone') ||
-          normalizedRow.includes('institute') ||
-          normalizedRow.includes('enrollment');
-
-        if (looksLikeHeader) {
-          headerRowIndex = i;
-          break;
+        if (headerIdx !== -1) {
+          const rows = XLSX.utils.sheet_to_json(sheet, { range: headerIdx, defval: '', raw: true });
+          if (rows.length > 0) {
+            validRows = rows;
+            detectedSheetName = name;
+            break;
+          }
         }
       }
 
-      if (headerRowIndex === -1) {
-        throw new Error('Header row not found. Please check column headers.');
+      if (!validRows.length) {
+        throw new Error('Could not find header row (NAME, GRADE, MOBILE NO, DOB) in any worksheet tab.');
       }
 
-      const rows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: '', raw: true });
-
-      if (!rows.length) {
-        throw new Error('No student records were found below the header row.');
-      }
-
-      students = rows
-        .map((row, idx) => mapRow(row, idx))
-        .filter(student => String(student.name || '').trim() !== '' || String(student.phone || '').trim() !== '');
+      // Map rows to student objects
+      students = validRows
+        .map((r, i) => mapRow(r, i))
+        .filter(s => s.name && norm(s.name) !== 'name' && norm(s.name) !== 'studentname');
 
       if (!students.length) {
-        throw new Error('Student records could not be detected. Please check the sheet contents.');
+        throw new Error('Header row detected, but no valid student rows were found underneath it.');
       }
 
-      document.getElementById('search').value = '';
+      $('search').value = '';
       populateStudentDropdown(students);
-
-      const select = document.getElementById('studentSelect');
-      select.selectedIndex = 0;
+      $('studentSelect').selectedIndex = 0;
       setForm(students[0]);
 
-      status.textContent = `Successfully loaded ${students.length} student record(s).`;
-      status.classList.add('flash-confirm');
-      setTimeout(() => status.classList.remove('flash-confirm'), 1200);
+      status.className = 'status-bar flash-confirm';
+      status.textContent = `Loaded ${students.length} student record(s) from sheet "${detectedSheetName}".`;
 
-    } catch (error) {
-      console.error('Excel/CSV loading error:', error);
+      setTimeout(() => { status.classList.remove('flash-confirm'); }, 2000);
+
+    } catch (err) {
+      console.error('File Parse Error:', err);
       students = [];
       populateStudentDropdown([]);
-      status.textContent = `Unable to load file: ${error.message}`;
+      status.className = 'status-bar flash-error';
+      status.textContent = `File Load Error: ${err.message}`;
     }
   };
 
   reader.onerror = function () {
-    students = [];
-    populateStudentDropdown([]);
-    status.textContent = 'Unable to load file: File reading failed.';
+    status.className = 'status-bar flash-error';
+    status.textContent = 'Error reading file from disk.';
   };
 
   reader.readAsArrayBuffer(file);
 });
 
+/* Custom Background Image Handler */
+$('bgUpload').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    $('cardBgImg').src = ev.target.result;
+    $('status').textContent = 'Background image loaded into canvas successfully.';
+  };
+  reader.readAsDataURL(file);
+});
+
 function setForm(student) {
   if (!student) return;
-  document.getElementById('id').value = student.id || '';
-  document.getElementById('name').value = student.name || '';
-  document.getElementById('grade').value = student.grade || '';
-  document.getElementById('dob').value = student.dob || '';
-  document.getElementById('institute').value = student.institute || '';
-  document.getElementById('joining').value = student.joining || 'Aug 2026';
-  document.getElementById('phone').value = student.phone || '';
+  $('id').value = student.id || '';
+  $('name').value = student.name \vert{}\vert{} '';$('grade').value = student.grade || '';
+  $('dob').value = student.dob \vert{}\vert{} '';$('institute').value = student.institute || '';
+  $('joining').value = student.joining \vert{}\vert{} 'Aug 2026';$('phone').value = student.phone || '';
   update();
 }
 
@@ -810,13 +816,13 @@ function current() {
 }
 
 const cardValueEls = Object.freeze({
-  vId: document.getElementById('vId'),
-  vName: document.getElementById('vName'),
-  vGrade: document.getElementById('vGrade'),
-  vDob: document.getElementById('vDob'),
-  vInstitute: document.getElementById('vInstitute'),
-  vJoining: document.getElementById('vJoining'),
-  vPhone: document.getElementById('vPhone')
+  vId: $('vId'),
+  vName: $('vName'),
+  vGrade: $('vGrade'),
+  vDob: $('vDob'),
+  vInstitute: $('vInstitute'),
+  vJoining: $('vJoining'),
+  vPhone: $('vPhone')
 });
 
 function update() {
@@ -835,19 +841,20 @@ fields.forEach(f => $('' + f).addEventListener('input', update));
 $('clear').onclick = () => {
   fields.forEach(f => $('' + f).value = '');$('joining').value = 'Aug 2026';
   const statusEl = $('status');
+  statusEl.className = 'status-bar flash-confirm';
   statusEl.textContent = 'Form cleared successfully.';
-  statusEl.classList.add('flash-confirm');
   setTimeout(() => statusEl.classList.remove('flash-confirm'), 1200);
   update();
 };
 
+/* PDF Generator */
 const generatePDF = async () => {
   const card = $('card');
   const btn = $('download');
   const s = current();
 
   if (!s.id && !s.name) {
-    alert('Please enter student details first.');
+    alert('Please select or enter student details first.');
     return;
   }
 
@@ -864,8 +871,7 @@ const generatePDF = async () => {
       allowTaint: false,
       backgroundColor: '#fffdf6',
       logging: false,
-      imageTimeout: 15000,
-      removeContainer: true
+      imageTimeout: 15000
     });
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
@@ -889,7 +895,7 @@ const generatePDF = async () => {
     $('status').textContent = 'Student ID Card PDF generated and downloaded successfully.';
   } catch (error) {
     console.error('PDF Generation Error:', error);
-    $('status').textContent = 'Error during PDF generation.';
+    $('status').className = 'status-bar flash-error';$('status').textContent = 'Error generating PDF.';
     alert('Unable to generate PDF.\n\n' + error.message);
   } finally {
     btn.disabled = false;
@@ -899,6 +905,7 @@ const generatePDF = async () => {
 
 $('download').onclick = () => generatePDF();
 
+// Initial draw
 update();
 </script>
 </body>
