@@ -12,29 +12,154 @@
 
 <style>
 * { box-sizing: border-box; }
-body { margin: 0; background: #eef1f5; font-family: Arial, Helvetica, sans-serif; color: #102f59; }
-.wrap { max-width: 1250px; margin: auto; padding: 24px; }
-h1 { margin: 0 0 6px; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px; }
-.sub { margin: 0 0 18px; color: #667085; font-size: 14px; }
-.panel { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(0,0,0,.08); }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+body { 
+  margin: 0; 
+  background: #f0f3f8; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  color: #0c2340; 
+}
+.wrap { 
+  max-width: 1250px; 
+  margin: auto; 
+  padding: 24px; 
+}
+h1 { 
+  margin: 0 0 6px; 
+  font-size: 26px; 
+  text-transform: uppercase; 
+  letter-spacing: 0.8px; 
+  color: #062d5c;
+}
+.sub { 
+  margin: 0 0 20px; 
+  color: #556987; 
+  font-size: 14px; 
+}
+.panel { 
+  background: #ffffff; 
+  border-radius: 12px; 
+  padding: 22px; 
+  margin-bottom: 20px; 
+  box-shadow: 0 4px 16px rgba(6, 45, 92, 0.06); 
+  border: 1px solid #e1e8f0;
+}
+.panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #062d5c;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: #062d5c;
+  border-radius: 2px;
+}
+.grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 16px; 
+}
 @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #082d5c; }
-input, select, button { font: inherit; }
-input[type=text], input[type=date], input[type=file], select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #172033; }
-input:disabled { background: #f3f4f6; color: #667085; }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
-.primary { background: #082d5c; color: #fff; }
-.primary:hover { background: #0a3d7c; }
-.secondary { background: #e7ecf3; color: #102f59; }
-.secondary:hover { background: #d7e0ec; }
-.success { background: #107c41; color: #fff; }
-.success:hover { background: #0d6635; }
-.status { margin-top: 10px; font-size: 13px; color: #475467; font-weight: 600; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border-left: 4px solid #082d5c; }
-.hint { font-size: 12px; color: #667085; margin-top: 6px; }
 
-.card-wrap { display: flex; justify-content: center; align-items: flex-start; width: 100%; overflow: hidden; padding: 4px; }
+label { 
+  display: block; 
+  font-size: 13px; 
+  font-weight: 700; 
+  margin-bottom: 6px; 
+  color: #082d5c; 
+}
+input, select, button { font: inherit; }
+
+input[type=text], input[type=date], input[type=file] { 
+  width: 100%; 
+  padding: 11px 14px; 
+  border: 1px solid #cbd5e1; 
+  border-radius: 8px; 
+  background: #f8fafc; 
+  color: #0f172a; 
+  transition: all 0.2s ease;
+}
+input[type=text]:focus {
+  background: #ffffff;
+  border-color: #062d5c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(6, 45, 92, 0.1);
+}
+
+/* ===== PROMINENT & STYLED STUDENT DROPDOWN ===== */
+select#studentSelect {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #062d5c;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #062d5c;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(6, 45, 92, 0.08);
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23062d5c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+  padding-right: 40px;
+}
+select#studentSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(6, 45, 92, 0.2);
+}
+select#studentSelect option {
+  padding: 10px;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+button { 
+  border: 0; 
+  border-radius: 8px; 
+  padding: 12px 22px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  font-size: 14px;
+}
+.primary { background: #062d5c; color: #fff; }
+.primary:hover { background: #0a3d7c; transform: translateY(-1px); }
+.secondary { background: #e2e8f0; color: #1e293b; }
+.secondary:hover { background: #cbd5e1; }
+
+.status { 
+  margin-top: 14px; 
+  font-size: 13px; 
+  color: #334155; 
+  font-weight: 600; 
+  padding: 10px 14px; 
+  background: #f1f5f9; 
+  border-radius: 8px; 
+  border-left: 4px solid #062d5c; 
+}
+.hint { font-size: 12px; color: #64748b; margin-top: 5px; }
+
+.card-wrap { 
+  display: flex; 
+  justify-content: center; 
+  align-items: flex-start; 
+  width: 100%; 
+  overflow: hidden; 
+  padding: 10px 0; 
+}
 
 /* ===== CARD PREVIEW CONTAINER & LAYOUT ===== */
 .card {
@@ -49,7 +174,7 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
     background: #fffdf6;
     flex: none;
     border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
 
 .card-fields {
@@ -96,7 +221,6 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
 .c-colon { display: block !important; text-align: center !important; }
 .c-value:empty { visibility: hidden !important; }
 
-/* ===== RESPONSIVE MEDIA QUERIES ===== */
 @media (max-width: 750px) {
     .card-fields {
         left: 21% !important;
@@ -105,7 +229,7 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
         gap: 5px !important;
     }
     .card-row {
-        grid-template-columns: 120px 15px minmax(0, 1fr) !important;
+        grid-template-columns: 110px 12px minmax(0, 1fr) !important;
         min-height: 18px !important;
         font-size: 11px !important;
     }
@@ -133,50 +257,52 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
 
 <div class="wrap">
   <h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
-  <p class="sub">Create premium APAA Grade Examination Student ID Cards — high-resolution single & bulk PDF export.</p>
+  <p class="sub">Upload Excel/CSV records, search or select any student from the dropdown, edit details, and export print-ready PDFs.</p>
 
-  <!-- FILE & SELECTION PANEL -->
+  <!-- STUDENT DATA & SELECTION PANEL -->
   <div class="panel">
+    <div class="panel-title">STUDENT DATA & SELECTION</div>
+    
     <div class="grid">
       <div>
-        <label>Excel / CSV File</label>
+        <label for="file">1. Excel / CSV File Upload</label>
         <input id="file" type="file" accept=".xlsx,.xls,.csv">
-        <div class="hint">Upload student records sheet. Automatically detects ENROLLMENT NO, NAME, GRADE, DOB, etc.</div>
+        <div class="hint">Upload student records sheet to populate student database.</div>
       </div>
       <div>
-        <label>Search Student</label>
-        <input id="search" type="text" placeholder="Type enrollment number, name or phone...">
-      </div>
-    </div>
-
-    <div class="grid" style="margin-top:14px">
-      <div>
-        <label>Select Student</label>
-        <select id="studentSelect">
-          <option value="">Enter details below or upload Excel / CSV</option>
-        </select>
-      </div>
-      <div>
-        <label>Upload Card Background (card-bg.png)</label>
+        <label for="bgUpload">2. Upload Card Background (card-bg.png)</label>
         <input id="bgUpload" type="file" accept="image/*">
-        <div class="hint">Select <strong>card-bg.png</strong> template to render card backgrounds cleanly.</div>
+        <div class="hint">Select template image to set background overlay.</div>
       </div>
     </div>
 
-    <div id="status" class="status">Ready. You can select a student above or type details manually below.</div>
+    <div style="margin-top: 16px;">
+      <label for="search">3. Search Student</label>
+      <input id="search" type="text" placeholder="🔍 Search by ID, Name, Grade, or Phone Number...">
+    </div>
+
+    <div style="margin-top: 16px;">
+      <label for="studentSelect">4. Select Student</label>
+      <select id="studentSelect">
+        <option value="">-- Upload Excel/CSV or select a student from dropdown --</option>
+      </select>
+      <div class="hint">Select any student to automatically fill form fields and update the live card preview below.</div>
+    </div>
+
+    <div id="status" class="status">Ready. Select a student from the dropdown or upload an Excel file to start.</div>
   </div>
 
   <!-- EDITABLE FORM DETAILS -->
   <div class="panel">
-    <div class="manual-title" style="font-weight:700;margin-bottom:10px;font-size:16px;">Student Details</div>
+    <div class="panel-title">STUDENT DETAILS FORM</div>
     <div class="grid">
-      <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. ALGBIN0001"></div>
-      <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
-      <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
-      <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-      <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
-      <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
-      <div><label>Phone / Mobile No.</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
+      <div><label for="id">Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. ALGBIN0001"></div>
+      <div><label for="name">Name</label><input id="name" type="text" placeholder="Student Full Name"></div>
+      <div><label for="grade">Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+      <div><label for="dob">Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
+      <div><label for="institute">Name of the Institution</label><input id="institute" type="text" placeholder="e.g. Alagappa Arts School"></div>
+      <div><label for="joining">Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
+      <div><label for="phone">Phone / Mobile No.</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
     </div>
     
     <div class="actions">
@@ -187,6 +313,7 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
 
   <!-- CARD PREVIEW DISPLAY -->
   <div class="panel">
+    <div class="panel-title">ID CARD PREVIEW</div>
     <div class="card-wrap">
       <div class="card" id="card">
         <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png" onerror="this.style.background='#fffdf6'">
@@ -254,12 +381,12 @@ $('bgUpload').addEventListener('change', e => {
   });
 });
 
-/* Normalize text for matching */
+/* Normalize text for case-insensitive matching */
 function norm(v) {
   return String(v || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-/* Dynamic column value lookup */
+/* Dynamic column value lookup for flexible header matching */
 function val(row, names) {
   const keys = Object.keys(row || {});
   for (let i = 0; i < names.length; i++) {
@@ -300,6 +427,7 @@ function mapRow(r, idx) {
   };
 }
 
+/* Set form field values */
 function setForm(s) {
   if (!s) return;
   $('id').value = s.id || '';
@@ -312,6 +440,7 @@ function setForm(s) {
   update();
 }
 
+/* Retrieve current values from form */
 function current() {
   return {
     id: $('id').value.trim(),
@@ -334,6 +463,7 @@ const cardValueEls = Object.freeze({
   vPhone: $('vPhone')
 });
 
+/* Synchronize live card display elements */
 function update() {
   const s = current();
   cardValueEls.vId.textContent = s.id;
@@ -354,47 +484,77 @@ $('clear').onclick = () => {
   update();
 };
 
+/* Populate the select dropdown with a list of students */
+function renderDropdown(list) {
+  const sel = $('studentSelect');
+  sel.innerHTML = '';
+  
+  if (!list || !list.length) {
+    const o = document.createElement('option');
+    o.value = '';
+    o.textContent = '-- No matching student found --';
+    sel.appendChild(o);
+    sel._list = [];
+    return;
+  }
+
+  list.forEach((s, idx) => {
+    const o = document.createElement('option');
+    o.value = idx;
+    // Format strictly required: [STUDENT_ID] — [STUDENT_NAME]
+    o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed Student');
+    sel.appendChild(o);
+  });
+
+  sel._list = list;
+}
+
 /* Live Student Search Filter */
 $('search').addEventListener('input', () => {
   const q = norm($('search').value);
-  const list = students.filter(s => !q || norm(s.id).includes(q) || norm(s.name).includes(q) || norm(s.phone).includes(q) || norm(s.grade).includes(q));
-  const sel = $('studentSelect');
-  sel.innerHTML = '';
-  if (!list.length) {
-    sel.innerHTML = '<option value="">No matching student</option>';
-    return;
+  const list = students.filter(s => 
+    !q || 
+    norm(s.id).includes(q) || 
+    norm(s.name).includes(q) || 
+    norm(s.phone).includes(q) || 
+    norm(s.grade).includes(q) ||
+    norm(s.institute).includes(q)
+  );
+
+  renderDropdown(list);
+  if (list.length > 0) {
+    $('studentSelect').selectedIndex = 0;
+    setForm(list[0]);
   }
-  list.forEach((s, i) => {
-    const o = document.createElement('option');
-    o.value = i;
-    o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed');
-    sel.appendChild(o);
-  });
-  sel._list = list;
-  if (list.length) setForm(list[0]);
 });
 
 /* Student Selection Dropdown event listener */
 $('studentSelect').addEventListener('change', () => {
   const list = $('studentSelect')._list || students;
   const idx = parseInt($('studentSelect').value, 10);
-  if (!isNaN(idx) && list[idx]) setForm(list[idx]);
+  if (!isNaN(idx) && list[idx]) {
+    setForm(list[idx]);
+    $('status').textContent = 'Selected: ' + (list[idx].id || '') + ' — ' + (list[idx].name || '');
+  }
 });
 
 /* Excel / CSV File Parsing Logic */
 $('file').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
-  $('status').textContent = 'Reading ' + file.name + '...';
+  $('status').textContent = 'Parsing file: ' + file.name + '...';
+  
   if (!window.XLSX) {
-    $('status').textContent = 'File Load Error: XLSX parser library is not available.';
+    $('status').textContent = 'Error: SheetJS (xlsx) library not loaded.';
     return;
   }
+
   const reader = new FileReader();
   reader.onload = ev => {
     try {
       const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
-      if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('No valid sheet found in workbook');
+      if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('No valid sheet found');
+      
       const ws = wb.Sheets[wb.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
 
@@ -411,40 +571,36 @@ $('file').addEventListener('change', e => {
       const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: hi });
       students = rows.map(mapRow).filter(s => s.name && norm(s.name) !== 'name');
 
-      const sel = $('studentSelect');
-      sel.innerHTML = '';
-      students.forEach((s, i) => {
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed');
-        sel.appendChild(o);
-      });
-      sel._list = students;
-      if (students.length) {
-        sel.selectedIndex = 0;
+      renderDropdown(students);
+
+      if (students.length > 0) {
+        $('studentSelect').selectedIndex = 0;
         setForm(students[0]);
+        $('status').textContent = 'Loaded ' + students.length + ' student records from ' + file.name + '.';
+      } else {
+        $('status').textContent = 'No valid student records found in file.';
       }
-      $('status').textContent = 'Successfully loaded ' + students.length + ' student record(s) from ' + file.name;
     } catch (err) {
       console.error(err);
-      $('status').textContent = 'File Reading Error: ' + err.message;
+      $('status').textContent = 'File parsing failed: ' + err.message;
     }
   };
   reader.readAsArrayBuffer(file);
 });
 
+/* Single High-Resolution PDF Export Function */
 const generatePDF = async () => {
   const card = $('card');
   const s = current();
 
   if (!s.id && !s.name) {
-    alert('Please enter student details first.');
+    alert('Please select or enter student details first.');
     return;
   }
 
   try {
-    $('status').textContent = 'Generating PDF...';
-    await new Promise(resolve => setTimeout(resolve, 250));
+    $('status').textContent = 'Generating PDF... Please wait.';
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     const canvas = await html2canvas(card, {
       scale: 4,
@@ -457,7 +613,7 @@ const generatePDF = async () => {
     });
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      throw new Error('ID Card element could not be rendered');
+      throw new Error('Canvas rendering produced an empty image');
     }
 
     const imageData = canvas.toDataURL('image/png', 1.0);
@@ -475,7 +631,7 @@ const generatePDF = async () => {
     const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
     pdf.save('Student_ID_Card_' + filename + '.pdf');
 
-    $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+    $('status').textContent = 'Downloaded PDF for ' + (s.name || s.id) + ' successfully.';
   } catch (error) {
     console.error('PDF Generation Error:', error);
     $('status').textContent = 'PDF generation failed.';
@@ -485,6 +641,7 @@ const generatePDF = async () => {
 
 $('download').onclick = () => generatePDF();
 
+/* Initialize live display on load */
 update();
 </script>
 </body>
