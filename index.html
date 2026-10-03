@@ -636,14 +636,6 @@
       return (str || '').toString().toLowerCase().trim();
     }
 
-    // Header normalization helper for Excel columns
-    function normalizeHeader(value) {
-      return String(value || '')
-        .toLowerCase()
-        .trim()
-        .replace(/[\s_\-\/().]+/g, ' ');
-    }
-
     function val(id) {
       const el = document.getElementById(id);
       return el ? el.value.trim() : '';
@@ -661,67 +653,16 @@
       };
     }
 
-    // Robust Excel / CSV Column Mapping
+    // Exact mapRow implementation
     function mapRow(row) {
-      const rawKeys = Object.keys(row);
-      
-      // Pre-normalize keys
-      const normalizedMap = {};
-      rawKeys.forEach(k => {
-        normalizedMap[normalizeHeader(k)] = row[k];
-      });
-
-      const findVal = (exactCandidates, partialCandidates) => {
-        // 1. Check exact candidate matches against normalized headers
-        for (const candidate of exactCandidates) {
-          const normCand = normalizeHeader(candidate);
-          if (normalizedMap[normCand] !== undefined && String(normalizedMap[normCand]).trim() !== '') {
-            return String(normalizedMap[normCand]).trim();
-          }
-        }
-        // 2. Fall back to partial matching if exact fail
-        if (partialCandidates) {
-          for (const normKey in normalizedMap) {
-            for (const part of partialCandidates) {
-              const normPart = normalizeHeader(part);
-              if (normKey.includes(normPart) && String(normalizedMap[normKey]).trim() !== '') {
-                return String(normalizedMap[normKey]).trim();
-              }
-            }
-          }
-        }
-        return '';
-      };
-
       return {
-        id: findVal(
-          ['student id', 'enrollment no', 'enrollment number', 'admission no', 'registration no', 'reg no', 'studentid', 'student_id', 'enrollment'],
-          ['student id', 'enrollment', 'reg', 'id']
-        ),
-        name: findVal(
-          ['student name', 'full name', 'student full name', 'name', 'studentname'],
-          ['student name', 'full name', 'name']
-        ),
-        grade: findVal(
-          ['grade', 'class', 'course', 'level'],
-          ['grade', 'class', 'course']
-        ),
-        dob: findVal(
-          ['date of birth', 'dob', 'birth date', 'birthdate'],
-          ['date of birth', 'dob', 'birth']
-        ),
-        institute: findVal(
-          ['name of the institution', 'institution', 'institution name', 'name of institution', 'institute', 'school', 'academy'],
-          ['institution', 'institute', 'school', 'academy']
-        ),
-        joining: findVal(
-          ['date of joining', 'doj', 'joining date', 'joining'],
-          ['date of joining', 'joining', 'doj']
-        ),
-        phone: findVal(
-          ['phone number', 'mobile number', 'contact number', 'phone no', 'mobile no', 'phone', 'mobile', 'contact', 'cell'],
-          ['phone', 'mobile', 'contact', 'cell']
-        )
+        id: row['ENROLLMENT NO'] || '',
+        name: row['NAME'] || '',
+        grade: row['GRADE'] || '',
+        dob: row['DATE OF BIRTH'] || '',
+        institute: row['NAME OF THE INSTITUTE'] || '',
+        joining: '',
+        phone: row['MOBILE NO'] || ''
       };
     }
 
@@ -747,7 +688,7 @@
       document.getElementById('vPhone').textContent = cur.phone;
     }
 
-    // REQUIRED renderDropdown FUNCTION
+    // renderDropdown FUNCTION
     function renderDropdown(list) {
       const sel = document.getElementById('studentSelect');
       sel.innerHTML = '';
@@ -813,7 +754,7 @@
         }
       });
 
-      // Excel / CSV Parse Sequence
+      // Dynamic Excel / CSV Import with Automatic Header Detection
       document.getElementById('file').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -824,44 +765,60 @@
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rawJson = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
-            if (!rawJson || rawJson.length === 0) {
-              alert("Uploaded file is empty.");
-              return;
-            }
-
-            // Inspect and debug Excel headers
-            console.log("Excel headers:", Object.keys(rawJson[0] || {}));
-            console.log("First Excel row:", rawJson[0]);
-
-            // Map rows
-            students = rawJson.map(mapRow);
-            console.log("Mapped first student:", students[0]);
+            // 1. Read sheet as a 2D array with formatted cell strings (raw: false)
+            const rows = XLSX.utils.sheet_to_json(firstSheet, {
+              header: 1,
+              defval: '',
+              raw: false
+            });
 
             const statusEl = document.getElementById('status');
 
-            // Validate mapped student data
-            const first = students[0] || {};
-            if (!first.id && !first.name) {
-              renderDropdown([]);
+            // 2. Find header row dynamically
+            const headerIndex = rows.findIndex(row =>
+              row.some(cell => String(cell).trim().toUpperCase() === 'ENROLLMENT NO') &&
+              row.some(cell => String(cell).trim().toUpperCase() === 'NAME')
+            );
+
+            if (headerIndex === -1) {
               if (statusEl) {
-                statusEl.textContent = "Excel columns could not be mapped. Please check the column headings.";
+                statusEl.textContent = "Could not find the student header row in the Excel file.";
                 statusEl.style.color = "#DC2626";
               }
-              alert("Excel columns could not be mapped. Please check column headings in the console.");
+              renderDropdown([]);
               return;
             }
+
+            // 3. Extract headers and transform raw rows to objects
+            const headers = rows[headerIndex];
+            const rawJson = rows
+              .slice(headerIndex + 1)
+              .filter(row => row.some(cell => String(cell || '').trim() !== ''))
+              .map(row => {
+                const obj = {};
+                headers.forEach((header, index) => {
+                  const key = String(header || '').trim();
+                  if (key) {
+                    obj[key] = row[index] ?? '';
+                  }
+                });
+                return obj;
+              });
+
+            // 4. Map rows and filter out empty entries
+            students = rawJson
+              .map(mapRow)
+              .filter(student => student.id || student.name);
 
             if (statusEl) {
               statusEl.style.color = "var(--royal-blue)";
               statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
             }
 
-            // Render all students to #studentSelect
+            // 5. Populate dropdown & default to first record
             renderDropdown(students);
 
-            // Select first student and set form
             if (students.length > 0) {
               document.getElementById('studentSelect').selectedIndex = 0;
               setForm(students[0]);
