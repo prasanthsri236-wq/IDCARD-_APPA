@@ -181,8 +181,6 @@ button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cu
     
     <div class="actions">
       <button class="primary" id="download">Download High-Res PDF</button>
-      <button class="secondary" id="print">Download Quick PDF</button>
-      <button class="success" id="batchDownload">Batch Download All Loaded Students</button>
       <button class="secondary" id="clear">Clear Fields</button>
     </div>
   </div>
@@ -485,55 +483,7 @@ const generatePDF = async () => {
   }
 };
 
-/* Batch / Bulk Export Handler */
-const generateBatchPDF = async () => {
-  const activeList = ($('studentSelect')._list && $('studentSelect')._list.length) ? $('studentSelect')._list : students;
-  if (!activeList.length) {
-    alert('No student records loaded to download. Please load an Excel/CSV file first.');
-    return;
-  }
-
-  try {
-    const { jsPDF } = window.jspdf;
-    const batchPdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: [101.6, 63.8],
-      compress: true
-    });
-
-    for (let i = 0; i < activeList.length; i++) {
-      const student = activeList[i];
-      $('status').textContent = `Processing card ${i + 1} of ${activeList.length}: ${student.name}...`;
-
-      setForm(student);
-      await new Promise(r => setTimeout(r, 150));
-
-      const canvas = await html2canvas($('card'), {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#fffdf6',
-        logging: false
-      });
-
-      const imageData = canvas.toDataURL('image/jpeg', 0.92);
-      if (i > 0) batchPdf.addPage([101.6, 63.8], 'landscape');
-      batchPdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
-    }
-
-    batchPdf.save(`APAA_ID_Cards_Batch_${activeList.length}_Students.pdf`);
-    $('status').textContent = `Batch export completed successfully! Exported ${activeList.length} cards.`;
-  } catch (err) {
-    console.error(err);
-    $('status').textContent = 'Batch export encountered an error.';
-    alert('Batch export error: ' + err.message);
-  }
-};
-
 $('download').onclick = () => generatePDF();
-$('print').onclick = () => generatePDF();
-$('batchDownload').onclick = () => generateBatchPDF();
 
 update();
 </script>
