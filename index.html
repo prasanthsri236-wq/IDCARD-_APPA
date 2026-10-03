@@ -2,31 +2,41 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Alagappa Performing Arts Academy ID Card Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alagappa Performing Arts Academy - ID Card Generator</title>
+
+<!-- External Libraries for Excel parsing, Canvas conversion, and PDF rendering -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#eef1f5;font-family:Arial,Helvetica,sans-serif;color:#102f59}
-.wrap{max-width:1250px;margin:auto;padding:24px}
-h1{margin:0 0 6px;font-size:28px}
-.sub{margin:0 0 18px;color:#667085}
-.panel{background:#fff;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
-input,select,button{font:inherit}
-input[type=text],input[type=date],input[type=file],select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#172033}
-input:disabled{background:#f3f4f6;color:#667085}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
-.primary{background:#082d5c;color:#fff}
-.secondary{background:#e7ecf3;color:#102f59}
-.status{margin-top:10px;font-size:13px;color:#475467}
-.hint{font-size:12px;color:#667085;margin-top:6px}
-.card-wrap{display:flex;justify-content:center;align-items:flex-start;width:100%;overflow:hidden;padding:4px}
 
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #eef1f5; font-family: Arial, Helvetica, sans-serif; color: #102f59; }
+.wrap { max-width: 1250px; margin: auto; padding: 24px; }
+h1 { margin: 0 0 6px; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px; }
+.sub { margin: 0 0 18px; color: #667085; font-size: 14px; }
+.panel { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #082d5c; }
+input, select, button { font: inherit; }
+input[type=text], input[type=date], input[type=file], select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #172033; }
+input:disabled { background: #f3f4f6; color: #667085; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+button { border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+.primary { background: #082d5c; color: #fff; }
+.primary:hover { background: #0a3d7c; }
+.secondary { background: #e7ecf3; color: #102f59; }
+.secondary:hover { background: #d7e0ec; }
+.success { background: #107c41; color: #fff; }
+.success:hover { background: #0d6635; }
+.status { margin-top: 10px; font-size: 13px; color: #475467; font-weight: 600; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border-left: 4px solid #082d5c; }
+.hint { font-size: 12px; color: #667085; margin-top: 6px; }
+
+.card-wrap { display: flex; justify-content: center; align-items: flex-start; width: 100%; overflow: hidden; padding: 4px; }
+
+/* ===== CARD PREVIEW CONTAINER & LAYOUT ===== */
 .card {
     position: relative;
     display: block;
@@ -38,15 +48,15 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     contain: paint;
     background: #fffdf6;
     flex: none;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
-
-/* ===== STUDENT DETAILS POSITION & ALIGNMENT ===== */
 
 .card-fields {
     left: 21% !important;
     top: 39% !important;
     width: 58% !important;
-    gap: 10px !important;
+    gap: 8px !important;
     position: absolute !important;
     z-index: 10 !important;
     display: flex !important;
@@ -55,9 +65,9 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
 }
 
 .card-row {
-    grid-template-columns: 250px 25px minmax(0, 1fr) !important;
-    min-height: 30px !important;
-    font-size: 21px !important;
+    grid-template-columns: 240px 20px minmax(0, 1fr) !important;
+    min-height: 28px !important;
+    font-size: 20px !important;
     line-height: 1.25 !important;
     display: grid !important;
     align-items: center !important;
@@ -68,13 +78,11 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     white-space: nowrap !important;
 }
 
-#row-institute {
-    font-size: 19px !important;
-}
+#row-institute { font-size: 18px !important; }
 
 .c-value {
-    font-size: 21px !important;
-    padding-left: 3px !important;
+    font-size: 20px !important;
+    padding-left: 4px !important;
     display: block !important;
     text-align: left !important;
     min-width: 0 !important;
@@ -84,181 +92,185 @@ button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:point
     white-space: nowrap !important;
 }
 
-.c-label {
-    display: block !important;
-    text-align: left !important;
-}
+.c-label { display: block !important; text-align: left !important; }
+.c-colon { display: block !important; text-align: center !important; }
+.c-value:empty { visibility: hidden !important; }
 
-.c-colon {
-    display: block !important;
-    text-align: center !important;
-}
-
-.c-value:empty {
-    visibility: hidden !important;
-}
-
-/* ===== RESPONSIVE ===== */
-
+/* ===== RESPONSIVE MEDIA QUERIES ===== */
 @media (max-width: 750px) {
     .card-fields {
         left: 21% !important;
         top: 39% !important;
         width: 58% !important;
-        gap: 6px !important;
+        gap: 5px !important;
     }
-
     .card-row {
-        grid-template-columns: 130px 15px minmax(0, 1fr) !important;
-        min-height: 20px !important;
+        grid-template-columns: 120px 15px minmax(0, 1fr) !important;
+        min-height: 18px !important;
         font-size: 11px !important;
     }
-
-    .c-value {
-        font-size: 11px !important;
-    }
-
-    #row-institute {
-        font-size: 10px !important;
-    }
+    .c-value { font-size: 11px !important; }
+    #row-institute { font-size: 10px !important; }
 }
 
-.card-background{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;display:block !important;margin:0 !important;padding:0 !important;border:0 !important;z-index:0 !important;pointer-events:none !important;user-select:none !important;object-fit:cover;}
+.card-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    object-fit: cover;
+}
 </style>
 </head>
 <body>
+
 <div class="wrap">
-<h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
-<p class="sub">Create a premium APAA Grade Examination Student ID Card — high-resolution PDF export for printing.</p>
+  <h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
+  <p class="sub">Create premium APAA Grade Examination Student ID Cards — high-resolution single & bulk PDF export.</p>
 
-<div class="panel">
-  <div class="grid">
-    <div>
-      <label>Excel / CSV File</label>
-      <input id="file" type="file" accept=".xlsx,.xls,.csv">
-      <div class="hint">The program automatically finds the row containing ENROLLMENT NO, NAME and GRADE.</div>
+  <!-- FILE & SELECTION PANEL -->
+  <div class="panel">
+    <div class="grid">
+      <div>
+        <label>Excel / CSV File</label>
+        <input id="file" type="file" accept=".xlsx,.xls,.csv">
+        <div class="hint">Upload student records sheet. Automatically detects ENROLLMENT NO, NAME, GRADE, DOB, etc.</div>
+      </div>
+      <div>
+        <label>Search Student</label>
+        <input id="search" type="text" placeholder="Type enrollment number, name or phone...">
+      </div>
     </div>
-    <div>
-      <label>Search Student</label>
-      <input id="search" type="text" placeholder="Type enrollment number or student name...">
+
+    <div class="grid" style="margin-top:14px">
+      <div>
+        <label>Select Student</label>
+        <select id="studentSelect">
+          <option value="">Enter details below or upload Excel / CSV</option>
+        </select>
+      </div>
+      <div>
+        <label>Upload Card Background (card-bg.png)</label>
+        <input id="bgUpload" type="file" accept="image/*">
+        <div class="hint">Select <strong>card-bg.png</strong> template to render card backgrounds cleanly.</div>
+      </div>
+    </div>
+
+    <div id="status" class="status">Ready. You can select a student above or type details manually below.</div>
+  </div>
+
+  <!-- EDITABLE FORM DETAILS -->
+  <div class="panel">
+    <div class="manual-title" style="font-weight:700;margin-bottom:10px;font-size:16px;">Student Details</div>
+    <div class="grid">
+      <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. ALGBIN0001"></div>
+      <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
+      <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
+      <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
+      <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
+      <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
+      <div><label>Phone / Mobile No.</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
+    </div>
+    
+    <div class="actions">
+      <button class="primary" id="download">Download High-Res PDF</button>
+      <button class="secondary" id="print">Download Quick PDF</button>
+      <button class="success" id="batchDownload">Batch Download All Loaded Students</button>
+      <button class="secondary" id="clear">Clear Fields</button>
     </div>
   </div>
 
-  <div class="grid" style="margin-top:14px">
-    <div>
-      <label>Select Student</label>
-      <select id="studentSelect"><option value="">Enter details below or upload Excel</option></select>
-    </div>
-    <div>
-      <label>Upload Card Background (card-bg.png)</label>
-      <input id="bgUpload" type="file" accept="image/*">
-      <div class="hint">Select <strong>card-bg.png</strong> to convert and render without security issues.</div>
-    </div>
-  </div>
-
-  <div id="status" class="status" style="margin-top:10px">Ready. You can type student details below.</div>
-</div>
-
-<div class="panel">
-  <div class="manual-title" style="font-weight:700;margin-bottom:10px">Student Details</div>
-  <div class="grid">
-    <div><label>Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. ALGBIN0001"></div>
-    <div><label>Name</label><input id="name" type="text" placeholder="Student Name"></div>
-    <div><label>Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
-    <div><label>Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-    <div><label>Name of the Institution</label><input id="institute" type="text" placeholder="Alagappa School"></div>
-    <div><label>Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
-    <div><label>Phone Number</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
-  </div>
-  <div class="actions">
-    <button class="primary" id="download">Download High-Resolution PDF</button>
-    <button class="secondary" id="print">Download PDF</button>
-    <button class="secondary" id="clear">Clear</button>
-  </div>
-</div>
-
-<div class="panel">
-  <div class="card-wrap">
-    <div class="card" id="card">
-      <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png">
-      
-      <div class="card-fields" aria-label="Student information">
-        <div class="card-row" id="row-id">
-          <span class="c-label">Student ID</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vId"></span>
-        </div>
-        <div class="card-row" id="row-name">
-          <span class="c-label">Name</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vName"></span>
-        </div>
-        <div class="card-row" id="row-grade">
-          <span class="c-label">Grade</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vGrade"></span>
-        </div>
-        <div class="card-row" id="row-dob">
-          <span class="c-label">Date of Birth</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vDob"></span>
-        </div>
-        <div class="card-row" id="row-institute">
-          <span class="c-label">Name of the Institution</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vInstitute"></span>
-        </div>
-        <div class="card-row" id="row-joining">
-          <span class="c-label">Date of Joining</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vJoining"></span>
-        </div>
-        <div class="card-row" id="row-phone">
-          <span class="c-label">Phone Number</span>
-          <span class="c-colon">:</span>
-          <span class="c-value" id="vPhone"></span>
+  <!-- CARD PREVIEW DISPLAY -->
+  <div class="panel">
+    <div class="card-wrap">
+      <div class="card" id="card">
+        <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png" onerror="this.style.background='#fffdf6'">
+        
+        <div class="card-fields" aria-label="Student information">
+          <div class="card-row" id="row-id">
+            <span class="c-label">Student ID</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vId"></span>
+          </div>
+          <div class="card-row" id="row-name">
+            <span class="c-label">Name</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vName"></span>
+          </div>
+          <div class="card-row" id="row-grade">
+            <span class="c-label">Grade</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vGrade"></span>
+          </div>
+          <div class="card-row" id="row-dob">
+            <span class="c-label">Date of Birth</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vDob"></span>
+          </div>
+          <div class="card-row" id="row-institute">
+            <span class="c-label">Name of the Institution</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vInstitute"></span>
+          </div>
+          <div class="card-row" id="row-joining">
+            <span class="c-label">Date of Joining</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vJoining"></span>
+          </div>
+          <div class="card-row" id="row-phone">
+            <span class="c-label">Phone Number</span>
+            <span class="c-colon">:</span>
+            <span class="c-value" id="vPhone"></span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-</div>
 
 <script>
-const $=id=>document.getElementById(id);
-let students=[];
-const fields=['id','name','grade','dob','institute','joining','phone'];
+const $ = id => document.getElementById(id);
+let students = [];
+const fields = ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'];
 
-/* Convert uploaded image file directly into data URL using FileReader */
+/* Utility to convert uploaded background file into base64 data URL */
 function loadFileAsDataURL(file, callback) {
   const reader = new FileReader();
-  reader.onload = function(e) {
-    callback(e.target.result);
-  };
+  reader.onload = e => callback(e.target.result);
   reader.readAsDataURL(file);
 }
 
-/* Event handler for background file picker */
 $('bgUpload').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
-  loadFileAsDataURL(file, (dataUrl) => {
+  loadFileAsDataURL(file, dataUrl => {
     $('cardBgImg').src = dataUrl;
-    $('status').textContent = 'Background image loaded into memory successfully.';
+    $('status').textContent = 'Background image loaded successfully into card template.';
   });
 });
 
-function norm(v){return String(v||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');}
+/* Normalize text for matching */
+function norm(v) {
+  return String(v || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
+/* Dynamic column value lookup */
 function val(row, names) {
   const keys = Object.keys(row || {});
   for (let i = 0; i < names.length; i++) {
     const targetNorm = norm(names[i]);
     for (let j = 0; j < keys.length; j++) {
       if (norm(keys[j]) === targetNorm) {
-        const val = row[keys[j]];
-        if (val !== undefined && val !== null && String(val).trim() !== '') {
-          return String(val).trim();
+        const value = row[keys[j]];
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+          return String(value).trim();
         }
       }
     }
@@ -266,208 +278,262 @@ function val(row, names) {
   return '';
 }
 
-function dateText(v){
-  if(v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
-  if(typeof v==='number'&&window.XLSX){
-    const d=XLSX.SSF.parse_date_code(v);
-    if(d) return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
+function dateText(v) {
+  if (v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
+  if (typeof v === 'number' && window.XLSX) {
+    const d = XLSX.SSF.parse_date_code(v);
+    if (d) return String(d.d).padStart(2, '0') + '/' + String(d.m).padStart(2, '0') + '/' + d.y;
   }
-  return String(v||'').trim();
+  return String(v || '').trim();
 }
 
-function mapRow(r, idx){
-  let id = val(r,['ENROLLMENT NO','ENROLLMENTNO','ENROLLMENT NO.','STUDENT ID','STUDENTID','ID','SL NO','S.NO','NO']);
-  if(!id) id = 'ALGBIN' + String(idx + 1).padStart(4, '0');
+function mapRow(r, idx) {
+  let id = val(r, ['ENROLLMENT NO', 'ENROLLMENTNO', 'ENROLLMENT NO.', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'S.NO', 'NO']);
+  if (!id) id = 'ALGBIN' + String(idx + 1).padStart(4, '0');
 
   return {
     id: id,
-    name: val(r,['NAME','STUDENT NAME','STUDENTNAME','CANDIDATE NAME']),
-    grade: val(r,['GRADE','CLASS','LEVEL']),
-    dob: dateText(val(r,['DATE OF BIRTH','DOB','DATEOFBIRTH','BIRTH DATE'])),
-    institute: val(r,['NAME OF THE INSTITUTE','INSTITUTE NAME','INSTITUTE','INSTITUTION NAME','NAME OF THE INSTITUTION']),
-    joining: dateText(val(r,['DATE OF JOINING','JOINING DATE','DATEOFJOINING'])) || 'Aug 2026',
-    phone: val(r,['MOBILE NO','MOBILE','PHONE NUMBER','PHONE','CONTACT NUMBER'])
+    name: val(r, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'CANDIDATE NAME']),
+    grade: val(r, ['GRADE', 'CLASS', 'LEVEL']),
+    dob: dateText(val(r, ['DATE OF BIRTH', 'DOB', 'DATEOFBIRTH', 'BIRTH DATE'])),
+    institute: val(r, ['NAME OF THE INSTITUTE', 'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'NAME OF THE INSTITUTION']),
+    joining: dateText(val(r, ['DATE OF JOINING', 'JOINING DATE', 'DATEOFJOINING'])) || 'Aug 2026',
+    phone: val(r, ['MOBILE NO', 'MOBILE', 'PHONE NUMBER', 'PHONE', 'CONTACT NUMBER'])
   };
 }
 
-function setForm(s){
-  if(!s)return;
-  $('id').value=s.id||'';
-  $('name').value=s.name||'';
-  $('grade').value=s.grade||'';
-  $('dob').value=s.dob||'';
-  $('institute').value=s.institute||'';
-  $('joining').value=s.joining||'Aug 2026';
-  $('phone').value=s.phone||'';
+function setForm(s) {
+  if (!s) return;
+  $('id').value = s.id || '';
+  $('name').value = s.name || '';
+  $('grade').value = s.grade || '';
+  $('dob').value = s.dob || '';
+  $('institute').value = s.institute || '';
+  $('joining').value = s.joining || 'Aug 2026';
+  $('phone').value = s.phone || '';
   update();
 }
 
-function current(){
+function current() {
   return {
-    id:$('id').value.trim(),
-    name:$('name').value.trim(),
-    grade:$('grade').value.trim(),
-    dob:$('dob').value.trim(),
-    institute:$('institute').value.trim(),
-    joining:$('joining').value.trim(),
-    phone:$('phone').value.trim()
+    id: $('id').value.trim(),
+    name: $('name').value.trim(),
+    grade: $('grade').value.trim(),
+    dob: $('dob').value.trim(),
+    institute: $('institute').value.trim(),
+    joining: $('joining').value.trim(),
+    phone: $('phone').value.trim()
   };
 }
 
 const cardValueEls = Object.freeze({
-  vId: document.getElementById('vId'),
-  vName: document.getElementById('vName'),
-  vGrade: document.getElementById('vGrade'),
-  vDob: document.getElementById('vDob'),
-  vInstitute: document.getElementById('vInstitute'),
-  vJoining: document.getElementById('vJoining'),
-  vPhone: document.getElementById('vPhone')
+  vId: $('vId'),
+  vName: $('vName'),
+  vGrade: $('vGrade'),
+  vDob: $('vDob'),
+  vInstitute: $('vInstitute'),
+  vJoining: $('vJoining'),
+  vPhone: $('vPhone')
 });
 
-function update(){
-  const s=current();
+function update() {
+  const s = current();
   cardValueEls.vId.textContent = s.id;
   cardValueEls.vName.textContent = s.name;
   cardValueEls.vGrade.textContent = s.grade;
   cardValueEls.vDob.textContent = s.dob;
   cardValueEls.vInstitute.textContent = s.institute;
   cardValueEls.vJoining.textContent = s.joining;
-  if(cardValueEls.vPhone) cardValueEls.vPhone.textContent = s.phone;
+  if (cardValueEls.vPhone) cardValueEls.vPhone.textContent = s.phone;
 }
 
-fields.forEach(f=>$(''+f).addEventListener('input',update));
+fields.forEach(f => $(f).addEventListener('input', update));
 
-$('clear').onclick=()=>{
-  fields.forEach(f=>{ if(f!=='joining') $(''+f).value=''; });
-  $('joining').value='Aug 2026';
-  $('status').textContent='Cleared. You can type student details.';
+$('clear').onclick = () => {
+  fields.forEach(f => { if (f !== 'joining') $(f).value = ''; });
+  $('joining').value = 'Aug 2026';
+  $('status').textContent = 'Cleared form inputs.';
   update();
 };
 
-$('search').addEventListener('input',()=>{
-  const q=norm($('search').value);
-  const list=students.filter(s=>!q||norm(s.id).includes(q)||norm(s.name).includes(q)||norm(s.phone).includes(q)||norm(s.grade).includes(q));
-  const sel=$('studentSelect'); sel.innerHTML='';
-  if(!list.length){sel.innerHTML='<option value="">No matching student</option>';return;}
-  list.forEach((s,i)=>{
-    const o=document.createElement('option');
-    o.value=i;
-    o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');
-    sel.appendChild(o);
-  });
-  sel._list=list;
-  if(list.length) setForm(list[0]);
-});
-
-$('studentSelect').addEventListener('change',()=>{
-  const list=$('studentSelect')._list||students;
-  const idx=parseInt($('studentSelect').value, 10);
-  if(!isNaN(idx) && list[idx]) setForm(list[idx]);
-});
-
-$('file').addEventListener('change',e=>{
-  const file=e.target.files[0]; if(!file)return;
-  $('status').textContent='Reading '+file.name+'...';
-  if(!window.XLSX){
-    $('status').textContent='File Load Error: XLSX library failed to load.';
+/* Live Student Search Filter */
+$('search').addEventListener('input', () => {
+  const q = norm($('search').value);
+  const list = students.filter(s => !q || norm(s.id).includes(q) || norm(s.name).includes(q) || norm(s.phone).includes(q) || norm(s.grade).includes(q));
+  const sel = $('studentSelect');
+  sel.innerHTML = '';
+  if (!list.length) {
+    sel.innerHTML = '<option value="">No matching student</option>';
     return;
   }
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{
-      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
-      if(!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('No sheet found');
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
-      
+  list.forEach((s, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed');
+    sel.appendChild(o);
+  });
+  sel._list = list;
+  if (list.length) setForm(list[0]);
+});
+
+/* Student Selection Dropdown event listener */
+$('studentSelect').addEventListener('change', () => {
+  const list = $('studentSelect')._list || students;
+  const idx = parseInt($('studentSelect').value, 10);
+  if (!isNaN(idx) && list[idx]) setForm(list[idx]);
+});
+
+/* Excel / CSV File Parsing Logic */
+$('file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  $('status').textContent = 'Reading ' + file.name + '...';
+  if (!window.XLSX) {
+    $('status').textContent = 'File Load Error: XLSX parser library is not available.';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
+      if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('No valid sheet found in workbook');
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+
       let hi = -1;
-      for(let i=0; i<Math.min(matrix.length, 40); i++){
+      for (let i = 0; i < Math.min(matrix.length, 40); i++) {
         const rowStr = matrix[i].map(norm).join(' ');
-        if(rowStr.includes('name') && (rowStr.includes('enrollment') || rowStr.includes('grade') || rowStr.includes('mobile') || rowStr.includes('sno'))){
+        if (rowStr.includes('name') && (rowStr.includes('enrollment') || rowStr.includes('grade') || rowStr.includes('mobile') || rowStr.includes('sno'))) {
           hi = i;
           break;
         }
       }
-      if(hi < 0) hi = 0;
+      if (hi < 0) hi = 0;
 
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true,range:hi});
-      students=rows.map(mapRow).filter(s=>s.name && norm(s.name) !== 'name');
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: hi });
+      students = rows.map(mapRow).filter(s => s.name && norm(s.name) !== 'name');
 
-      const sel=$('studentSelect'); sel.innerHTML='';
-      students.forEach((s,i)=>{
-        const o=document.createElement('option');
-        o.value=i;
-        o.textContent=(s.id||'No ID')+' — '+(s.name||'Unnamed');
+      const sel = $('studentSelect');
+      sel.innerHTML = '';
+      students.forEach((s, i) => {
+        const o = document.createElement('option');
+        o.value = i;
+        o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed');
         sel.appendChild(o);
       });
-      sel._list=students;
-      if(students.length){
-        sel.selectedIndex=0;
+      sel._list = students;
+      if (students.length) {
+        sel.selectedIndex = 0;
         setForm(students[0]);
       }
-      $('status').textContent='Loaded '+students.length+' student record(s) from sheet "'+file.name+'".';
-    }catch(err){
+      $('status').textContent = 'Successfully loaded ' + students.length + ' student record(s) from ' + file.name;
+    } catch (err) {
       console.error(err);
-      $('status').textContent='File Load Error: '+err.message;
+      $('status').textContent = 'File Reading Error: ' + err.message;
     }
   };
   reader.readAsArrayBuffer(file);
 });
 
 const generatePDF = async () => {
-    const card = $('card');
-    const s = current();
+  const card = $('card');
+  const s = current();
 
-    if (!s.id && !s.name) {
-        alert('Please enter student details first.');
-        return;
+  if (!s.id && !s.name) {
+    alert('Please enter student details first.');
+    return;
+  }
+
+  try {
+    $('status').textContent = 'Generating PDF...';
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    const canvas = await html2canvas(card, {
+      scale: 4,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#fffdf6',
+      logging: false,
+      imageTimeout: 15000,
+      removeContainer: true
+    });
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      throw new Error('ID Card element could not be rendered');
     }
 
-    try {
-        $('status').textContent = 'Preparing PDF...';
+    const imageData = canvas.toDataURL('image/png', 1.0);
+    const { jsPDF } = window.jspdf;
 
-        await new Promise(resolve => setTimeout(resolve, 300));
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: [101.6, 63.8],
+      compress: false
+    });
 
-        const canvas = await html2canvas(card, {
-            scale: 4,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#fffdf6',
-            logging: false,
-            imageTimeout: 15000,
-            removeContainer: true
-        });
+    pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
 
-        if (!canvas || canvas.width === 0 || canvas.height === 0) {
-            throw new Error('ID card could not be rendered.');
-        }
+    const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
+    pdf.save('Student_ID_Card_' + filename + '.pdf');
 
-        const imageData = canvas.toDataURL('image/png', 1.0);
-        const { jsPDF } = window.jspdf;
+    $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+  } catch (error) {
+    console.error('PDF Generation Error:', error);
+    $('status').textContent = 'PDF generation failed.';
+    alert('Unable to generate PDF.\n\n' + error.message);
+  }
+};
 
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: [101.6, 63.8],
-            compress: false
-        });
+/* Batch / Bulk Export Handler */
+const generateBatchPDF = async () => {
+  const activeList = ($('studentSelect')._list && $('studentSelect')._list.length) ? $('studentSelect')._list : students;
+  if (!activeList.length) {
+    alert('No student records loaded to download. Please load an Excel/CSV file first.');
+    return;
+  }
 
-        pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
+  try {
+    const { jsPDF } = window.jspdf;
+    const batchPdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: [101.6, 63.8],
+      compress: true
+    });
 
-        const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
-        pdf.save('Student_ID_Card_' + filename + '.pdf');
+    for (let i = 0; i < activeList.length; i++) {
+      const student = activeList[i];
+      $('status').textContent = `Processing card ${i + 1} of ${activeList.length}: ${student.name}...`;
 
-        $('status').textContent = 'Student ID Card PDF downloaded successfully.';
+      setForm(student);
+      await new Promise(r => setTimeout(r, 150));
 
-    } catch (error) {
-        console.error('PDF ERROR:', error);
-        $('status').textContent = 'PDF generation failed.';
-        alert('Unable to generate PDF.\n\n' + error.message);
+      const canvas = await html2canvas($('card'), {
+        scale: 3,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#fffdf6',
+        logging: false
+      });
+
+      const imageData = canvas.toDataURL('image/jpeg', 0.92);
+      if (i > 0) batchPdf.addPage([101.6, 63.8], 'landscape');
+      batchPdf.addImage(imageData, 'JPEG', 0, 0, 101.6, 63.8);
     }
+
+    batchPdf.save(`APAA_ID_Cards_Batch_${activeList.length}_Students.pdf`);
+    $('status').textContent = `Batch export completed successfully! Exported ${activeList.length} cards.`;
+  } catch (err) {
+    console.error(err);
+    $('status').textContent = 'Batch export encountered an error.';
+    alert('Batch export error: ' + err.message);
+  }
 };
 
 $('download').onclick = () => generatePDF();
 $('print').onclick = () => generatePDF();
+$('batchDownload').onclick = () => generateBatchPDF();
 
 update();
 </script>
