@@ -48,7 +48,7 @@
       flex-direction: column;
     }
 
-    /* HEADER & BOTH LOGOS VISIBILITY */
+    /* HEADER & LOGOS */
     .app-header {
       background-color: var(--primary-navy);
       color: #FFFFFF;
@@ -238,7 +238,7 @@
       cursor: pointer;
     }
 
-    /* DROPDOWN STYLING & HIGH VISIBILITY */
+    /* DROPDOWN STYLING */
     select#studentSelect {
       width: 100%;
       min-height: 46px;
@@ -344,7 +344,7 @@
       border: 1px dashed #CBD5E1;
     }
 
-    /* ID CARD OVERLAY AND LAYOUT */
+    /* ID CARD OVERLAY & EXACT POSITIONING */
     .id-card {
       position: relative;
       width: 500px;
@@ -365,25 +365,43 @@
       z-index: 1;
     }
 
+    /* CARD FIELDS CONTAINER */
     .card-fields {
       position: absolute;
-      top: 36%;
-      left: 56.5%;
-      width: 38%;
+      top: 48%;
+      left: 24%;
+      width: 71%;
+      z-index: 2;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      z-index: 2;
+      gap: 3px;
     }
 
+    /* ROW GRID FOR LABELS, COLONS, AND VALUES */
     .field-row {
-      height: 18px;
-      display: flex;
+      display: grid;
+      grid-template-columns: 34% 4% 62%;
       align-items: center;
+      min-height: 16px;
+      line-height: 1.1;
+    }
+
+    .field-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #0F2A4A;
+      white-space: nowrap;
+    }
+
+    .field-colon {
+      font-size: 10px;
+      font-weight: 700;
+      color: #0F2A4A;
+      text-align: center;
     }
 
     .field-val {
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 700;
       color: #0F2A4A;
       white-space: nowrap;
@@ -480,7 +498,7 @@
 </head>
 <body>
 
-  <!-- HEADER WITH BOTH LOGOS CLEARLY VISIBLE -->
+  <!-- HEADER WITH BOTH LOGOS -->
   <header class="app-header">
     <div class="header-container">
       <div class="header-left">
@@ -593,13 +611,47 @@
             <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
             
             <div class="card-fields">
-              <div class="field-row"><span id="vId" class="field-val"></span></div>
-              <div class="field-row"><span id="vName" class="field-val"></span></div>
-              <div class="field-row"><span id="vGrade" class="field-val"></span></div>
-              <div class="field-row"><span id="vDob" class="field-val"></span></div>
-              <div class="field-row"><span id="vInstitute" class="field-val"></span></div>
-              <div class="field-row"><span id="vJoining" class="field-val"></span></div>
-              <div class="field-row"><span id="vPhone" class="field-val"></span></div>
+              <div class="field-row">
+                <span class="field-label">Student ID</span>
+                <span class="field-colon">:</span>
+                <span id="vId" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Name</span>
+                <span class="field-colon">:</span>
+                <span id="vName" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Grade</span>
+                <span class="field-colon">:</span>
+                <span id="vGrade" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Date of Birth</span>
+                <span class="field-colon">:</span>
+                <span id="vDob" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Name of the Institution</span>
+                <span class="field-colon">:</span>
+                <span id="vInstitute" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Date of Joining</span>
+                <span class="field-colon">:</span>
+                <span id="vJoining" class="field-val"></span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Phone Number</span>
+                <span class="field-colon">:</span>
+                <span id="vPhone" class="field-val"></span>
+              </div>
             </div>
           </div>
         </div>
@@ -653,7 +705,7 @@
       };
     }
 
-    // Exact mapRow implementation
+    // Row Mapping
     function mapRow(row) {
       return {
         id: row['ENROLLMENT NO'] || '',
@@ -688,7 +740,7 @@
       document.getElementById('vPhone').textContent = cur.phone;
     }
 
-    // renderDropdown FUNCTION
+    // Dropdown Rendering
     function renderDropdown(list) {
       const sel = document.getElementById('studentSelect');
       sel.innerHTML = '';
@@ -716,7 +768,7 @@
       sel._list = list;
     }
 
-    // Search Filtering Function
+    // Search Filtering
     function filterStudents() {
       const q = norm(document.getElementById('search').value);
       if (!q) {
@@ -746,7 +798,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Form Input Dynamic Card Update
+      // Event Listeners for Dynamic Updates
       ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'].forEach(fieldId => {
         const el = document.getElementById(fieldId);
         if (el) {
@@ -754,7 +806,7 @@
         }
       });
 
-      // Dynamic Excel / CSV Import with Automatic Header Detection
+      // Excel / CSV File Read
       document.getElementById('file').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -766,7 +818,6 @@
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            // 1. Read sheet as a 2D array with formatted cell strings (raw: false)
             const rows = XLSX.utils.sheet_to_json(firstSheet, {
               header: 1,
               defval: '',
@@ -775,7 +826,6 @@
 
             const statusEl = document.getElementById('status');
 
-            // 2. Find header row dynamically
             const headerIndex = rows.findIndex(row =>
               row.some(cell => String(cell).trim().toUpperCase() === 'ENROLLMENT NO') &&
               row.some(cell => String(cell).trim().toUpperCase() === 'NAME')
@@ -790,7 +840,6 @@
               return;
             }
 
-            // 3. Extract headers and transform raw rows to objects
             const headers = rows[headerIndex];
             const rawJson = rows
               .slice(headerIndex + 1)
@@ -806,7 +855,6 @@
                 return obj;
               });
 
-            // 4. Map rows and filter out empty entries
             students = rawJson
               .map(mapRow)
               .filter(student => student.id || student.name);
@@ -816,7 +864,6 @@
               statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
             }
 
-            // 5. Populate dropdown & default to first record
             renderDropdown(students);
 
             if (students.length > 0) {
@@ -831,7 +878,7 @@
         reader.readAsArrayBuffer(file);
       });
 
-      // Student Dropdown Change Event
+      // Student Dropdown Selection Listener
       document.getElementById('studentSelect').addEventListener('change', (e) => {
         const sel = e.target;
         const currentList = sel._list || students;
@@ -842,10 +889,10 @@
         }
       });
 
-      // Search Event Listener
+      // Search Field Listener
       document.getElementById('search').addEventListener('input', filterStudents);
 
-      // Card Background Image Upload
+      // Card Background Upload
       document.getElementById('bgUpload').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -857,7 +904,7 @@
         }
       });
 
-      // Clear Form Event Listener
+      // Clear Form Listener
       document.getElementById('clear').addEventListener('click', () => {
         setForm({});
         document.getElementById('studentSelect').value = '';
@@ -865,7 +912,7 @@
         renderDropdown(students);
       });
 
-      // Download High-Res PDF Action
+      // High-Res PDF Export
       document.getElementById('download').addEventListener('click', async () => {
         const cardEl = document.getElementById('card');
         if (!cardEl) return;
@@ -894,7 +941,7 @@
         }
       });
 
-      // Initial card display sync
+      // Sync initial state
       update();
     });
   </script>
