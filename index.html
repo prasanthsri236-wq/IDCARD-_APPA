@@ -77,7 +77,6 @@
       gap: 14px;
     }
 
-    /* White container behind dark/blue logos for ultra-clear visibility */
     .logo-box {
       background: #FFFFFF;
       padding: 6px 12px;
@@ -637,6 +636,14 @@
       return (str || '').toString().toLowerCase().trim();
     }
 
+    // Header normalization helper for Excel columns
+    function normalizeHeader(value) {
+      return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[\s_\-\/().]+/g, ' ');
+    }
+
     function val(id) {
       const el = document.getElementById(id);
       return el ? el.value.trim() : '';
@@ -654,22 +661,67 @@
       };
     }
 
-    // Flexible key mapping for Excel / CSV headers
+    // Robust Excel / CSV Column Mapping
     function mapRow(row) {
-      const keys = Object.keys(row);
-      const findKey = (...aliases) => {
-        const k = keys.find(key => aliases.some(alias => norm(key).includes(norm(alias))));
-        return k !== undefined ? row[k] : '';
+      const rawKeys = Object.keys(row);
+      
+      // Pre-normalize keys
+      const normalizedMap = {};
+      rawKeys.forEach(k => {
+        normalizedMap[normalizeHeader(k)] = row[k];
+      });
+
+      const findVal = (exactCandidates, partialCandidates) => {
+        // 1. Check exact candidate matches against normalized headers
+        for (const candidate of exactCandidates) {
+          const normCand = normalizeHeader(candidate);
+          if (normalizedMap[normCand] !== undefined && String(normalizedMap[normCand]).trim() !== '') {
+            return String(normalizedMap[normCand]).trim();
+          }
+        }
+        // 2. Fall back to partial matching if exact fail
+        if (partialCandidates) {
+          for (const normKey in normalizedMap) {
+            for (const part of partialCandidates) {
+              const normPart = normalizeHeader(part);
+              if (normKey.includes(normPart) && String(normalizedMap[normKey]).trim() !== '') {
+                return String(normalizedMap[normKey]).trim();
+              }
+            }
+          }
+        }
+        return '';
       };
 
       return {
-        id: findKey('student id', 'enrollment', 'id', 'reg') || '',
-        name: findKey('student name', 'name', 'full name') || '',
-        grade: findKey('grade', 'class', 'course') || '',
-        dob: findKey('date of birth', 'dob', 'birth') || '',
-        institute: findKey('institution', 'institute', 'school', 'academy') || '',
-        joining: findKey('date of joining', 'joining', 'doj') || '',
-        phone: findKey('phone', 'mobile', 'contact', 'cell') || ''
+        id: findVal(
+          ['student id', 'enrollment no', 'enrollment number', 'admission no', 'registration no', 'reg no', 'studentid', 'student_id', 'enrollment'],
+          ['student id', 'enrollment', 'reg', 'id']
+        ),
+        name: findVal(
+          ['student name', 'full name', 'student full name', 'name', 'studentname'],
+          ['student name', 'full name', 'name']
+        ),
+        grade: findVal(
+          ['grade', 'class', 'course', 'level'],
+          ['grade', 'class', 'course']
+        ),
+        dob: findVal(
+          ['date of birth', 'dob', 'birth date', 'birthdate'],
+          ['date of birth', 'dob', 'birth']
+        ),
+        institute: findVal(
+          ['name of the institution', 'institution', 'institution name', 'name of institution', 'institute', 'school', 'academy'],
+          ['institution', 'institute', 'school', 'academy']
+        ),
+        joining: findVal(
+          ['date of joining', 'doj', 'joining date', 'joining'],
+          ['date of joining', 'joining', 'doj']
+        ),
+        phone: findVal(
+          ['phone number', 'mobile number', 'contact number', 'phone no', 'mobile no', 'phone', 'mobile', 'contact', 'cell'],
+          ['phone', 'mobile', 'contact', 'cell']
+        )
       };
     }
 
@@ -774,8 +826,37 @@
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const rawJson = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
-            // Populate global student list
+            if (!rawJson || rawJson.length === 0) {
+              alert("Uploaded file is empty.");
+              return;
+            }
+
+            // Inspect and debug Excel headers
+            console.log("Excel headers:", Object.keys(rawJson[0] || {}));
+            console.log("First Excel row:", rawJson[0]);
+
+            // Map rows
             students = rawJson.map(mapRow);
+            console.log("Mapped first student:", students[0]);
+
+            const statusEl = document.getElementById('status');
+
+            // Validate mapped student data
+            const first = students[0] || {};
+            if (!first.id && !first.name) {
+              renderDropdown([]);
+              if (statusEl) {
+                statusEl.textContent = "Excel columns could not be mapped. Please check the column headings.";
+                statusEl.style.color = "#DC2626";
+              }
+              alert("Excel columns could not be mapped. Please check column headings in the console.");
+              return;
+            }
+
+            if (statusEl) {
+              statusEl.style.color = "var(--royal-blue)";
+              statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
+            }
 
             // Render all students to #studentSelect
             renderDropdown(students);
@@ -786,10 +867,6 @@
               setForm(students[0]);
             }
 
-            const statusEl = document.getElementById('status');
-            if (statusEl) {
-              statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
-            }
           } catch (err) {
             alert('Error parsing Excel/CSV file: ' + err.message);
           }
