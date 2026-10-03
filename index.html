@@ -1,648 +1,771 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Alagappa Performing Arts Academy - ID Card Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALAGAPPA PERFORMING ARTS ACADEMY - ID Card Generator</title>
+  
+  <!-- Inter Font & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<!-- External Libraries for Excel parsing, Canvas conversion, and PDF rendering -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- SheetJS & html2canvas / jsPDF dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<style>
-* { box-sizing: border-box; }
-body { 
-  margin: 0; 
-  background: #f0f3f8; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-  color: #0c2340; 
-}
-.wrap { 
-  max-width: 1250px; 
-  margin: auto; 
-  padding: 24px; 
-}
-h1 { 
-  margin: 0 0 6px; 
-  font-size: 26px; 
-  text-transform: uppercase; 
-  letter-spacing: 0.8px; 
-  color: #062d5c;
-}
-.sub { 
-  margin: 0 0 20px; 
-  color: #556987; 
-  font-size: 14px; 
-}
-.panel { 
-  background: #ffffff; 
-  border-radius: 12px; 
-  padding: 22px; 
-  margin-bottom: 20px; 
-  box-shadow: 0 4px 16px rgba(6, 45, 92, 0.06); 
-  border: 1px solid #e1e8f0;
-}
-.panel-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #062d5c;
-  margin-bottom: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.panel-title::before {
-  content: '';
-  display: inline-block;
-  width: 4px;
-  height: 16px;
-  background: #062d5c;
-  border-radius: 2px;
-}
-.grid { 
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
-  gap: 16px; 
-}
-@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  <style>
+    :root {
+      --primary-navy: #0B2545;
+      --royal-blue: #134074;
+      --accent-gold: #D4AF37;
+      --bg-light: #F4F6F9;
+      --card-bg: #FFFFFF;
+      --text-dark: #1D2A44;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(11, 37, 69, 0.08);
+    }
 
-label { 
-  display: block; 
-  font-size: 13px; 
-  font-weight: 700; 
-  margin-bottom: 6px; 
-  color: #082d5c; 
-}
-input, select, button { font: inherit; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-input[type=text], input[type=date], input[type=file] { 
-  width: 100%; 
-  padding: 11px 14px; 
-  border: 1px solid #cbd5e1; 
-  border-radius: 8px; 
-  background: #f8fafc; 
-  color: #0f172a; 
-  transition: all 0.2s ease;
-}
-input[type=text]:focus {
-  background: #ffffff;
-  border-color: #062d5c;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(6, 45, 92, 0.1);
-}
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-/* ===== PROMINENT & STYLED STUDENT DROPDOWN ===== */
-select#studentSelect {
-  width: 100%;
-  padding: 12px 14px;
-  border: 2px solid #062d5c;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #062d5c;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(6, 45, 92, 0.08);
-  transition: all 0.2s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23062d5c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 18px;
-  padding-right: 40px;
-}
-select#studentSelect:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(6, 45, 92, 0.2);
-}
-select#studentSelect option {
-  padding: 10px;
-  font-size: 14px;
-  color: #0f172a;
-}
+    /* HEADER */
+    .app-header {
+      background-color: var(--primary-navy);
+      color: #FFFFFF;
+      padding: 16px 32px;
+      border-bottom: 3px solid var(--accent-gold);
+    }
 
-.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
-button { 
-  border: 0; 
-  border-radius: 8px; 
-  padding: 12px 22px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  transition: all 0.2s ease; 
-  font-size: 14px;
-}
-.primary { background: #062d5c; color: #fff; }
-.primary:hover { background: #0a3d7c; transform: translateY(-1px); }
-.secondary { background: #e2e8f0; color: #1e293b; }
-.secondary:hover { background: #cbd5e1; }
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
 
-.status { 
-  margin-top: 14px; 
-  font-size: 13px; 
-  color: #334155; 
-  font-weight: 600; 
-  padding: 10px 14px; 
-  background: #f1f5f9; 
-  border-radius: 8px; 
-  border-left: 4px solid #062d5c; 
-}
-.hint { font-size: 12px; color: #64748b; margin-top: 5px; }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-.card-wrap { 
-  display: flex; 
-  justify-content: center; 
-  align-items: flex-start; 
-  width: 100%; 
-  overflow: hidden; 
-  padding: 10px 0; 
-}
+    .header-logo {
+      height: 58px;
+      width: auto;
+      object-fit: contain;
+    }
 
-/* ===== CARD PREVIEW CONTAINER & LAYOUT ===== */
-.card {
-    position: relative;
-    display: block;
-    width: 1024px;
-    max-width: 100%;
-    aspect-ratio: 2048/1294;
-    overflow: hidden;
-    isolation: isolate;
-    contain: paint;
-    background: #fffdf6;
-    flex: none;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-}
+    .header-title-box {
+      display: flex;
+      flex-direction: column;
+    }
 
-.card-fields {
-    left: 21% !important;
-    top: 39% !important;
-    width: 58% !important;
-    gap: 8px !important;
-    position: absolute !important;
-    z-index: 10 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    pointer-events: none !important;
-}
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
 
-.card-row {
-    grid-template-columns: 240px 20px minmax(0, 1fr) !important;
-    min-height: 28px !important;
-    font-size: 20px !important;
-    line-height: 1.25 !important;
-    display: grid !important;
-    align-items: center !important;
-    width: 100% !important;
-    font-family: "Trebuchet MS", Arial, sans-serif !important;
-    font-weight: 700 !important;
-    color: #062d5c !important;
-    white-space: nowrap !important;
-}
+    .header-subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      letter-spacing: 1px;
+    }
 
-#row-institute { font-size: 18px !important; }
+    .header-desc {
+      font-size: 0.8rem;
+      color: #94A3B8;
+      margin-top: 2px;
+    }
 
-.c-value {
-    font-size: 20px !important;
-    padding-left: 4px !important;
-    display: block !important;
-    text-align: left !important;
-    min-width: 0 !important;
-    color: #062d5c !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
 
-.c-label { display: block !important; text-align: left !important; }
-.c-colon { display: block !important; text-align: center !important; }
-.c-value:empty { visibility: hidden !important; }
+    .status-badge {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-@media (max-width: 750px) {
+    /* MAIN CONTENT */
+    .main-content {
+      max-width: 1400px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card-section {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+      padding-left: 12px;
+      border-left: 4px solid var(--primary-navy);
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* SELECTION SECTION GRID */
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group label i {
+      color: var(--royal-blue);
+    }
+
+    .form-control, .file-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: #FFFFFF;
+      color: var(--text-dark);
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--royal-blue);
+      box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.1);
+    }
+
+    .file-input {
+      padding: 7px 10px;
+      font-size: 0.8rem;
+      background-color: #F8FAFC;
+      cursor: pointer;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%3C0B2545' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      appearance: none;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .status-message {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--royal-blue);
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-navy);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--royal-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: #E2E8F0;
+      color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+      background-color: #CBD5E1;
+    }
+
+    .btn-large {
+      padding: 14px 28px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    /* LIVE CARD PREVIEW SECTION */
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-preview-wrapper {
+      background-color: #E2E8F0;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      border: 1px dashed #CBD5E1;
+    }
+
+    /* ID CARD OVERLAY AND LAYOUT */
+    .id-card {
+      position: relative;
+      width: 500px;
+      height: 315px;
+      background-color: #FFFFFF;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      z-index: 1;
+    }
+
     .card-fields {
-        left: 21% !important;
-        top: 39% !important;
-        width: 58% !important;
-        gap: 5px !important;
+      position: absolute;
+      top: 36%;
+      left: 56.5%;
+      width: 38%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 2;
     }
-    .card-row {
-        grid-template-columns: 110px 12px minmax(0, 1fr) !important;
-        min-height: 18px !important;
-        font-size: 11px !important;
-    }
-    .c-value { font-size: 11px !important; }
-    #row-institute { font-size: 10px !important; }
-}
 
-.card-background {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
-    user-select: none !important;
-    object-fit: cover;
-}
-</style>
+    .field-row {
+      height: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    .field-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0F2A4A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .download-actions {
+      margin-top: 20px;
+    }
+
+    /* FOOTER */
+    .app-footer {
+      background-color: #07172C;
+      color: #94A3B8;
+      padding: 16px 32px;
+      border-top: 1px solid #1E293B;
+      margin-top: auto;
+    }
+
+    .footer-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .footer-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-title {
+      color: #E2E8F0;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .footer-sub {
+      font-size: 0.725rem;
+      color: #64748B;
+    }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 1024px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .header-right {
+        align-self: flex-start;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-preview-wrapper {
+        overflow-x: auto;
+      }
+
+      .id-card {
+        transform: scale(0.85);
+        transform-origin: center center;
+      }
+
+      .footer-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="wrap">
-  <h1>ALAGAPPA PERFORMING ARTS ACADEMY ID CARD GENERATOR</h1>
-  <p class="sub">Upload Excel/CSV records, search or select any student from the dropdown, edit details, and export print-ready PDFs.</p>
-
-  <!-- STUDENT DATA & SELECTION PANEL -->
-  <div class="panel">
-    <div class="panel-title">STUDENT DATA & SELECTION</div>
-    
-    <div class="grid">
-      <div>
-        <label for="file">1. Excel / CSV File Upload</label>
-        <input id="file" type="file" accept=".xlsx,.xls,.csv">
-        <div class="hint">Upload student records sheet to populate student database.</div>
-      </div>
-      <div>
-        <label for="bgUpload">2. Upload Card Background (card-bg.png)</label>
-        <input id="bgUpload" type="file" accept="image/*">
-        <div class="hint">Select template image to set background overlay.</div>
-      </div>
-    </div>
-
-    <div style="margin-top: 16px;">
-      <label for="search">3. Search Student</label>
-      <input id="search" type="text" placeholder="🔍 Search by ID, Name, Grade, or Phone Number...">
-    </div>
-
-    <div style="margin-top: 16px;">
-      <label for="studentSelect">4. Select Student</label>
-      <select id="studentSelect">
-        <option value="">-- Upload Excel/CSV or select a student from dropdown --</option>
-      </select>
-      <div class="hint">Select any student to automatically fill form fields and update the live card preview below.</div>
-    </div>
-
-    <div id="status" class="status">Ready. Select a student from the dropdown or upload an Excel file to start.</div>
-  </div>
-
-  <!-- EDITABLE FORM DETAILS -->
-  <div class="panel">
-    <div class="panel-title">STUDENT DETAILS FORM</div>
-    <div class="grid">
-      <div><label for="id">Student ID / Enrollment No.</label><input id="id" type="text" placeholder="e.g. ALGBIN0001"></div>
-      <div><label for="name">Name</label><input id="name" type="text" placeholder="Student Full Name"></div>
-      <div><label for="grade">Grade</label><input id="grade" type="text" placeholder="e.g. Grade 5"></div>
-      <div><label for="dob">Date of Birth</label><input id="dob" type="text" placeholder="DD/MM/YYYY"></div>
-      <div><label for="institute">Name of the Institution</label><input id="institute" type="text" placeholder="e.g. Alagappa Arts School"></div>
-      <div><label for="joining">Date of Joining</label><input id="joining" type="text" value="Aug 2026" placeholder="Aug 2026"></div>
-      <div><label for="phone">Phone / Mobile No.</label><input id="phone" type="text" placeholder="e.g. 9876543210"></div>
-    </div>
-    
-    <div class="actions">
-      <button class="primary" id="download">Download High-Res PDF</button>
-      <button class="secondary" id="clear">Clear Fields</button>
-    </div>
-  </div>
-
-  <!-- CARD PREVIEW DISPLAY -->
-  <div class="panel">
-    <div class="panel-title">ID CARD PREVIEW</div>
-    <div class="card-wrap">
-      <div class="card" id="card">
-        <img class="card-background" id="cardBgImg" alt="ID Card Background" src="card-bg.png" onerror="this.style.background='#fffdf6'">
-        
-        <div class="card-fields" aria-label="Student information">
-          <div class="card-row" id="row-id">
-            <span class="c-label">Student ID</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vId"></span>
-          </div>
-          <div class="card-row" id="row-name">
-            <span class="c-label">Name</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vName"></span>
-          </div>
-          <div class="card-row" id="row-grade">
-            <span class="c-label">Grade</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vGrade"></span>
-          </div>
-          <div class="card-row" id="row-dob">
-            <span class="c-label">Date of Birth</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vDob"></span>
-          </div>
-          <div class="card-row" id="row-institute">
-            <span class="c-label">Name of the Institution</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vInstitute"></span>
-          </div>
-          <div class="card-row" id="row-joining">
-            <span class="c-label">Date of Joining</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vJoining"></span>
-          </div>
-          <div class="card-row" id="row-phone">
-            <span class="c-label">Phone Number</span>
-            <span class="c-colon">:</span>
-            <span class="c-value" id="vPhone"></span>
-          </div>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="header-logo" />
+        <div class="header-title-box">
+          <h1 class="header-title">ALAGAPPA PERFORMING ARTS ACADEMY</h1>
+          <h2 class="header-subtitle">ID CARD GENERATOR</h2>
+          <p class="header-desc">Student ID Card Management System</p>
         </div>
       </div>
+      <div class="header-right">
+        <span class="status-badge"><i class="fa-solid fa-circle-check"></i> READY</span>
+      </div>
     </div>
-  </div>
-</div>
+  </header>
 
-<script>
-const $ = id => document.getElementById(id);
-let students = [];
-const fields = ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'];
+  <!-- MAIN CONTAINER -->
+  <main class="main-content">
 
-/* Utility to convert uploaded background file into base64 data URL */
-function loadFileAsDataURL(file, callback) {
-  const reader = new FileReader();
-  reader.onload = e => callback(e.target.result);
-  reader.readAsDataURL(file);
-}
+    <!-- SECTION 1: STUDENT DATA & SELECTION -->
+    <section class="card-section">
+      <h2 class="section-title">1. STUDENT DATA & SELECTION</h2>
+      <div class="selection-grid">
+        <div class="form-group">
+          <label for="file"><i class="fa-solid fa-file-excel"></i> Excel / CSV File Upload</label>
+          <input type="file" id="file" accept=".xlsx, .xls, .csv" class="file-input" />
+        </div>
+        
+        <div class="form-group">
+          <label for="bgUpload"><i class="fa-solid fa-image"></i> Upload Card Background</label>
+          <input type="file" id="bgUpload" accept="image/*" class="file-input" />
+        </div>
 
-$('bgUpload').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  loadFileAsDataURL(file, dataUrl => {
-    $('cardBgImg').src = dataUrl;
-    $('status').textContent = 'Background image loaded successfully into card template.';
-  });
-});
+        <div class="form-group">
+          <label for="search"><i class="fa-solid fa-magnifying-glass"></i> Search Student</label>
+          <input type="text" id="search" placeholder="Search by ID, Name, Grade, Phone, Institution..." class="form-control" />
+        </div>
 
-/* Normalize text for case-insensitive matching */
-function norm(v) {
-  return String(v || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+        <div class="form-group">
+          <label for="studentSelect"><i class="fa-solid fa-user-check"></i> Select Student</label>
+          <select id="studentSelect" class="form-control">
+            <option value="">-- Select Student --</option>
+          </select>
+        </div>
+      </div>
+      <div id="status" class="status-message"></div>
+    </section>
 
-/* Dynamic column value lookup for flexible header matching */
-function val(row, names) {
-  const keys = Object.keys(row || {});
-  for (let i = 0; i < names.length; i++) {
-    const targetNorm = norm(names[i]);
-    for (let j = 0; j < keys.length; j++) {
-      if (norm(keys[j]) === targetNorm) {
-        const value = row[keys[j]];
-        if (value !== undefined && value !== null && String(value).trim() !== '') {
-          return String(value).trim();
+    <!-- TWO-COLUMN WORKSPACE -->
+    <div class="workspace-grid">
+
+      <!-- SECTION 2: STUDENT DETAILS FORM -->
+      <section class="card-section">
+        <h2 class="section-title">2. STUDENT DETAILS FORM</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="id">Student ID / Enrollment No.</label>
+            <input type="text" id="id" class="form-control" placeholder="e.g. ALGBIN0001" />
+          </div>
+
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" class="form-control" placeholder="e.g. RIYANSHIKA THATIPARTHI" />
+          </div>
+
+          <div class="form-group">
+            <label for="grade">Grade</label>
+            <input type="text" id="grade" class="form-control" placeholder="e.g. Grade 1" />
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="text" id="dob" class="form-control" placeholder="DD/MM/YYYY" />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="institute">Name of the Institution</label>
+            <input type="text" id="institute" class="form-control" placeholder="Institution Name" />
+          </div>
+
+          <div class="form-group">
+            <label for="joining">Date of Joining</label>
+            <input type="text" id="joining" class="form-control" placeholder="MMM YYYY" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone / Mobile No.</label>
+            <input type="text" id="phone" class="form-control" placeholder="Mobile Number" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="clear" class="btn btn-secondary">
+            <i class="fa-solid fa-rotate-left"></i> Clear Fields
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 3: LIVE CARD PREVIEW -->
+      <section class="card-section preview-section">
+        <h2 class="section-title">3. LIVE CARD PREVIEW</h2>
+        
+        <div class="card-preview-wrapper">
+          <div id="card" class="id-card">
+            <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
+            
+            <div class="card-fields">
+              <div class="field-row"><span id="vId" class="field-val"></span></div>
+              <div class="field-row"><span id="vName" class="field-val"></span></div>
+              <div class="field-row"><span id="vGrade" class="field-val"></span></div>
+              <div class="field-row"><span id="vDob" class="field-val"></span></div>
+              <div class="field-row"><span id="vInstitute" class="field-val"></span></div>
+              <div class="field-row"><span id="vJoining" class="field-val"></span></div>
+              <div class="field-row"><span id="vPhone" class="field-val"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="download-actions">
+          <button type="button" id="download" class="btn btn-primary btn-large">
+            <i class="fa-solid fa-file-pdf"></i> Download High-Res PDF
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <img src="./logo2%20-%20Copy.png" alt="APAA Secondary Logo" class="footer-logo" />
+      <div class="footer-info">
+        <div class="footer-title">ALAGAPPA PERFORMING ARTS ACADEMY</div>
+        <div class="footer-sub">Student ID Card Management System</div>
+      </div>
+      <div class="footer-copy">&copy; 2026</div>
+    </div>
+  </footer>
+
+  <script>
+    // State variables
+    let students = [];
+
+    // Helper functions as per spec
+    function norm(str) {
+      return (str || '').toString().toLowerCase().trim();
+    }
+
+    function val(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
+    function current() {
+      return {
+        id: val('id'),
+        name: val('name'),
+        grade: val('grade'),
+        dob: val('dob'),
+        institute: val('institute'),
+        joining: val('joining'),
+        phone: val('phone')
+      };
+    }
+
+    function mapRow(row) {
+      const keys = Object.keys(row);
+      const findKey = (...aliases) => {
+        const k = keys.find(key => aliases.some(alias => norm(key).includes(norm(alias))));
+        return k ? row[k] : '';
+      };
+
+      return {
+        id: findKey('student id', 'enrollment', 'id') || '',
+        name: findKey('name', 'student name') || '',
+        grade: findKey('grade', 'class') || '',
+        dob: findKey('date of birth', 'dob', 'birth') || '',
+        institute: findKey('institution', 'institute', 'school') || '',
+        joining: findKey('date of joining', 'joining') || '',
+        phone: findKey('phone', 'mobile', 'contact') || ''
+      };
+    }
+
+    function setForm(data = {}) {
+      document.getElementById('id').value = data.id || '';
+      document.getElementById('name').value = data.name || '';
+      document.getElementById('grade').value = data.grade || '';
+      document.getElementById('dob').value = data.dob || '';
+      document.getElementById('institute').value = data.institute || '';
+      document.getElementById('joining').value = data.joining || '';
+      document.getElementById('phone').value = data.phone || '';
+      update();
+    }
+
+    function update() {
+      const cur = current();
+      document.getElementById('vId').textContent = cur.id;
+      document.getElementById('vName').textContent = cur.name;
+      document.getElementById('vGrade').textContent = cur.grade;
+      document.getElementById('vDob').textContent = cur.dob;
+      document.getElementById('vInstitute').textContent = cur.institute;
+      document.getElementById('vJoining').textContent = cur.joining;
+      document.getElementById('vPhone').textContent = cur.phone;
+    }
+
+    function renderDropdown(filteredStudents = students) {
+      const select = document.getElementById('studentSelect');
+      select.innerHTML = '<option value="">-- Select Student --</option>';
+
+      filteredStudents.forEach((student, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${student.id} — ${student.name}`;
+        select.appendChild(option);
+      });
+    }
+
+    function filterStudents() {
+      const q = norm(document.getElementById('search').value);
+      if (!q) {
+        renderDropdown(students);
+        return;
+      }
+
+      const filtered = students.filter(s => 
+        norm(s.id).includes(q) ||
+        norm(s.name).includes(q) ||
+        norm(s.grade).includes(q) ||
+        norm(s.phone).includes(q) ||
+        norm(s.institute).includes(q)
+      );
+
+      renderDropdown(filtered);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'].forEach(fieldId => {
+        const el = document.getElementById(fieldId);
+        if (el) {
+          el.addEventListener('input', update);
         }
-      }
-    }
-  }
-  return '';
-}
+      });
 
-function dateText(v) {
-  if (v instanceof Date && !isNaN(v)) return v.toLocaleDateString('en-GB');
-  if (typeof v === 'number' && window.XLSX) {
-    const d = XLSX.SSF.parse_date_code(v);
-    if (d) return String(d.d).padStart(2, '0') + '/' + String(d.m).padStart(2, '0') + '/' + d.y;
-  }
-  return String(v || '').trim();
-}
+      document.getElementById('file').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-function mapRow(r, idx) {
-  let id = val(r, ['ENROLLMENT NO', 'ENROLLMENTNO', 'ENROLLMENT NO.', 'STUDENT ID', 'STUDENTID', 'ID', 'SL NO', 'S.NO', 'NO']);
-  if (!id) id = 'ALGBIN' + String(idx + 1).padStart(4, '0');
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rawJson = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
-  return {
-    id: id,
-    name: val(r, ['NAME', 'STUDENT NAME', 'STUDENTNAME', 'CANDIDATE NAME']),
-    grade: val(r, ['GRADE', 'CLASS', 'LEVEL']),
-    dob: dateText(val(r, ['DATE OF BIRTH', 'DOB', 'DATEOFBIRTH', 'BIRTH DATE'])),
-    institute: val(r, ['NAME OF THE INSTITUTE', 'INSTITUTE NAME', 'INSTITUTE', 'INSTITUTION NAME', 'NAME OF THE INSTITUTION']),
-    joining: dateText(val(r, ['DATE OF JOINING', 'JOINING DATE', 'DATEOFJOINING'])) || 'Aug 2026',
-    phone: val(r, ['MOBILE NO', 'MOBILE', 'PHONE NUMBER', 'PHONE', 'CONTACT NUMBER'])
-  };
-}
+            students = rawJson.map(mapRow);
+            renderDropdown(students);
 
-/* Set form field values */
-function setForm(s) {
-  if (!s) return;
-  $('id').value = s.id || '';
-  $('name').value = s.name || '';
-  $('grade').value = s.grade || '';
-  $('dob').value = s.dob || '';
-  $('institute').value = s.institute || '';
-  $('joining').value = s.joining || 'Aug 2026';
-  $('phone').value = s.phone || '';
-  update();
-}
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+              statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
+            }
+          } catch (err) {
+            alert('Error parsing Excel/CSV file: ' + err.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
 
-/* Retrieve current values from form */
-function current() {
-  return {
-    id: $('id').value.trim(),
-    name: $('name').value.trim(),
-    grade: $('grade').value.trim(),
-    dob: $('dob').value.trim(),
-    institute: $('institute').value.trim(),
-    joining: $('joining').value.trim(),
-    phone: $('phone').value.trim()
-  };
-}
-
-const cardValueEls = Object.freeze({
-  vId: $('vId'),
-  vName: $('vName'),
-  vGrade: $('vGrade'),
-  vDob: $('vDob'),
-  vInstitute: $('vInstitute'),
-  vJoining: $('vJoining'),
-  vPhone: $('vPhone')
-});
-
-/* Synchronize live card display elements */
-function update() {
-  const s = current();
-  cardValueEls.vId.textContent = s.id;
-  cardValueEls.vName.textContent = s.name;
-  cardValueEls.vGrade.textContent = s.grade;
-  cardValueEls.vDob.textContent = s.dob;
-  cardValueEls.vInstitute.textContent = s.institute;
-  cardValueEls.vJoining.textContent = s.joining;
-  if (cardValueEls.vPhone) cardValueEls.vPhone.textContent = s.phone;
-}
-
-fields.forEach(f => $(f).addEventListener('input', update));
-
-$('clear').onclick = () => {
-  fields.forEach(f => { if (f !== 'joining') $(f).value = ''; });
-  $('joining').value = 'Aug 2026';
-  $('status').textContent = 'Cleared form inputs.';
-  update();
-};
-
-/* Populate the select dropdown with a list of students */
-function renderDropdown(list) {
-  const sel = $('studentSelect');
-  sel.innerHTML = '';
-  
-  if (!list || !list.length) {
-    const o = document.createElement('option');
-    o.value = '';
-    o.textContent = '-- No matching student found --';
-    sel.appendChild(o);
-    sel._list = [];
-    return;
-  }
-
-  list.forEach((s, idx) => {
-    const o = document.createElement('option');
-    o.value = idx;
-    // Format strictly required: [STUDENT_ID] — [STUDENT_NAME]
-    o.textContent = (s.id || 'No ID') + ' — ' + (s.name || 'Unnamed Student');
-    sel.appendChild(o);
-  });
-
-  sel._list = list;
-}
-
-/* Live Student Search Filter */
-$('search').addEventListener('input', () => {
-  const q = norm($('search').value);
-  const list = students.filter(s => 
-    !q || 
-    norm(s.id).includes(q) || 
-    norm(s.name).includes(q) || 
-    norm(s.phone).includes(q) || 
-    norm(s.grade).includes(q) ||
-    norm(s.institute).includes(q)
-  );
-
-  renderDropdown(list);
-  if (list.length > 0) {
-    $('studentSelect').selectedIndex = 0;
-    setForm(list[0]);
-  }
-});
-
-/* Student Selection Dropdown event listener */
-$('studentSelect').addEventListener('change', () => {
-  const list = $('studentSelect')._list || students;
-  const idx = parseInt($('studentSelect').value, 10);
-  if (!isNaN(idx) && list[idx]) {
-    setForm(list[idx]);
-    $('status').textContent = 'Selected: ' + (list[idx].id || '') + ' — ' + (list[idx].name || '');
-  }
-});
-
-/* Excel / CSV File Parsing Logic */
-$('file').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  $('status').textContent = 'Parsing file: ' + file.name + '...';
-  
-  if (!window.XLSX) {
-    $('status').textContent = 'Error: SheetJS (xlsx) library not loaded.';
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array', cellDates: true });
-      if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('No valid sheet found');
-      
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
-
-      let hi = -1;
-      for (let i = 0; i < Math.min(matrix.length, 40); i++) {
-        const rowStr = matrix[i].map(norm).join(' ');
-        if (rowStr.includes('name') && (rowStr.includes('enrollment') || rowStr.includes('grade') || rowStr.includes('mobile') || rowStr.includes('sno'))) {
-          hi = i;
-          break;
+      document.getElementById('studentSelect').addEventListener('change', (e) => {
+        const idx = e.target.value;
+        if (idx !== '' && students[idx]) {
+          setForm(students[idx]);
         }
-      }
-      if (hi < 0) hi = 0;
+      });
 
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true, range: hi });
-      students = rows.map(mapRow).filter(s => s.name && norm(s.name) !== 'name');
+      document.getElementById('search').addEventListener('input', filterStudents);
 
-      renderDropdown(students);
+      document.getElementById('bgUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            document.getElementById('cardBgImg').src = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
 
-      if (students.length > 0) {
-        $('studentSelect').selectedIndex = 0;
-        setForm(students[0]);
-        $('status').textContent = 'Loaded ' + students.length + ' student records from ' + file.name + '.';
-      } else {
-        $('status').textContent = 'No valid student records found in file.';
-      }
-    } catch (err) {
-      console.error(err);
-      $('status').textContent = 'File parsing failed: ' + err.message;
-    }
-  };
-  reader.readAsArrayBuffer(file);
-});
+      document.getElementById('clear').addEventListener('click', () => {
+        setForm({});
+        document.getElementById('studentSelect').value = '';
+        document.getElementById('search').value = '';
+        renderDropdown(students);
+      });
 
-/* Single High-Resolution PDF Export Function */
-const generatePDF = async () => {
-  const card = $('card');
-  const s = current();
+      document.getElementById('download').addEventListener('click', async () => {
+        const cardEl = document.getElementById('card');
+        if (!cardEl) return;
 
-  if (!s.id && !s.name) {
-    alert('Please select or enter student details first.');
-    return;
-  }
+        try {
+          const canvas = await html2canvas(cardEl, {
+            scale: 3,
+            useCORS: true,
+            logging: false
+          });
 
-  try {
-    $('status').textContent = 'Generating PDF... Please wait.';
-    await new Promise(resolve => setTimeout(resolve, 200));
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: [85.6, 53.98]
+          });
 
-    const canvas = await html2canvas(card, {
-      scale: 4,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#fffdf6',
-      logging: false,
-      imageTimeout: 15000,
-      removeContainer: true
+          pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
+          const studentId = val('id') || 'student';
+          pdf.save(`${studentId}_ID_Card.pdf`);
+        } catch (err) {
+          alert('Failed to generate PDF: ' + err.message);
+        }
+      });
+
+      update();
     });
-
-    if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      throw new Error('Canvas rendering produced an empty image');
-    }
-
-    const imageData = canvas.toDataURL('image/png', 1.0);
-    const { jsPDF } = window.jspdf;
-
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: [101.6, 63.8],
-      compress: false
-    });
-
-    pdf.addImage(imageData, 'PNG', 0, 0, 101.6, 63.8, undefined, 'FAST');
-
-    const filename = (s.name || s.id || 'Student').replace(/[^a-z0-9_-]+/gi, '_');
-    pdf.save('Student_ID_Card_' + filename + '.pdf');
-
-    $('status').textContent = 'Downloaded PDF for ' + (s.name || s.id) + ' successfully.';
-  } catch (error) {
-    console.error('PDF Generation Error:', error);
-    $('status').textContent = 'PDF generation failed.';
-    alert('Unable to generate PDF.\n\n' + error.message);
-  }
-};
-
-$('download').onclick = () => generatePDF();
-
-/* Initialize live display on load */
-update();
-</script>
+  </script>
 </body>
 </html>
