@@ -48,7 +48,7 @@
       flex-direction: column;
     }
 
-    /* HEADER */
+    /* HEADER & BOTH LOGOS VISIBILITY */
     .app-header {
       background-color: var(--primary-navy);
       color: #FFFFFF;
@@ -68,11 +68,34 @@
     .header-left {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
     }
 
-    .header-logo {
+    .logos-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* White container behind dark/blue logos for ultra-clear visibility */
+    .logo-box {
+      background: #FFFFFF;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-logo-apaa {
       height: 58px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .header-logo-sec {
+      height: 52px;
       width: auto;
       object-fit: contain;
     }
@@ -80,6 +103,7 @@
     .header-title-box {
       display: flex;
       flex-direction: column;
+      margin-left: 8px;
     }
 
     .header-title {
@@ -215,13 +239,33 @@
       cursor: pointer;
     }
 
-    select.form-control {
+    /* DROPDOWN STYLING & HIGH VISIBILITY */
+    select#studentSelect {
+      width: 100%;
+      min-height: 46px;
+      font-size: 15px;
+      padding: 10px 14px;
       cursor: pointer;
+      background-color: #FFFFFF;
+      color: #0c2340;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%3C0B2545' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       padding-right: 36px;
       appearance: none;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      display: block !important;
+    }
+
+    select#studentSelect option {
+      color: #0c2340;
+      background-color: #ffffff;
+      font-size: 14px;
+      padding: 8px;
     }
 
     .form-grid {
@@ -239,7 +283,7 @@
     .status-message {
       margin-top: 12px;
       font-size: 0.85rem;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--royal-blue);
     }
 
@@ -437,11 +481,16 @@
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- HEADER WITH BOTH LOGOS CLEARLY VISIBLE -->
   <header class="app-header">
     <div class="header-container">
       <div class="header-left">
-        <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="header-logo" />
+        <div class="logos-container">
+          <div class="logo-box">
+            <img src="./APAA_blue%20logo.png" alt="APAA Blue Logo" class="header-logo-apaa" />
+          </div>
+          <img src="./logo2%20-%20Copy.png" alt="APAA Secondary Logo" class="header-logo-sec" />
+        </div>
         <div class="header-title-box">
           <h1 class="header-title">ALAGAPPA PERFORMING ARTS ACADEMY</h1>
           <h2 class="header-subtitle">ID CARD GENERATOR</h2>
@@ -478,7 +527,7 @@
 
         <div class="form-group">
           <label for="studentSelect"><i class="fa-solid fa-user-check"></i> Select Student</label>
-          <select id="studentSelect" class="form-control">
+          <select id="studentSelect">
             <option value="">-- Select Student --</option>
           </select>
         </div>
@@ -580,10 +629,10 @@
   </footer>
 
   <script>
-    // State variables
+    // Global state variables
     let students = [];
 
-    // Helper functions as per spec
+    // Helper utilities
     function norm(str) {
       return (str || '').toString().toLowerCase().trim();
     }
@@ -605,21 +654,22 @@
       };
     }
 
+    // Flexible key mapping for Excel / CSV headers
     function mapRow(row) {
       const keys = Object.keys(row);
       const findKey = (...aliases) => {
         const k = keys.find(key => aliases.some(alias => norm(key).includes(norm(alias))));
-        return k ? row[k] : '';
+        return k !== undefined ? row[k] : '';
       };
 
       return {
-        id: findKey('student id', 'enrollment', 'id') || '',
-        name: findKey('name', 'student name') || '',
-        grade: findKey('grade', 'class') || '',
+        id: findKey('student id', 'enrollment', 'id', 'reg') || '',
+        name: findKey('student name', 'name', 'full name') || '',
+        grade: findKey('grade', 'class', 'course') || '',
         dob: findKey('date of birth', 'dob', 'birth') || '',
-        institute: findKey('institution', 'institute', 'school') || '',
-        joining: findKey('date of joining', 'joining') || '',
-        phone: findKey('phone', 'mobile', 'contact') || ''
+        institute: findKey('institution', 'institute', 'school', 'academy') || '',
+        joining: findKey('date of joining', 'joining', 'doj') || '',
+        phone: findKey('phone', 'mobile', 'contact', 'cell') || ''
       };
     }
 
@@ -645,22 +695,43 @@
       document.getElementById('vPhone').textContent = cur.phone;
     }
 
-    function renderDropdown(filteredStudents = students) {
-      const select = document.getElementById('studentSelect');
-      select.innerHTML = '<option value="">-- Select Student --</option>';
+    // REQUIRED renderDropdown FUNCTION
+    function renderDropdown(list) {
+      const sel = document.getElementById('studentSelect');
+      sel.innerHTML = '';
 
-      filteredStudents.forEach((student, index) => {
+      if (!list || !list.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '-- No students found --';
+        sel.appendChild(option);
+        sel._list = [];
+        return;
+      }
+
+      list.forEach((student, index) => {
         const option = document.createElement('option');
         option.value = index;
-        option.textContent = `${student.id} — ${student.name}`;
-        select.appendChild(option);
+        option.textContent =
+          (student.id || 'No ID') +
+          ' — ' +
+          (student.name || 'Unnamed Student');
+
+        sel.appendChild(option);
       });
+
+      sel._list = list;
     }
 
+    // Search Filtering Function
     function filterStudents() {
       const q = norm(document.getElementById('search').value);
       if (!q) {
         renderDropdown(students);
+        if (students.length > 0) {
+          document.getElementById('studentSelect').selectedIndex = 0;
+          setForm(students[0]);
+        }
         return;
       }
 
@@ -673,9 +744,16 @@
       );
 
       renderDropdown(filtered);
+      if (filtered.length > 0) {
+        document.getElementById('studentSelect').selectedIndex = 0;
+        setForm(filtered[0]);
+      } else {
+        setForm({});
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Form Input Dynamic Card Update
       ['id', 'name', 'grade', 'dob', 'institute', 'joining', 'phone'].forEach(fieldId => {
         const el = document.getElementById(fieldId);
         if (el) {
@@ -683,6 +761,7 @@
         }
       });
 
+      // Excel / CSV Parse Sequence
       document.getElementById('file').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -695,8 +774,17 @@
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const rawJson = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
+            // Populate global student list
             students = rawJson.map(mapRow);
+
+            // Render all students to #studentSelect
             renderDropdown(students);
+
+            // Select first student and set form
+            if (students.length > 0) {
+              document.getElementById('studentSelect').selectedIndex = 0;
+              setForm(students[0]);
+            }
 
             const statusEl = document.getElementById('status');
             if (statusEl) {
@@ -709,15 +797,21 @@
         reader.readAsArrayBuffer(file);
       });
 
+      // Student Dropdown Change Event
       document.getElementById('studentSelect').addEventListener('change', (e) => {
-        const idx = e.target.value;
-        if (idx !== '' && students[idx]) {
-          setForm(students[idx]);
+        const sel = e.target;
+        const currentList = sel._list || students;
+        const idx = sel.value;
+
+        if (idx !== '' && currentList[idx]) {
+          setForm(currentList[idx]);
         }
       });
 
+      // Search Event Listener
       document.getElementById('search').addEventListener('input', filterStudents);
 
+      // Card Background Image Upload
       document.getElementById('bgUpload').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -729,6 +823,7 @@
         }
       });
 
+      // Clear Form Event Listener
       document.getElementById('clear').addEventListener('click', () => {
         setForm({});
         document.getElementById('studentSelect').value = '';
@@ -736,6 +831,7 @@
         renderDropdown(students);
       });
 
+      // Download High-Res PDF Action
       document.getElementById('download').addEventListener('click', async () => {
         const cardEl = document.getElementById('card');
         if (!cardEl) return;
@@ -764,6 +860,7 @@
         }
       });
 
+      // Initial card display sync
       update();
     });
   </script>
