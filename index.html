@@ -344,7 +344,7 @@
       border: 1px dashed #CBD5E1;
     }
 
-    /* --- CLEAN, SINGLE-INSTANCE ID CARD TEMPLATE --- */
+    /* ID CARD OVERLAY & EXACT POSITIONING */
     .id-card {
       position: relative;
       width: 500px;
@@ -353,10 +353,6 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       border-radius: 8px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 8px 12px 6px 12px;
     }
 
     .card-bg {
@@ -369,156 +365,53 @@
       z-index: 1;
     }
 
-    /* CARD HEADER */
-    .card-header-inner {
-      position: relative;
+    /* CARD FIELDS CONTAINER PERFECTLY POSITIONED OVER BACKGROUND */
+    .card-fields {
+      position: absolute;
+      top: 44%;
+      left: 17%;
+      width: 54%;
       z-index: 2;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding-bottom: 3px;
-      border-bottom: 1.5px solid rgba(212, 175, 55, 0.4);
-    }
-
-    .card-logo-left {
-      height: 32px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    .card-logo-right {
-      height: 28px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    .card-header-text {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .card-org-name {
-      font-size: 9.5px;
-      font-weight: 800;
-      color: #0B2545;
-      letter-spacing: 0.3px;
-      line-height: 1.1;
-    }
-
-    .card-uni-text {
-      font-size: 7px;
-      font-weight: 700;
-      color: #134074;
-      margin-top: 1px;
-      letter-spacing: 0.2px;
-    }
-
-    /* CARD TITLE BANNER */
-    .card-title-banner {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      margin: 2px 0;
-    }
-
-    .gold-plaque {
-      background: linear-gradient(135deg, #FDF0CD 0%, #D4AF37 50%, #9C7820 100%);
-      color: #0B2545;
-      font-size: 9.5px;
-      font-weight: 800;
-      padding: 2px 12px;
-      border-radius: 3px;
-      display: inline-block;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      border: 1px solid #B8860B;
-      letter-spacing: 0.8px;
-    }
-
-    .card-sub-title {
-      font-size: 7.5px;
-      font-weight: 800;
-      color: #0B2545;
-      margin-top: 1px;
-      letter-spacing: 0.6px;
-    }
-
-    /* CARD BODY CONTENT */
-    .card-body-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5px;
-      padding: 0 4px;
-      max-width: 350px;
+      gap: 3.5px;
     }
 
     .field-row {
       display: grid;
-      grid-template-columns: 36% 4% 60%;
-      align-items: flex-start;
+      grid-template-columns: 38% 6% 56%;
+      align-items: center;
       width: 100%;
-      min-height: 13px;
-      line-height: 1.1;
+      min-height: 17px;
+      line-height: 1.15;
+      text-align: center;
     }
 
     .field-label {
-      font-size: 8px;
+      font-size: 9.5px;
       font-weight: 700;
-      color: #0B2545;
+      color: #0F2A4A;
       text-align: right;
-      padding-right: 4px;
       white-space: nowrap;
+      padding-right: 4px;
     }
 
     .field-colon {
-      font-size: 8px;
+      font-size: 9.5px;
       font-weight: 700;
-      color: #0B2545;
+      color: #0F2A4A;
       text-align: center;
     }
 
     .field-val {
-      font-size: 8px;
+      font-size: 9.5px;
       font-weight: 700;
-      color: #1D2A44;
+      color: #0F2A4A;
       text-align: left;
       white-space: normal;
       overflow-wrap: break-word;
       word-break: break-word;
-    }
-
-    #vInstitute {
-      font-size: 8px;
-      line-height: 1.05;
-      display: block;
-      max-height: 26px;
-      overflow: hidden;
-    }
-
-    /* CARD SIGNATURE AREA */
-    .card-signature-area {
-      position: absolute;
-      right: 12px;
-      bottom: 6px;
-      z-index: 2;
-      text-align: center;
-      width: 105px;
-    }
-
-    .sig-line {
-      border-top: 1px solid #0B2545;
-      margin-bottom: 1.5px;
-      width: 100%;
-    }
-
-    .sig-label {
-      font-size: 6px;
-      font-weight: 700;
-      color: #0B2545;
-      letter-spacing: 0.4px;
     }
 
     .download-actions {
@@ -722,24 +615,7 @@
           <div id="card" class="id-card">
             <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
             
-            <!-- Professional ID Card Header (Single Instance) -->
-            <div class="card-header-inner">
-              <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="card-logo-left" />
-              <div class="card-header-text">
-                <div class="card-org-name">ALAGAPPA PERFORMING ARTS ACADEMY</div>
-                <div class="card-uni-text">In Collaboration with Alagappa University</div>
-              </div>
-              <img src="./logo2%20-%20Copy.png" alt="University Emblem" class="card-logo-right" />
-            </div>
-
-            <!-- Title Banner (Single Instance) -->
-            <div class="card-title-banner">
-              <div class="gold-plaque">GRADE EXAMINATION</div>
-              <div class="card-sub-title">STUDENT ID CARD</div>
-            </div>
-
-            <!-- Student Details Body Content (All 7 Fields) -->
-            <div class="card-body-content">
+            <div class="card-fields">
               <div class="field-row">
                 <span class="field-label">Student ID</span>
                 <span class="field-colon">:</span>
@@ -782,13 +658,6 @@
                 <span id="vPhone" class="field-val"></span>
               </div>
             </div>
-
-            <!-- Signature Area (Single Instance) -->
-            <div class="card-signature-area">
-              <div class="sig-line"></div>
-              <div class="sig-label">AUTHORISED SIGNATURE</div>
-            </div>
-
           </div>
         </div>
 
@@ -819,7 +688,6 @@
     // Global state variables
     let students = [];
 
-    // Month Names array for formatting
     const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // Helper utilities
@@ -831,7 +699,6 @@
       return (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').trim();
     }
 
-    // Robust Date Parsing for Date of Birth -> DD/MM/YYYY
     function formatDob(rawDob) {
       if (!rawDob) return '';
       let str = String(rawDob).trim();
@@ -887,7 +754,6 @@
       return str;
     }
 
-    // Robust Date Parsing for Date of Joining -> MMM YYYY
     function formatJoining(rawJoining) {
       if (!rawJoining) return 'Aug 2026';
       let str = String(rawJoining).trim();
@@ -989,23 +855,6 @@
       update();
     }
 
-    function fitInstitutionName() {
-      const el = document.getElementById('vInstitute');
-      if (!el) return;
-
-      const text = el.textContent || '';
-      if (text.length > 35) {
-        el.style.fontSize = '6.5px';
-        el.style.lineHeight = '1.05';
-      } else if (text.length > 25) {
-        el.style.fontSize = '7px';
-        el.style.lineHeight = '1.1';
-      } else {
-        el.style.fontSize = '8px';
-        el.style.lineHeight = '1.15';
-      }
-    }
-
     function update() {
       const cur = current();
       document.getElementById('vId').textContent = cur.id;
@@ -1015,8 +864,6 @@
       document.getElementById('vInstitute').textContent = cur.institute;
       document.getElementById('vJoining').textContent = formatJoining(cur.joining);
       document.getElementById('vPhone').textContent = cur.phone;
-
-      fitInstitutionName();
     }
 
     // Dropdown Rendering
