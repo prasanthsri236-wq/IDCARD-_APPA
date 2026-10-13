@@ -344,7 +344,7 @@
       border: 1px dashed #CBD5E1;
     }
 
-    /* ID CARD OVERLAY & EXACT POSITIONING */
+    /* --- REDESIGNED PROFESSIONAL ID CARD TEMPLATE --- */
     .id-card {
       position: relative;
       width: 500px;
@@ -353,6 +353,10 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       border-radius: 8px;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 14px 8px 14px;
     }
 
     .card-bg {
@@ -365,54 +369,148 @@
       z-index: 1;
     }
 
-    /* CARD FIELDS CONTAINER CENTERED */
-    .card-fields {
-      position: absolute;
-      top: 48%;
-      left: 18%;
-      width: 52%;
+    /* CARD HEADER */
+    .card-header-inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid rgba(212, 175, 55, 0.4);
+    }
+
+    .card-logo-left {
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .card-logo-right {
+      height: 30px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .card-header-text {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card-org-name {
+      font-size: 10px;
+      font-weight: 800;
+      color: #0B2545;
+      letter-spacing: 0.3px;
+      line-height: 1.1;
+    }
+
+    .card-uni-text {
+      font-size: 7.5px;
+      font-weight: 700;
+      color: #134074;
+      margin-top: 1px;
+      letter-spacing: 0.2px;
+    }
+
+    /* CARD TITLE BANNER */
+    .card-title-banner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin: 3px 0;
+    }
+
+    .gold-plaque {
+      background: linear-gradient(135deg, #FDF0CD 0%, #D4AF37 50%, #9C7820 100%);
+      color: #0B2545;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 14px;
+      border-radius: 3px;
+      display: inline-block;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      border: 1px solid #B8860B;
+      letter-spacing: 0.8px;
+    }
+
+    .card-sub-title {
+      font-size: 8px;
+      font-weight: 800;
+      color: #0B2545;
+      margin-top: 2px;
+      letter-spacing: 0.6px;
+    }
+
+    /* CARD BODY CONTENT */
+    .card-body-content {
+      position: relative;
       z-index: 2;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 3px;
+      gap: 2.5px;
+      padding: 0 4px;
     }
 
-    /* ROW GRID CENTER-ALIGNED */
     .field-row {
       display: grid;
-      grid-template-columns: 42% 6% 52%;
-      align-items: center;
+      grid-template-columns: 36% 4% 60%;
+      align-items: flex-start;
       width: 100%;
-      min-height: 16px;
-      line-height: 1.1;
-      text-align: center;
+      min-height: 14px;
+      line-height: 1.15;
     }
 
     .field-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: #0F2A4A;
+      font-size: 9px;
+      font-weight: 700;
+      color: #0B2545;
       text-align: right;
+      padding-right: 4px;
       white-space: nowrap;
     }
 
     .field-colon {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      color: #0F2A4A;
+      color: #0B2545;
       text-align: center;
     }
 
     .field-val {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      color: #0F2A4A;
+      color: #1D2A44;
       text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      word-break: break-word;
     }
+
+    /* CARD SIGNATURE AREA */
+    .card-signature-area {
+      position: absolute;
+      right: 16px;
+      bottom: 10px;
+      z-index: 2;
+      text-align: center;
+      width: 115px;
+    }
+
+    .sig-line {
+      border-top: 1px solid #0B2545;
+      margin-bottom: 2px;
+      width: 100%;
+    }
+
+    .sig-label {
+      font-size: 7px;
+      font-weight: 700;
+      color: #0B2545;
+      letter-spacing: 0.4px;
+    }
+    /* --- END REDESIGNED ID CARD TEMPLATE --- */
 
     .download-actions {
       margin-top: 20px;
@@ -615,7 +713,24 @@
           <div id="card" class="id-card">
             <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
             
-            <div class="card-fields">
+            <!-- Redesigned Professional ID Card Header -->
+            <div class="card-header-inner">
+              <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="card-logo-left" />
+              <div class="card-header-text">
+                <div class="card-org-name">ALAGAPPA PERFORMING ARTS ACADEMY</div>
+                <div class="card-uni-text">In Collaboration with Alagappa University</div>
+              </div>
+              <img src="./logo2%20-%20Copy.png" alt="University Emblem" class="card-logo-right" />
+            </div>
+
+            <!-- Redesigned Title Banner -->
+            <div class="card-title-banner">
+              <div class="gold-plaque">GRADE EXAMINATION</div>
+              <div class="card-sub-title">STUDENT ID CARD</div>
+            </div>
+
+            <!-- Redesigned Student Details Body Content -->
+            <div class="card-body-content">
               <div class="field-row">
                 <span class="field-label">Student ID</span>
                 <span class="field-colon">:</span>
@@ -641,7 +756,7 @@
               </div>
 
               <div class="field-row">
-                <span class="field-label">Name of the Institution</span>
+                <span class="field-label">Institution</span>
                 <span class="field-colon">:</span>
                 <span id="vInstitute" class="field-val"></span>
               </div>
@@ -658,6 +773,13 @@
                 <span id="vPhone" class="field-val"></span>
               </div>
             </div>
+
+            <!-- Redesigned Signature Area -->
+            <div class="card-signature-area">
+              <div class="sig-line"></div>
+              <div class="sig-label">AUTHORISED SIGNATURE</div>
+            </div>
+
           </div>
         </div>
 
