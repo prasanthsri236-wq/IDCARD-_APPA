@@ -344,7 +344,7 @@
       border: 1px dashed #CBD5E1;
     }
 
-    /* --- REDESIGNED PROFESSIONAL ID CARD TEMPLATE --- */
+    /* --- ID CARD TEMPLATE --- */
     .id-card {
       position: relative;
       width: 500px;
@@ -450,8 +450,9 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
-      gap: 2.5px;
+      gap: 2px;
       padding: 0 4px;
+      max-width: 360px; /* Leave space for background artwork & signature */
     }
 
     .field-row {
@@ -485,7 +486,18 @@
       color: #1D2A44;
       text-align: left;
       white-space: normal;
+      overflow-wrap: break-word;
       word-break: break-word;
+    }
+
+    /* Dedicated styling for Institution Field to support full line wrapping */
+    #vInstitute {
+      font-size: 9px;
+      line-height: 1.1;
+      display: block;
+      max-height: 32px;
+      overflow: hidden;
+      transition: font-size 0.2s ease;
     }
 
     /* CARD SIGNATURE AREA */
@@ -510,7 +522,6 @@
       color: #0B2545;
       letter-spacing: 0.4px;
     }
-    /* --- END REDESIGNED ID CARD TEMPLATE --- */
 
     .download-actions {
       margin-top: 20px;
@@ -713,7 +724,7 @@
           <div id="card" class="id-card">
             <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
             
-            <!-- Redesigned Professional ID Card Header -->
+            <!-- Professional ID Card Header -->
             <div class="card-header-inner">
               <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="card-logo-left" />
               <div class="card-header-text">
@@ -723,13 +734,13 @@
               <img src="./logo2%20-%20Copy.png" alt="University Emblem" class="card-logo-right" />
             </div>
 
-            <!-- Redesigned Title Banner -->
+            <!-- Title Banner -->
             <div class="card-title-banner">
               <div class="gold-plaque">GRADE EXAMINATION</div>
               <div class="card-sub-title">STUDENT ID CARD</div>
             </div>
 
-            <!-- Redesigned Student Details Body Content -->
+            <!-- Student Details Body Content -->
             <div class="card-body-content">
               <div class="field-row">
                 <span class="field-label">Student ID</span>
@@ -774,7 +785,7 @@
               </div>
             </div>
 
-            <!-- Redesigned Signature Area -->
+            <!-- Signature Area -->
             <div class="card-signature-area">
               <div class="sig-line"></div>
               <div class="sig-label">AUTHORISED SIGNATURE</div>
@@ -810,6 +821,9 @@
     // Global state variables
     let students = [];
 
+    // Month Names array for formatting
+    const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     // Helper utilities
     function norm(str) {
       return (str || '').toString().toLowerCase().trim();
@@ -817,6 +831,92 @@
 
     function cleanHeader(str) {
       return (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    }
+
+    // Robust Date Parsing for Date of Birth -> DD/MM/YYYY
+    function formatDob(rawDob) {
+      if (!rawDob) return '';
+      let str = String(rawDob).trim();
+      if (!str) return '';
+
+      // Check for Excel Serial Number (e.g. 43616)
+      if (/^\d{5}$/.test(str)) {
+        const serial = parseInt(str, 10);
+        const utc_days = Math.floor(serial - 25569);
+        const utc_value = utc_days * 86400;
+        const dateObj = new Date(utc_value * 1000);
+        if (!isNaN(dateObj.getTime())) {
+          const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+          const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+          const yyyy = dateObj.getUTCFullYear();
+          return `${dd}/${mm}/${yyyy}`;
+        }
+      }
+
+      // If already formatted like DD/MM/YYYY or DD-MM-YYYY
+      const ddmmyyyyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (ddmmyyyyMatch) {
+        let p1 = parseInt(ddmmyyyyMatch[1], 10);
+        let p2 = parseInt(ddmmyyyyMatch[2], 10);
+        let yyyy = ddmmyyyyMatch[3];
+
+        // Handle DD/MM/YYYY vs MM/DD/YYYY if p1 > 12 it's definitely day
+        let day = p1;
+        let month = p2;
+        if (p1 <= 12 && p2 > 12) {
+          day = p2;
+          month = p1;
+        }
+
+        const dd = String(day).padStart(2, '0');
+        const mm = String(month).padStart(2, '0');
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      // Check ISO format YYYY-MM-DD
+      const isoMatch = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (isoMatch) {
+        const yyyy = isoMatch[1];
+        const mm = String(parseInt(isoMatch[2], 10)).padStart(2, '0');
+        const dd = String(parseInt(isoMatch[3], 10)).padStart(2, '0');
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      // Standard Javascript Date parsing fallback
+      const parsed = new Date(str);
+      if (!isNaN(parsed.getTime())) {
+        const dd = String(parsed.getDate()).padStart(2, '0');
+        const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+        const yyyy = parsed.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      }
+
+      return str; // Return original string if format is completely unique
+    }
+
+    // Robust Date Parsing for Date of Joining -> MMM YYYY
+    function formatJoining(rawJoining) {
+      if (!rawJoining) return 'Aug 2026';
+      let str = String(rawJoining).trim();
+      if (!str) return 'Aug 2026';
+
+      // Check if already in 'MMM YYYY' format (e.g., Aug 2026)
+      const mmmYyyyMatch = str.match(/^([a-zA-Z]{3,9})\s+(\d{4})$/);
+      if (mmmYyyyMatch) {
+        const mStr = mmmYyyyMatch[1].substring(0, 3);
+        const capitalizedMonth = mStr.charAt(0).toUpperCase() + mStr.slice(1).toLowerCase();
+        return `${capitalizedMonth} ${mmmYyyyMatch[2]}`;
+      }
+
+      // Parse dates like 08/2026 or 2026-08 or full date strings
+      const parsed = new Date(str);
+      if (!isNaN(parsed.getTime())) {
+        const m = MONTH_NAMES[parsed.getMonth()];
+        const y = parsed.getFullYear();
+        return `${m} ${y}`;
+      }
+
+      return str;
     }
 
     function val(id) {
@@ -871,18 +971,18 @@
       }
 
       let grade = getField(['GRADE', 'CLASS', 'STANDARD']);
-      let dob = getField(['DATE OF BIRTH', 'DOB', 'BIRTH DATE']);
+      let rawDob = getField(['DATE OF BIRTH', 'DOB', 'BIRTH DATE']);
       let institute = getField(['NAME OF THE INSTITUTE', 'INSTITUTION', 'SCHOOL NAME', 'INSTITUTE', 'ORGANIZATION NAME', 'COMPANY']);
-      let joining = getField(['DATE OF JOINING', 'JOINING DATE', 'DOJ']);
+      let rawJoining = getField(['DATE OF JOINING', 'JOINING DATE', 'DOJ']);
       let phone = getField(['MOBILE NO', 'MOBILE NUMBER', 'PHONE', 'PHONE NUMBER', 'CONTACT NUMBER', 'MOBILE', 'PHONE 1 - VALUE', 'PRIMARY PHONE']);
 
       return {
         id: studentId,
         name: name,
         grade: grade,
-        dob: dob,
+        dob: formatDob(rawDob),
         institute: institute,
-        joining: joining || 'Aug 2026',
+        joining: formatJoining(rawJoining),
         phone: phone
       };
     }
@@ -891,11 +991,31 @@
       document.getElementById('id').value = data.id || '';
       document.getElementById('name').value = data.name || '';
       document.getElementById('grade').value = data.grade || '';
-      document.getElementById('dob').value = data.dob || '';
+      document.getElementById('dob').value = data.dob ? formatDob(data.dob) : '';
       document.getElementById('institute').value = data.institute || '';
-      document.getElementById('joining').value = data.joining || 'Aug 2026';
+      document.getElementById('joining').value = formatJoining(data.joining);
       document.getElementById('phone').value = data.phone || '';
       update();
+    }
+
+    // Dynamic Font Scaling for Institution Name to guarantee complete visibility without clipping
+    function fitInstitutionName() {
+      const el = document.getElementById('vInstitute');
+      if (!el) return;
+
+      const text = el.textContent || '';
+      
+      // Scale font down dynamically if institution text length is long
+      if (text.length > 35) {
+        el.style.fontSize = '7.5px';
+        el.style.lineHeight = '1.05';
+      } else if (text.length > 25) {
+        el.style.fontSize = '8px';
+        el.style.lineHeight = '1.1';
+      } else {
+        el.style.fontSize = '9px';
+        el.style.lineHeight = '1.15';
+      }
     }
 
     function update() {
@@ -903,10 +1023,12 @@
       document.getElementById('vId').textContent = cur.id;
       document.getElementById('vName').textContent = cur.name;
       document.getElementById('vGrade').textContent = cur.grade;
-      document.getElementById('vDob').textContent = cur.dob;
+      document.getElementById('vDob').textContent = formatDob(cur.dob);
       document.getElementById('vInstitute').textContent = cur.institute;
-      document.getElementById('vJoining').textContent = cur.joining;
+      document.getElementById('vJoining').textContent = formatJoining(cur.joining);
       document.getElementById('vPhone').textContent = cur.phone;
+
+      fitInstitutionName();
     }
 
     // Dropdown Rendering
@@ -974,6 +1096,24 @@
           el.addEventListener('input', update);
         }
       });
+
+      // Format Date of Birth on Blur in Form Input
+      const dobInput = document.getElementById('dob');
+      if (dobInput) {
+        dobInput.addEventListener('blur', () => {
+          dobInput.value = formatDob(dobInput.value);
+          update();
+        });
+      }
+
+      // Format Date of Joining on Blur in Form Input
+      const joiningInput = document.getElementById('joining');
+      if (joiningInput) {
+        joiningInput.addEventListener('blur', () => {
+          joiningInput.value = formatJoining(joiningInput.value);
+          update();
+        });
+      }
 
       // Excel / CSV File Read
       document.getElementById('file').addEventListener('change', (e) => {
