@@ -591,7 +591,7 @@
 
           <div class="form-group">
             <label for="joining">Date of Joining</label>
-            <input type="text" id="joining" class="form-control" placeholder="MMM YYYY" />
+            <input type="text" id="joining" class="form-control" placeholder="Aug 2026" />
           </div>
 
           <div class="form-group">
@@ -693,7 +693,6 @@
       return (str || '').toString().toLowerCase().trim();
     }
 
-    // Comprehensive header cleaning: removes all spaces, underscores, hyphens, and punctuation
     function cleanHeader(str) {
       return (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').trim();
     }
@@ -710,12 +709,11 @@
         grade: val('grade'),
         dob: val('dob'),
         institute: val('institute'),
-        joining: val('joining'),
+        joining: val('joining') || 'Aug 2026',
         phone: val('phone')
       };
     }
 
-    // Comprehensive list of recognized header aliases
     const RECOGNIZED_ALIASES = [
       'enrollmentno', 'enrollmentnumber', 'studentid', 'id',
       'name', 'studentname', 'fullname', 'firstname', 'givenname', 'lastname', 'familyname',
@@ -726,7 +724,6 @@
       'mobileno', 'mobilenumber', 'phone', 'phonenumber', 'contactnumber', 'mobile', 'phone1value', 'primaryphone'
     ];
 
-    // Flexible Row Mapping supporting academic data & Google Contacts formats
     function mapRow(row) {
       const getField = (aliases) => {
         for (let key of Object.keys(row)) {
@@ -763,7 +760,7 @@
         grade: grade,
         dob: dob,
         institute: institute,
-        joining: joining,
+        joining: joining || 'Aug 2026',
         phone: phone
       };
     }
@@ -774,7 +771,7 @@
       document.getElementById('grade').value = data.grade || '';
       document.getElementById('dob').value = data.dob || '';
       document.getElementById('institute').value = data.institute || '';
-      document.getElementById('joining').value = data.joining || '';
+      document.getElementById('joining').value = data.joining || 'Aug 2026';
       document.getElementById('phone').value = data.phone || '';
       update();
     }
@@ -865,7 +862,6 @@
         reader.onload = (evt) => {
           try {
             const data = new Uint8Array(evt.target.result);
-            // cellText: true, raw: false preserves leading zeros in ID numbers and phone numbers
             const workbook = XLSX.read(data, { type: 'array', cellText: true, raw: false });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
@@ -886,7 +882,6 @@
               return;
             }
 
-            // Automatically detect the correct header row by counting how many recognized aliases match each row
             let headerIndex = -1;
             let maxMatches = 0;
 
@@ -898,7 +893,6 @@
                   matchCount++;
                 }
               });
-              // Require at least 2 matching headers to ensure it's a valid header row and not a data row
               if (matchCount > maxMatches && matchCount >= 2) {
                 maxMatches = matchCount;
                 headerIndex = idx;
@@ -989,7 +983,7 @@
 
       // Clear Form Listener
       document.getElementById('clear').addEventListener('click', () => {
-        setForm({});
+        setForm({ joining: 'Aug 2026' });
         document.getElementById('studentSelect').value = '';
         document.getElementById('search').value = '';
         renderDropdown(students);
@@ -1023,6 +1017,12 @@
           alert('Failed to generate PDF: ' + err.message);
         }
       });
+
+      // Initialize default Date of Joining on load
+      const joiningEl = document.getElementById('joining');
+      if (joiningEl && !joiningEl.value) {
+        joiningEl.value = 'Aug 2026';
+      }
 
       // Sync initial state
       update();
