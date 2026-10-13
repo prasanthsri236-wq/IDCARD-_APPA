@@ -365,47 +365,47 @@
       z-index: 1;
     }
 
-    /* CARD FIELDS CONTAINER PERFECTLY POSITIONED OVER BACKGROUND */
+    /* CARD FIELDS CONTAINER CENTERED */
     .card-fields {
       position: absolute;
-      top: 44%;
-      left: 17%;
-      width: 54%;
+      top: 48%;
+      left: 18%;
+      width: 52%;
       z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3.5px;
+      gap: 3px;
     }
 
+    /* ROW GRID CENTER-ALIGNED */
     .field-row {
       display: grid;
-      grid-template-columns: 38% 6% 56%;
+      grid-template-columns: 42% 6% 52%;
       align-items: center;
       width: 100%;
-      min-height: 17px;
-      line-height: 1.15;
+      min-height: 16px;
+      line-height: 1.1;
       text-align: center;
     }
 
     .field-label {
-      font-size: 9.5px;
-      font-weight: 700;
+      font-size: 10px;
+      font-weight: 600;
       color: #0F2A4A;
       text-align: right;
       white-space: nowrap;
-      padding-right: 4px;
     }
 
     .field-colon {
-      font-size: 9.5px;
+      font-size: 10px;
       font-weight: 700;
       color: #0F2A4A;
       text-align: center;
     }
 
     .field-val {
-      font-size: 9.5px;
+      font-size: 10px;
       font-weight: 700;
       color: #0F2A4A;
       text-align: left;
@@ -641,7 +641,7 @@
               </div>
 
               <div class="field-row">
-                <span class="field-label">Institution</span>
+                <span class="field-label">Name of the Institution</span>
                 <span class="field-colon">:</span>
                 <span id="vInstitute" class="field-val"></span>
               </div>
