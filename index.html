@@ -249,7 +249,7 @@
       color: #0c2340;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%3C0B2545' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%230B2545' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       padding-right: 36px;
@@ -693,6 +693,11 @@
       return (str || '').toString().toLowerCase().trim();
     }
 
+    // Comprehensive header cleaning: removes all spaces, underscores, hyphens, and punctuation
+    function cleanHeader(str) {
+      return (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    }
+
     function val(id) {
       const el = document.getElementById(id);
       return el ? el.value.trim() : '';
@@ -710,16 +715,56 @@
       };
     }
 
-    // Row Mapping
+    // Comprehensive list of recognized header aliases
+    const RECOGNIZED_ALIASES = [
+      'enrollmentno', 'enrollmentnumber', 'studentid', 'id',
+      'name', 'studentname', 'fullname', 'firstname', 'givenname', 'lastname', 'familyname',
+      'grade', 'class', 'standard',
+      'dateofbirth', 'dob', 'birthdate',
+      'nameoftheinstitute', 'institution', 'schoolname', 'institute', 'organizationname', 'company',
+      'dateofjoining', 'joiningdate', 'doj',
+      'mobileno', 'mobilenumber', 'phone', 'phonenumber', 'contactnumber', 'mobile', 'phone1value', 'primaryphone'
+    ];
+
+    // Flexible Row Mapping supporting academic data & Google Contacts formats
     function mapRow(row) {
+      const getField = (aliases) => {
+        for (let key of Object.keys(row)) {
+          const cleanedKey = cleanHeader(key);
+          for (let alias of aliases) {
+            if (cleanedKey === cleanHeader(alias)) {
+              return (row[key] !== undefined && row[key] !== null) ? String(row[key]).trim() : '';
+            }
+          }
+        }
+        return '';
+      };
+
+      let studentId = getField(['ENROLLMENT NO', 'ENROLLMENT NUMBER', 'STUDENT ID', 'ID']);
+      
+      let name = getField(['NAME', 'STUDENT NAME', 'FULL NAME']);
+      if (!name) {
+        const firstName = getField(['FIRST NAME', 'GIVEN NAME']);
+        const lastName = getField(['LAST NAME', 'FAMILY NAME']);
+        if (firstName || lastName) {
+          name = `${firstName} ${lastName}`.trim();
+        }
+      }
+
+      let grade = getField(['GRADE', 'CLASS', 'STANDARD']);
+      let dob = getField(['DATE OF BIRTH', 'DOB', 'BIRTH DATE']);
+      let institute = getField(['NAME OF THE INSTITUTE', 'INSTITUTION', 'SCHOOL NAME', 'INSTITUTE', 'ORGANIZATION NAME', 'COMPANY']);
+      let joining = getField(['DATE OF JOINING', 'JOINING DATE', 'DOJ']);
+      let phone = getField(['MOBILE NO', 'MOBILE NUMBER', 'PHONE', 'PHONE NUMBER', 'CONTACT NUMBER', 'MOBILE', 'PHONE 1 - VALUE', 'PRIMARY PHONE']);
+
       return {
-        id: row['ENROLLMENT NO'] || '',
-        name: row['NAME'] || '',
-        grade: row['GRADE'] || '',
-        dob: row['DATE OF BIRTH'] || '',
-        institute: row['NAME OF THE INSTITUTE'] || '',
-        joining: '',
-        phone: row['MOBILE NO'] || ''
+        id: studentId,
+        name: name,
+        grade: grade,
+        dob: dob,
+        institute: institute,
+        joining: joining,
+        phone: phone
       };
     }
 
@@ -763,9 +808,9 @@
         const option = document.createElement('option');
         option.value = index;
         option.textContent =
-          (student.id || 'No ID') +
+          (student.id || student.phone || 'Record ' + (index + 1)) +
           ' — ' +
-          (student.name || 'Unnamed Student');
+          (student.name || 'Unnamed Record');
 
         sel.appendChild(option);
       });
@@ -820,7 +865,8 @@
         reader.onload = (evt) => {
           try {
             const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
+            // cellText: true, raw: false preserves leading zeros in ID numbers and phone numbers
+            const workbook = XLSX.read(data, { type: 'array', cellText: true, raw: false });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
             const rows = XLSX.utils.sheet_to_json(firstSheet, {
@@ -831,14 +877,37 @@
 
             const statusEl = document.getElementById('status');
 
-            const headerIndex = rows.findIndex(row =>
-              row.some(cell => String(cell).trim().toUpperCase() === 'ENROLLMENT NO') &&
-              row.some(cell => String(cell).trim().toUpperCase() === 'NAME')
-            );
+            if (!rows || rows.length === 0) {
+              if (statusEl) {
+                statusEl.textContent = "The uploaded file is empty.";
+                statusEl.style.color = "#DC2626";
+              }
+              renderDropdown([]);
+              return;
+            }
+
+            // Automatically detect the correct header row by counting how many recognized aliases match each row
+            let headerIndex = -1;
+            let maxMatches = 0;
+
+            rows.forEach((row, idx) => {
+              let matchCount = 0;
+              row.forEach(cell => {
+                const c = cleanHeader(cell);
+                if (c && RECOGNIZED_ALIASES.includes(c)) {
+                  matchCount++;
+                }
+              });
+              // Require at least 2 matching headers to ensure it's a valid header row and not a data row
+              if (matchCount > maxMatches && matchCount >= 2) {
+                maxMatches = matchCount;
+                headerIndex = idx;
+              }
+            });
 
             if (headerIndex === -1) {
               if (statusEl) {
-                statusEl.textContent = "Could not find the student header row in the Excel file.";
+                statusEl.textContent = "Could not find a valid header row in the uploaded file.";
                 statusEl.style.color = "#DC2626";
               }
               renderDropdown([]);
@@ -862,11 +931,20 @@
 
             students = rawJson
               .map(mapRow)
-              .filter(student => student.id || student.name);
+              .filter(student => student.id || student.name || student.phone);
+
+            if (students.length === 0) {
+              if (statusEl) {
+                statusEl.textContent = "File parsed, but no usable student or contact records were found.";
+                statusEl.style.color = "#DC2626";
+              }
+              renderDropdown([]);
+              return;
+            }
 
             if (statusEl) {
               statusEl.style.color = "var(--royal-blue)";
-              statusEl.textContent = `Successfully loaded ${students.length} students from ${file.name}`;
+              statusEl.textContent = `Successfully loaded ${students.length} records from ${file.name}`;
             }
 
             renderDropdown(students);
@@ -939,8 +1017,8 @@
           });
 
           pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
-          const studentId = val('id') || 'student';
-          pdf.save(`${studentId}_ID_Card.pdf`);
+          const studentId = val('id') || val('name') || 'student';
+          pdf.save(`${studentId.replace(/[^a-z0-9]/gi, '_')}_ID_Card.pdf`);
         } catch (err) {
           alert('Failed to generate PDF: ' + err.message);
         }
