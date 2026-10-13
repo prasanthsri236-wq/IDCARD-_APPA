@@ -344,7 +344,7 @@
       border: 1px dashed #CBD5E1;
     }
 
-    /* --- ID CARD TEMPLATE --- */
+    /* --- CLEAN, SINGLE-INSTANCE ID CARD TEMPLATE --- */
     .id-card {
       position: relative;
       width: 500px;
@@ -356,7 +356,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 10px 14px 8px 14px;
+      padding: 8px 12px 6px 12px;
     }
 
     .card-bg {
@@ -376,18 +376,18 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 4px;
+      padding-bottom: 3px;
       border-bottom: 1.5px solid rgba(212, 175, 55, 0.4);
     }
 
     .card-logo-left {
-      height: 34px;
+      height: 32px;
       width: auto;
       object-fit: contain;
     }
 
     .card-logo-right {
-      height: 30px;
+      height: 28px;
       width: auto;
       object-fit: contain;
     }
@@ -400,7 +400,7 @@
     }
 
     .card-org-name {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 800;
       color: #0B2545;
       letter-spacing: 0.3px;
@@ -408,7 +408,7 @@
     }
 
     .card-uni-text {
-      font-size: 7.5px;
+      font-size: 7px;
       font-weight: 700;
       color: #134074;
       margin-top: 1px;
@@ -420,15 +420,15 @@
       position: relative;
       z-index: 2;
       text-align: center;
-      margin: 3px 0;
+      margin: 2px 0;
     }
 
     .gold-plaque {
       background: linear-gradient(135deg, #FDF0CD 0%, #D4AF37 50%, #9C7820 100%);
       color: #0B2545;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 800;
-      padding: 2px 14px;
+      padding: 2px 12px;
       border-radius: 3px;
       display: inline-block;
       box-shadow: 0 1px 3px rgba(0,0,0,0.12);
@@ -437,10 +437,10 @@
     }
 
     .card-sub-title {
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 800;
       color: #0B2545;
-      margin-top: 2px;
+      margin-top: 1px;
       letter-spacing: 0.6px;
     }
 
@@ -450,9 +450,9 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1.5px;
       padding: 0 4px;
-      max-width: 360px; /* Leave space for background artwork & signature */
+      max-width: 350px;
     }
 
     .field-row {
@@ -460,12 +460,12 @@
       grid-template-columns: 36% 4% 60%;
       align-items: flex-start;
       width: 100%;
-      min-height: 14px;
-      line-height: 1.15;
+      min-height: 13px;
+      line-height: 1.1;
     }
 
     .field-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #0B2545;
       text-align: right;
@@ -474,14 +474,14 @@
     }
 
     .field-colon {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #0B2545;
       text-align: center;
     }
 
     .field-val {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: #1D2A44;
       text-align: left;
@@ -490,34 +490,32 @@
       word-break: break-word;
     }
 
-    /* Dedicated styling for Institution Field to support full line wrapping */
     #vInstitute {
-      font-size: 9px;
-      line-height: 1.1;
+      font-size: 8px;
+      line-height: 1.05;
       display: block;
-      max-height: 32px;
+      max-height: 26px;
       overflow: hidden;
-      transition: font-size 0.2s ease;
     }
 
     /* CARD SIGNATURE AREA */
     .card-signature-area {
       position: absolute;
-      right: 16px;
-      bottom: 10px;
+      right: 12px;
+      bottom: 6px;
       z-index: 2;
       text-align: center;
-      width: 115px;
+      width: 105px;
     }
 
     .sig-line {
       border-top: 1px solid #0B2545;
-      margin-bottom: 2px;
+      margin-bottom: 1.5px;
       width: 100%;
     }
 
     .sig-label {
-      font-size: 7px;
+      font-size: 6px;
       font-weight: 700;
       color: #0B2545;
       letter-spacing: 0.4px;
@@ -724,7 +722,7 @@
           <div id="card" class="id-card">
             <img id="cardBgImg" src="./card-bg.png" alt="ID Card Background" class="card-bg" />
             
-            <!-- Professional ID Card Header -->
+            <!-- Professional ID Card Header (Single Instance) -->
             <div class="card-header-inner">
               <img src="./APAA_blue%20logo.png" alt="APAA Logo" class="card-logo-left" />
               <div class="card-header-text">
@@ -734,13 +732,13 @@
               <img src="./logo2%20-%20Copy.png" alt="University Emblem" class="card-logo-right" />
             </div>
 
-            <!-- Title Banner -->
+            <!-- Title Banner (Single Instance) -->
             <div class="card-title-banner">
               <div class="gold-plaque">GRADE EXAMINATION</div>
               <div class="card-sub-title">STUDENT ID CARD</div>
             </div>
 
-            <!-- Student Details Body Content -->
+            <!-- Student Details Body Content (All 7 Fields) -->
             <div class="card-body-content">
               <div class="field-row">
                 <span class="field-label">Student ID</span>
@@ -785,7 +783,7 @@
               </div>
             </div>
 
-            <!-- Signature Area -->
+            <!-- Signature Area (Single Instance) -->
             <div class="card-signature-area">
               <div class="sig-line"></div>
               <div class="sig-label">AUTHORISED SIGNATURE</div>
@@ -839,7 +837,6 @@
       let str = String(rawDob).trim();
       if (!str) return '';
 
-      // Check for Excel Serial Number (e.g. 43616)
       if (/^\d{5}$/.test(str)) {
         const serial = parseInt(str, 10);
         const utc_days = Math.floor(serial - 25569);
@@ -853,14 +850,12 @@
         }
       }
 
-      // If already formatted like DD/MM/YYYY or DD-MM-YYYY
       const ddmmyyyyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
       if (ddmmyyyyMatch) {
         let p1 = parseInt(ddmmyyyyMatch[1], 10);
         let p2 = parseInt(ddmmyyyyMatch[2], 10);
         let yyyy = ddmmyyyyMatch[3];
 
-        // Handle DD/MM/YYYY vs MM/DD/YYYY if p1 > 12 it's definitely day
         let day = p1;
         let month = p2;
         if (p1 <= 12 && p2 > 12) {
@@ -873,7 +868,6 @@
         return `${dd}/${mm}/${yyyy}`;
       }
 
-      // Check ISO format YYYY-MM-DD
       const isoMatch = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
       if (isoMatch) {
         const yyyy = isoMatch[1];
@@ -882,7 +876,6 @@
         return `${dd}/${mm}/${yyyy}`;
       }
 
-      // Standard Javascript Date parsing fallback
       const parsed = new Date(str);
       if (!isNaN(parsed.getTime())) {
         const dd = String(parsed.getDate()).padStart(2, '0');
@@ -891,7 +884,7 @@
         return `${dd}/${mm}/${yyyy}`;
       }
 
-      return str; // Return original string if format is completely unique
+      return str;
     }
 
     // Robust Date Parsing for Date of Joining -> MMM YYYY
@@ -900,7 +893,6 @@
       let str = String(rawJoining).trim();
       if (!str) return 'Aug 2026';
 
-      // Check if already in 'MMM YYYY' format (e.g., Aug 2026)
       const mmmYyyyMatch = str.match(/^([a-zA-Z]{3,9})\s+(\d{4})$/);
       if (mmmYyyyMatch) {
         const mStr = mmmYyyyMatch[1].substring(0, 3);
@@ -908,7 +900,6 @@
         return `${capitalizedMonth} ${mmmYyyyMatch[2]}`;
       }
 
-      // Parse dates like 08/2026 or 2026-08 or full date strings
       const parsed = new Date(str);
       if (!isNaN(parsed.getTime())) {
         const m = MONTH_NAMES[parsed.getMonth()];
@@ -993,27 +984,24 @@
       document.getElementById('grade').value = data.grade || '';
       document.getElementById('dob').value = data.dob ? formatDob(data.dob) : '';
       document.getElementById('institute').value = data.institute || '';
-      document.getElementById('joining').value = formatJoining(data.joining);
+      document.getElementById('joining').value = formatJoining(data.joining || 'Aug 2026');
       document.getElementById('phone').value = data.phone || '';
       update();
     }
 
-    // Dynamic Font Scaling for Institution Name to guarantee complete visibility without clipping
     function fitInstitutionName() {
       const el = document.getElementById('vInstitute');
       if (!el) return;
 
       const text = el.textContent || '';
-      
-      // Scale font down dynamically if institution text length is long
       if (text.length > 35) {
-        el.style.fontSize = '7.5px';
+        el.style.fontSize = '6.5px';
         el.style.lineHeight = '1.05';
       } else if (text.length > 25) {
-        el.style.fontSize = '8px';
+        el.style.fontSize = '7px';
         el.style.lineHeight = '1.1';
       } else {
-        el.style.fontSize = '9px';
+        el.style.fontSize = '8px';
         el.style.lineHeight = '1.15';
       }
     }
@@ -1097,7 +1085,6 @@
         }
       });
 
-      // Format Date of Birth on Blur in Form Input
       const dobInput = document.getElementById('dob');
       if (dobInput) {
         dobInput.addEventListener('blur', () => {
@@ -1106,7 +1093,6 @@
         });
       }
 
-      // Format Date of Joining on Blur in Form Input
       const joiningInput = document.getElementById('joining');
       if (joiningInput) {
         joiningInput.addEventListener('blur', () => {
