@@ -3,34 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alagappa Performing Arts Academy - Student ID Card Generator</title>
-
-    <!-- Google Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Alagappa Performing Arts Academy - Fee Receipt System</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- External Libraries for Excel Parsing, HTML Canvas & PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --primary-navy: #002147;
+            --primary-navy: #003366;
             --brand-gold: #D4AF37;
-            --brand-gold-dark: #AA820A;
-            --text-dark: #1E293B;
-            --text-muted: #64748B;
+            --text-dark: #2C3E50;
+            --text-muted: #7F8C8D;
             --border-light: #E2E8F0;
             --bg-light: #F8FAFC;
             --error-red: #DC2626;
-            --error-bg: #FEF2F2;
-            --warning-amber: #D97706;
-            --warning-bg: #FFFBEB;
-            --success-green: #16A34A;
-            --success-bg: #F0FDF4;
         }
 
+        /* Global Reset to eliminate unwanted click/tap outlines or selection bands on non-interactive zones */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -38,15 +29,21 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Suppress persistent focus highlight outlines or random text dragging flags on structural parent tags */
         body, div, header, footer, table, tbody, thead, tr, th, td, h1, h2, h3, span, label, p, i {
             outline: none !important;
-            user-select: none;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
+        /* Explicitly allow data selection inside input frameworks only */
         input, select, textarea {
-            user-select: text;
             -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         body {
@@ -54,1120 +51,1226 @@
             background-color: #F1F5F9;
             color: var(--text-dark);
             line-height: 1.5;
-            padding: 30px 15px;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 25px;
         }
 
-        .main-wrapper {
+        .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 950px;
             display: flex;
             flex-direction: column;
             gap: 25px;
         }
 
-        /* --- Page Header --- */
-        .app-header {
-            background: linear-gradient(135deg, var(--primary-navy) 0%, #001229 100%);
-            color: #FFFFFF;
-            padding: 25px 30px;
-            border-radius: 10px;
-            border-bottom: 4px solid var(--brand-gold);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-title-wrap h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 24px;
-            color: var(--brand-gold);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .header-title-wrap p {
-            font-size: 13px;
-            color: #94A3B8;
-            margin-top: 2px;
-        }
-
-        /* --- Control Layout Grid --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        @media (max-width: 992px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel-card {
+        /* --- Premium Receipt Card Document --- */
+        .receipt-card {
             background: #FFFFFF;
             border-radius: 8px;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
         }
 
-        .panel-heading {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--primary-navy);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--bg-light);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* Faint Institutional Watermark Component */
+        .receipt-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            background: url('Logo.png') no-repeat center/contain;
+            opacity: 0.03;
+            pointer-events: none;
         }
 
-        /* --- Form Inputs --- */
-        .form-grid {
+        /* --- Header Alignment --- */
+        .receipt-header {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: 130px 1fr 240px;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 18px;
+            border-bottom: 3px solid var(--brand-gold);
         }
 
-        .form-group {
+        .logo-container img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .branding-container {
+            text-align: center;
+        }
+
+        .branding-container h1 {
+            color: var(--primary-navy);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .branding-container .tagline {
+            color: var(--brand-gold);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 3px;
+            text-transform: uppercase;
+        }
+
+        .contact-container {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: right;
+            border-left: 1px solid var(--border-light);
+            padding-left: 20px;
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .form-group.full-width {
-            grid-column: span 2;
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+            line-height: 1.4;
         }
 
-        .form-group label {
-            font-size: 12px;
+        .contact-item i {
+            color: var(--brand-gold);
+            width: 12px;
+            text-align: center;
+        }
+
+        /* --- Document Title Row --- */
+        .title-meta-section {
+            text-align: center;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
+        .receipt-title {
+            font-size: 24px;
+            color: var(--primary-navy);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 13px;
+            color: var(--text-dark);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 15px;
+        }
+
+        .meta-row strong {
+            color: var(--primary-navy);
+        }
+
+        .meta-inline-input {
+            border: none;
+            border-bottom: 1px solid transparent;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-dark);
-            display: flex;
-            justify-content: space-between;
+            width: 120px;
+            transition: border-color 0.2s;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 9px 12px;
-            font-size: 13px;
+        .meta-inline-input:focus {
+            border-bottom-color: var(--brand-gold);
+        }
+
+        /* Non-editable system field adjustments */
+        .system-locked-field {
+            cursor: default;
+            user-select: none;
+            pointer-events: none;
+            color: var(--text-muted);
+        }
+
+        .system-locked-field:focus {
+            border-bottom-color: transparent !important;
+        }
+
+        /* --- Structural Input Cards Grid Layout --- */
+        .receipt-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .info-card {
             border: 1px solid var(--border-light);
-            border-radius: 5px;
-            outline: none;
-            transition: all 0.2s;
+            border-radius: 6px;
+            padding: 20px;
             background-color: #FFFFFF;
         }
 
-        .form-control:focus {
-            border-color: var(--brand-gold);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        .card-heading {
+            font-size: 13px;
+            color: var(--primary-navy);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
         }
 
-        .form-control.is-invalid {
-            border-color: var(--error-red) !important;
-            background-color: var(--error-bg);
+        /* Document-style Input Lines Component */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+            flex-wrap: wrap;
         }
 
-        .error-hint {
-            font-size: 11px;
-            color: var(--error-red);
-            display: none;
-            font-weight: 500;
+        .data-row:last-child {
+            margin-bottom: 0;
         }
 
-        /* --- Action Buttons & File Import --- */
-        .file-import-dropzone {
-            border: 2px dashed var(--brand-gold);
-            background-color: #FFFDF5;
-            padding: 20px;
-            border-radius: 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        .label {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .field-container {
+            width: 65%;
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
             position: relative;
         }
 
-        .file-import-dropzone:hover {
-            background-color: #FFF8E1;
+        /* Dedicated container spacing adjustments for fields containing inline tracking text blocks */
+        .field-container-stack {
+            flex-direction: column;
+            align-items: flex-end;
         }
 
-        .file-import-dropzone input[type="file"] {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0;
+        .doc-input, .doc-select {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid transparent;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-align: right;
+            padding: 2px 0;
+            background: transparent;
+            transition: border-color 0.2s;
+        }
+
+        .doc-input:focus, .doc-select:focus {
+            border-bottom-color: var(--brand-gold);
+        }
+
+        .doc-select {
             cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 16px;
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%232C3E50' d='M0 0l5 5 5-5z'/></svg>") no-repeat right 4px center;
         }
 
-        .btn-group {
+        /* --- Seamless Flex Wrapper for Country Code + Phone Number Input --- */
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .country-select {
+            border: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-navy);
+            background: transparent;
+            cursor: pointer;
+            padding: 2px 20px 2px 0;
+            width: auto;
+            min-width: 82px;
+            max-width: 95px;
+            text-align: left;
+            appearance: none;
+            -webkit-appearance: none;
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23003366' d='M0 0l5 5 5-5z'/></svg>") no-repeat right 4px center;
+        }
+
+        /* Dedicated Inline Phone Validation Styling Zone */
+        .inline-error-msg {
+            display: none;
+            color: var(--error-red);
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 4px;
+            text-align: right;
+            width: 100%;
+        }
+
+        /* Custom Focal Points */
+        .amount-highlight-input {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: var(--primary-navy) !important;
+        }
+
+        /* Radio Group Alignment Panel */
+        .mode-radio-group {
             display: flex;
             gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .radio-label input {
+            accent-color: var(--primary-navy);
+        }
+
+        /* --- Enclosed Remarks Info Box --- */
+        .remarks-box {
+            background-color: var(--bg-light);
+            border-left: 4px solid var(--brand-gold);
+            padding: 16px 20px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .remarks-inner-label {
+            font-weight: 600;
+            color: var(--primary-navy);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .remarks-textarea {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--text-dark);
+            height: 40px;
+        }
+
+        /* Fixed Academy Declaration Block styling */
+        .academy-declaration-clause {
+            background-color: #FFFDF4;
+            border: 1px dashed #E9D5A1;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 11.5px;
+            color: #5C5236;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .academy-declaration-clause i {
+            color: var(--brand-gold);
+            margin-top: 2px;
+        }
+
+        /* --- Closing Zone Layout --- */
+        .closing-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .verification-zone {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .qr-placeholder {
+            width: 75px;
+            height: 75px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 9px;
+            background: var(--bg-light);
+            font-weight: 500;
+        }
+
+        .timestamp-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .signature-wrap {
+            text-align: center;
+            width: 240px;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid var(--text-dark);
+            margin-bottom: 6px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signature-line img {
+            max-height: 40px;
+            object-fit: contain;
+        }
+
+        .signature-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Footer Styles --- */
+        .receipt-footer {
+            border-top: 1px solid var(--border-light);
+            padding-top: 15px;
+            text-align: center;
+        }
+
+        .thank-you {
+            font-size: 13px;
+            color: var(--brand-gold);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .system-generated-text {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* --- Isolated Controller Gateway Panel --- */
+        .secure-controller-gateway {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gateway-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 10px;
+        }
+
+        .gateway-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .security-lock-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .status-locked {
+            background-color: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FEE2E2;
+        }
+
+        .status-unlocked {
+            background-color: #F0FDF4;
+            color: #16A34A;
+            border: 1px solid #DCFCE7;
+        }
+
+        .action-toolbar {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
             flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            padding: 10px 18px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: all 0.2s;
             color: #FFFFFF;
+            transition: opacity 0.2s;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-            filter: grayscale(1);
-        }
+        .btn:hover { opacity: 0.9; }
+        #download { background-color: var(--primary-navy); }
+        #printBtn { background-color: var(--brand-gold); color: #000000; }
+        #exportExcel { background-color: #16A34A; }
+        #clearForm { background-color: #DC2626; }
 
-        .btn-primary { background-color: var(--primary-navy); }
-        .btn-primary:hover:not(:disabled) { background-color: #001229; }
-
-        .btn-gold { background-color: var(--brand-gold); color: #000000; }
-        .btn-gold:hover:not(:disabled) { background-color: var(--brand-gold-dark); color: #FFFFFF; }
-
-        .btn-success { background-color: var(--success-green); }
-        .btn-success:hover:not(:disabled) { background-color: #15803D; }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--border-light);
-            color: var(--text-dark);
-        }
-        .btn-outline:hover:not(:disabled) { background-color: var(--bg-light); }
-
-        /* --- Validation Summary Metric Cards --- */
-        .validation-metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-        }
-
-        .metric-card {
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-light);
-            background: var(--bg-light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .metric-card .val {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .metric-card .lbl {
-            font-size: 10.5px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .metric-card.valid { background: var(--success-bg); border-color: #BBF7D0; }
-        .metric-card.valid .val { color: var(--success-green); }
-
-        .metric-card.error { background: var(--error-bg); border-color: #FECACA; }
-        .metric-card.error .val { color: var(--error-red); }
-
-        .metric-card.warning { background: var(--warning-bg); border-color: #FDE68A; }
-        .metric-card.warning .val { color: var(--warning-amber); }
-
-        /* --- Validation Errors Table --- */
-        .report-table-wrapper {
-            max-height: 220px;
-            overflow-y: auto;
-            border: 1px solid var(--border-light);
-            border-radius: 6px;
-        }
-
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        .report-table th {
-            background-color: var(--bg-light);
-            color: var(--primary-navy);
-            font-weight: 700;
-            text-align: left;
-            padding: 8px 12px;
-            position: sticky;
-            top: 0;
-            border-bottom: 2px solid var(--border-light);
-        }
-
-        .report-table td {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge.bg-red { background: var(--error-bg); color: var(--error-red); border: 1px solid #FECACA; }
-        .badge.bg-amber { background: var(--warning-bg); color: var(--warning-amber); border: 1px solid #FDE68A; }
-        .badge.bg-green { background: var(--success-bg); color: var(--success-green); border: 1px solid #BBF7D0; }
-
-        /* --- ID CARD CANVAS CONTAINER (PRESERVED EXACT DIMENSIONS & POSITIONS) --- */
-        .card-preview-viewport {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #E2E8F0;
-            padding: 25px;
-            border-radius: 8px;
-            min-height: 480px;
-        }
-
-        /* Fixed Standard Vertical ID Card Dimensions (CR80 ratio base) */
-        .id-card-wrapper {
-            width: 320px;
-            height: 500px;
-            position: relative;
+        /* --- Live Batch Recovery Ledger Table --- */
+        .ledger-container {
             background-color: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            overflow: hidden;
-            background: url('ID.jpg') no-repeat center/cover;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
         }
 
-        /* Essential Photo Overlay Area */
-        .card-photo-box {
-            position: absolute;
-            top: 135px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 105px;
-            height: 125px;
-            border-radius: 6px;
-            border: 2px solid var(--brand-gold);
-            background-color: #F8FAFC;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .card-photo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* EXACT CSS POSITIONING PRESERVED FOR .card-fields */
-        .card-fields {
-            position: absolute;
-            top: 275px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            color: #FFFFFF;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-
-        .card-field-row {
-            display: flex;
-            font-size: 11.5px;
-            line-height: 1.3;
-        }
-
-        .card-field-label {
-            width: 90px;
-            font-weight: 600;
-            color: var(--brand-gold);
-            text-transform: uppercase;
-            font-size: 10.5px;
-            letter-spacing: 0.3px;
-        }
-
-        .card-field-value {
-            flex: 1;
-            font-weight: 600;
-            word-break: break-word;
-        }
-
-        .card-student-name {
-            font-family: 'Cinzel', serif;
-            font-size: 15px;
+        .ledger-title {
+            font-size: 13px;
             font-weight: 700;
-            color: #FFFFFF;
-            text-align: center;
-            margin-bottom: 4px;
+            color: var(--primary-navy);
+            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--brand-gold);
-            padding-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* --- Bulk Generation Grid --- */
-        .bulk-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
         }
 
-        /* --- Copyright Footer --- */
-        .app-footer {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
+        .ledger-table th {
+            background-color: var(--bg-light);
+            color: var(--primary-navy);
+            font-weight: 600;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid var(--border-light);
+            text-transform: uppercase;
+            font-size: 11px;
         }
 
-        /* --- Printing Rules --- */
+        .ledger-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        /* Pure Text Element Previews Container */
+        .print-preview-label {
+            display: none;
+        }
+
+        /* --- Responsive Printing Execution Rule Overrides --- */
         @media print {
-            body { background: #FFFFFF; padding: 0; }
-            .dashboard-grid, .app-header, .secure-gateway, .app-footer, .btn-group, .validation-panel {
+            body {
+                background-color: #FFFFFF;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .secure-controller-gateway, .ledger-container, .inline-error-msg {
                 display: none !important;
             }
-            .bulk-preview-grid {
-                display: block !important;
-            }
-            .id-card-wrapper {
-                page-break-after: always;
-                margin: 0 auto;
+            .receipt-card {
                 box-shadow: none !important;
+                padding: 20px !important;
+                width: 100% !important;
+            }
+            .doc-input, .doc-select, .mode-radio-group, .remarks-textarea, .meta-inline-input, .country-select {
+                display: none !important;
+            }
+            .print-preview-label {
+                display: inline-block !important;
+                font-weight: 600;
+                color: #000000;
+                text-align: right;
+            }
+            .amount-highlight-input + .print-preview-label {
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                color: var(--primary-navy) !important;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-
-    <!-- Header Section -->
-    <header class="app-header">
-        <div class="header-title-wrap">
-            <h1>Alagappa Performing Arts Academy</h1>
-            <p>Student Identification System & Validated Batch Card Generator</p>
-        </div>
-        <i class="fa-solid fa-id-card" style="font-size: 36px; color: var(--brand-gold);"></i>
-    </header>
-
-    <!-- Main Dashboard Split Grid -->
-    <div class="dashboard-grid">
-
-        <!-- Left Controls Column -->
-        <div style="display: flex; flex-direction: column; gap: 25px;">
-
-            <!-- Batch Import & Search Controls -->
-            <div class="panel-card">
-                <div class="panel-heading">
-                    <span>1. Data Import & Selection</span>
-                    <i class="fa-solid fa-file-excel"></i>
-                </div>
-
-                <div class="file-import-dropzone" id="dropzone">
-                    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 28px; color: var(--brand-gold); margin-bottom: 6px;"></i>
-                    <div style="font-size: 13px; font-weight: 600;">Upload Excel or CSV Batch File</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">Supports .xlsx, .xls, and .csv formats</div>
-                    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
-                </div>
-
-                <div class="form-group">
-                    <label for="studentSearch">Search Loaded Student Records</label>
-                    <select id="studentSearch" class="form-control">
-                        <option value="">-- Manual Entry / Select Loaded Student --</option>
-                    </select>
+<div class="container">
+    
+    <div id="receiptBlock" class="receipt-card">
+        
+        <header class="receipt-header">
+            <div class="logo-container">
+                <img src="Logo.png" alt="Logo" onerror="this.style.display='none';">
+            </div>
+            <div class="branding-container">
+                <h1>ALAGAPPA</h1>
+                <div class="tagline">Performing Arts Academy</div>
+                <div style="font-size: 9px; color: var(--text-muted); margin-top: 3px; font-weight: 500; letter-spacing: 0.5px;">
+                    BHARATHANATYAM | CARNATIC VOCAL | NATTUVANGAM
                 </div>
             </div>
-
-            <!-- Student Data Details Form -->
-            <div class="panel-card">
-                <div class="panel-heading">
-                    <span>2. Student Particulars</span>
-                    <i class="fa-solid fa-user-pen"></i>
+            <div class="contact-container">
+                <div class="contact-item">
+                    <span>49, Gangadeeshwar Koil St, Purasawalkam, Chennai - 600084</span>
+                    <i class="fa-solid fa-location-dot"></i>
                 </div>
-
-                <form id="studentForm" onsubmit="return false;">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="studentId">Student ID *</label>
-                            <input type="text" id="studentId" class="form-control" placeholder="e.g. APA2026001">
-                            <span class="error-hint" id="err_studentId">Duplicate or invalid ID</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="studentName">Full Name *</label>
-                            <input type="text" id="studentName" class="form-control" placeholder="e.g. Arun Kumar">
-                            <span class="error-hint" id="err_studentName">Student name is required</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="course">Course Registered *</label>
-                            <input type="text" id="course" class="form-control" placeholder="e.g. Bharatanatyam">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dob">Date of Birth *</label>
-                            <input type="text" id="dob" class="form-control" placeholder="DD/MM/YYYY">
-                            <span class="error-hint" id="err_dob">Invalid DOB date</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="doj">Date of Joining</label>
-                            <input type="text" id="doj" class="form-control" placeholder="MMM YYYY (Default: Aug 2026)">
-                            <span class="error-hint" id="err_doj">Invalid DOJ date</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="phone">Phone Number *</label>
-                            <input type="text" id="phone" class="form-control" placeholder="10-digit mobile number">
-                            <span class="error-hint" id="err_phone">Must contain 10 valid digits</span>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="photoInput">Student Photograph</label>
-                            <input type="file" id="photoInput" class="form-control" accept="image/*">
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Data Validation & Batch Action Panel -->
-            <div class="panel-card validation-panel">
-                <div class="panel-heading">
-                    <span>3. Data Validation & Card Output</span>
-                    <i class="fa-solid fa-shield-check"></i>
-                </div>
-
-                <div class="btn-group">
-                    <button type="button" id="btnValidate" class="btn btn-primary">
-                        <i class="fa-solid fa-check-double"></i> Validate Student Data
-                    </button>
-                    <button type="button" id="btnGenerate" class="btn btn-gold" disabled>
-                        <i class="fa-solid fa-address-card"></i> Generate ID Cards
-                    </button>
-                </div>
-
-                <!-- Validation Metrics Ticker -->
-                <div class="validation-metrics-grid" id="metricsGrid" style="display: none;">
-                    <div class="metric-card">
-                        <span class="val" id="m_total">0</span>
-                        <span class="lbl">Total Parsed</span>
-                    </div>
-                    <div class="metric-card valid">
-                        <span class="val" id="m_valid">0</span>
-                        <span class="lbl">Valid</span>
-                    </div>
-                    <div class="metric-card error">
-                        <span class="val" id="m_errors">0</span>
-                        <span class="lbl">Errors</span>
-                    </div>
-                    <div class="metric-card warning">
-                        <span class="val" id="m_warnings">0</span>
-                        <span class="lbl">Warnings</span>
-                    </div>
-                </div>
-
-                <!-- Error & Warning Audit Report Table -->
-                <div id="reportContainer" style="display: none; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 12px; font-weight: 700; color: var(--primary-navy);">Detailed Exception Log:</div>
-                    <div class="report-table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Row</th>
-                                    <th>ID</th>
-                                    <th>Field</th>
-                                    <th>Severity</th>
-                                    <th>Issue Description</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportTableBody">
-                                <!-- Generated Dynamic Diagnostics Output -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Document Export Utility Triggers -->
-                <div class="btn-group" style="margin-top: 10px; border-top: 1px solid var(--border-light); padding-top: 15px;">
-                    <button type="button" id="btnPrintSingle" class="btn btn-outline"><i class="fa-solid fa-print"></i> Print Live Preview</button>
-                    <button type="button" id="btnPdfSingle" class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> Download Preview PDF</button>
-                    <button type="button" id="btnPdfBulk" class="btn btn-success" style="display: none;"><i class="fa-solid fa-download"></i> Download Validated Batch PDF</button>
+                <div class="contact-item">
+                    <span>Vaishnavi@alagappaarts.com</span>
+                    <i class="fa-solid fa-envelope"></i>
                 </div>
             </div>
+        </header>
 
-        </div>
-
-        <!-- Right Side: Live Visual Preview Zone -->
-        <div class="panel-card" style="align-items: center; justify-content: flex-start;">
-            <div class="panel-heading" style="width: 100%;">
-                <span>Live Card Preview</span>
-                <i class="fa-solid fa-eye"></i>
-            </div>
-
-            <div class="card-preview-viewport">
-                <!-- Visual ID Card Asset Rendering Node -->
-                <div class="id-card-wrapper" id="idCardNode">
-                    <!-- Photograph Frame -->
-                    <div class="card-photo-box">
-                        <img id="cardImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Student Photo">
-                    </div>
-
-                    <!-- PRESERVED POSITIONING CONTAINER (.card-fields) -->
-                    <div class="card-fields">
-                        <div class="card-student-name" id="preview_name">STUDENT NAME</div>
-                        
-                        <div class="card-field-row">
-                            <span class="card-field-label">Student ID:</span>
-                            <span class="card-field-value" id="preview_id">APA2026000</span>
-                        </div>
-                        <div class="card-field-row">
-                            <span class="card-field-label">Course:</span>
-                            <span class="card-field-value" id="preview_course">Bharatanatyam</span>
-                        </div>
-                        <div class="card-field-row">
-                            <span class="card-field-label">D.O.B:</span>
-                            <span class="card-field-value" id="preview_dob">DD/MM/YYYY</span>
-                        </div>
-                        <div class="card-field-row">
-                            <span class="card-field-label">Joining:</span>
-                            <span class="card-field-value" id="preview_doj">Aug 2026</span>
-                        </div>
-                        <div class="card-field-row">
-                            <span class="card-field-label">Phone:</span>
-                            <span class="card-field-value" id="preview_phone">+91 00000 00000</span>
-                        </div>
-                    </div>
-                </div>
+        <div class="title-meta-section">
+            <h2 class="receipt-title">Fee Receipt</h2>
+            <div class="meta-row">
+                <span><strong>Receipt No:</strong> <input type="text" id="receiptNo" class="meta-inline-input system-locked-field" placeholder="APA-2026-0001" readonly tabindex="-1"><span id="print_receiptNo" class="print-preview-label"></span></span>
+                <span><strong>Receipt Date:</strong> <input type="text" id="receiptDate" class="meta-inline-input system-locked-field" style="width:110px;" placeholder="DD/MM/YYYY" readonly tabindex="-1"><span id="print_receiptDate" class="print-preview-label"></span></span>
             </div>
         </div>
+
+        <div class="receipt-grid">
+            
+            <div class="info-card">
+                <h3 class="card-heading">Student & Course Details</h3>
+                
+                <div class="data-row">
+                    <span class="label">Student Name *</span>
+                    <div class="field-container">
+                        <input type="text" id="name" class="doc-input" placeholder="Enter Name">
+                        <span id="print_name" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Phone Number *</span>
+                    <div class="field-container field-container-stack">
+                        <div class="phone-input-wrapper">
+                            <select id="countryCode" class="country-select">
+                                <option value="+91" data-min="10" data-max="10" selected>+91 (IN)</option>
+                                <option value="+1" data-min="10" data-max="10">+1 (US)</option>
+                                <option value="+44" data-min="9" data-max="10">+44 (UK)</option>
+                                <option value="+61" data-min="9" data-max="9">+61 (AU)</option>
+                                <option value="+65" data-min="8" data-max="8">+65 (SG)</option>
+                                <option value="+971" data-min="9" data-max="9">+971 (AE)</option>
+                            </select>
+                            <input type="text" id="phone" class="doc-input" placeholder="Enter phone number" maxlength="30">
+                        </div>
+                        <span id="print_phone" class="print-preview-label"></span>
+                        <div id="phoneError" class="inline-error-msg">Please enter a valid phone number for the selected country.</div>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Course Registered *</span>
+                    <div class="field-container">
+                        <select id="course" class="doc-select">
+                            <option value="" disabled selected hidden>Select Course</option>
+                            <option value="Diploma in Bharatanatyam">Diploma in Bharatanatyam</option>
+                            <option value="Carnatic Vocal">Carnatic Vocal</option>
+                            <option value="Keyboard">Keyboard</option>
+                            <option value="Drawing">Drawing</option>
+                            <option value="Abacus">Abacus</option>
+                        </select>
+                        <span id="print_course" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Academic Year *</span>
+                    <div class="field-container">
+                        <select id="year" class="doc-select">
+                            <option value="" disabled selected hidden>Select Year</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                        </select>
+                        <span id="print_year" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="info-card">
+                <h3 class="card-heading">Payment Information</h3>
+                
+                <div class="data-row">
+                    <span class="label">Amount Paid *</span>
+                    <div class="field-container">
+                        <input type="number" id="paidAmount" class="doc-input amount-highlight-input" placeholder="₹ 0">
+                        <span id="print_paidAmount" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Amount in Words</span>
+                    <div class="field-container">
+                        <input type="text" id="words" class="doc-input" placeholder="Zero Only" readonly>
+                        <span id="print_words" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Payment Date *</span>
+                    <div class="field-container">
+                        <input type="text" id="paymentDate" class="doc-input" placeholder="DD/MM/YYYY">
+                        <span id="print_paymentDate" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Payment Mode *</span>
+                    <div class="field-container">
+                        <div class="mode-radio-group">
+                            <label class="radio-label"><input type="radio" name="payment" value="Cash" checked> CASH</label>
+                            <label class="radio-label"><input type="radio" name="payment" value="UPI"> UPI</label>
+                            <label class="radio-label"><input type="radio" name="payment" value="Card"> CARD</label>
+                            <label class="radio-label"><input type="radio" name="payment" value="Bank"> BANK</label>
+                        </div>
+                        <span id="print_paymentMode" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">TXN / UPI ID</span>
+                    <div class="field-container">
+                        <input type="text" id="transactionId" class="doc-input" placeholder="N/A">
+                        <span id="print_transactionId" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <span class="label">Installment Stage *</span>
+                    <div class="field-container">
+                        <select id="installment" class="doc-select">
+                            <option value="" disabled selected hidden>Select Stage</option>
+                            <option value="Full Payment">Full Payment</option>
+                            <option value="First Installment">First Installment</option>
+                            <option value="Second Installment">Second Installment</option>
+                            <option value="Final Installment">Final Installment</option>
+                        </select>
+                        <span id="print_installment" class="print-preview-label"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="remarks-box">
+            <span class="remarks-inner-label">Remarks & Extra Declarations:</span>
+            <textarea id="remarks" class="remarks-textarea" placeholder="Enter payment references, cheque details, UPI transaction IDs, installment notes, or instructions..."></textarea>
+            <span id="print_remarks" class="print-preview-label" style="text-align: left; width: 100%;"></span>
+        </div>
+
+        <div class="academy-declaration-clause">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+                <strong>Official Notice:</strong> This is a computer-generated fee receipt issued by Alagappa Performing Arts Academy. The payment details recorded herein are considered valid and no physical signature or seal is required.
+            </div>
+        </div>
+
+        <div class="closing-area">
+            <div class="verification-zone">
+                <div class="qr-placeholder">
+                    <i class="fa-solid fa-qrcode" style="font-size: 24px; color: #BDC3C7; margin-bottom: 4px;"></i>
+                    <span>Verified Slip</span>
+                </div>
+                <div class="timestamp-note">
+                    <strong>Generated On:</strong> <span id="lblTimestamp">10-Jul-2026 11:31 AM</span><br>
+                    <strong>Secure Mode:</strong> Active System Gateway
+                </div>
+            </div>
+            
+            <div class="signature-wrap">
+                <div class="signature-line">
+                    <img src="signature.png" alt="Signature Asset" onerror="this.style.opacity='0';">
+                </div>
+                <div class="signature-title">Authorized Signature</div>
+            </div>
+        </div>
+
+        <footer class="receipt-footer">
+            <div class="thank-you">Thank You!</div>
+            <div class="system-generated-text">We appreciate your trust in Alagappa Performing Arts Academy. This receipt is a computer-generated record statement and does not require a physical signature stamp.</div>
+        </footer>
 
     </div>
 
-    <!-- Generated Batch Cards Hidden Grid (for multi-card printing/PDF rendering) -->
-    <div id="bulkContainer" class="bulk-preview-grid" style="display: none;"></div>
+    <div class="secure-controller-gateway">
+        <div class="gateway-header">
+            <div class="gateway-title">
+                <i class="fa-solid fa-shield-halved"></i> Isolated Processing Controller Gateway
+            </div>
+            <div id="lockStatus" class="security-lock-status status-locked">
+                <i class="fa-solid fa-lock"></i> <span>LEDGER WIPEOUT LOCKED</span>
+            </div>
+        </div>
+        
+        <div class="action-toolbar">
+            <button id="download" class="btn"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+            <button id="printBtn" class="btn"><i class="fa-solid fa-print"></i> Print Receipt</button>
+            <button id="exportExcel" class="btn"><i class="fa-solid fa-file-excel"></i> Export Batch Ledger</button>
+            <button id="clearForm" class="btn"><i class="fa-solid fa-trash-can"></i> Reset Form</button>
+        </div>
+    </div>
 
-    <!-- Copyright Footer -->
-    <footer class="app-footer">
-        &copy; 2026 Easwaran Prasanth. All Rights Reserved.
-    </footer>
+    <div class="ledger-container">
+        <div class="ledger-title"><i class="fa-solid fa-list-check"></i> Captured Batch Records Ledger</div>
+        <table class="ledger-table">
+            <thead>
+                <tr>
+                    <th>Receipt No</th>
+                    <th>Student Name</th>
+                    <th>Course</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Mode</th>
+                </tr>
+            </thead>
+            <tbody id="ledgerBody">
+                </tbody>
+        </table>
+    </div>
 
 </div>
 
-<!-- --- JAVASCRIPT VALIDATION & GENERATION LOGIC ENGINE --- -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- Core State Variables ---
-        let rawImportedData = [];
-        let validatedRecords = [];
-        let validationDiagnostics = [];
-        let defaultPhotoBase64 = document.getElementById('cardImg').src;
-
-        // --- DOM Selector References ---
-        const fileInput = document.getElementById('fileInput');
-        const studentSearch = document.getElementById('studentSearch');
-        const btnValidate = document.getElementById('btnValidate');
-        const btnGenerate = document.getElementById('btnGenerate');
-        const btnPdfBulk = document.getElementById('btnPdfBulk');
-        const photoInput = document.getElementById('photoInput');
+        const downloadBtn = document.getElementById('download');
+        const printBtn = document.getElementById('printBtn');
+        const lockStatus = document.getElementById('lockStatus');
+        const phoneInput = document.getElementById('phone');
+        const countryCodeSelect = document.getElementById('countryCode');
+        const phoneError = document.getElementById('phoneError');
         
-        // Form Controls
-        const studentIdEl = document.getElementById('studentId');
-        const studentNameEl = document.getElementById('studentName');
-        const courseEl = document.getElementById('course');
-        const dobEl = document.getElementById('dob');
-        const dojEl = document.getElementById('doj');
-        const phoneEl = document.getElementById('phone');
+        let sessionIsUnlocked = false; 
 
-        // --- 1. DATE FORMATTING & VALIDATION HELPER FUNCTIONS ---
-        const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        // Current real-time clock parsing setup for pre-filling manual fields
+        const now = new Date();
+        const dateString = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+        
+        // Receipt Date is fully assigned and systematically managed here
+        document.getElementById('receiptDate').value = dateString;
+        document.getElementById('paymentDate').value = dateString;
 
-        // Parses multiple date formats and returns an object: { isValid: boolean, dobStr: string, dojStr: string, errorReason: string }
-        function processDateValue(rawVal, isDOJ = false) {
-            if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
-                if (isDOJ) {
-                    // Default rule: Use 'Aug 2026' only when record has no joining date
-                    return { isValid: true, formatted: 'Aug 2026', raw: '' };
-                }
-                return { isValid: false, formatted: '', errorReason: 'Date is missing' };
-            }
+        const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+        document.getElementById('lblTimestamp').innerText = now.toLocaleString('en-US', options).replace(/,/g, '');
 
-            let dateObj = null;
-            let strVal = String(rawVal).trim();
-
-            // Handle Excel Numeric Serial Date Values
-            if (!isNaN(strVal) && Number(strVal) > 25000) {
-                const serial = Number(strVal);
-                const utcDays = Math.floor(serial - 25569);
-                const utcValue = utcDays * 86400;
-                const dateInfo = new Date(utcValue * 1000);
-                if (!isNaN(dateInfo.getTime())) {
-                    dateObj = dateInfo;
-                }
-            }
-
-            // Standard Delimiter Matching (DD/MM/YYYY, D/M/YYYY, YYYY-MM-DD)
-            if (!dateObj) {
-                if (strVal.includes('/')) {
-                    const parts = strVal.split('/');
-                    if (parts.length === 3) {
-                        const p1 = parseInt(parts[0], 10);
-                        const p2 = parseInt(parts[1], 10);
-                        const p3 = parseInt(parts[2], 10);
-                        
-                        // Check if YYYY/MM/DD vs DD/MM/YYYY
-                        if (p1 > 1000) {
-                            dateObj = new Date(p1, p2 - 1, p3);
-                        } else {
-                            dateObj = new Date(p3, p2 - 1, p1);
-                            // Verify day bounding
-                            if (dateObj.getDate() !== p1) dateObj = null; 
-                        }
-                    }
-                } else if (strVal.includes('-')) {
-                    const parts = strVal.split('-');
-                    if (parts.length === 3) {
-                        const p1 = parseInt(parts[0], 10);
-                        const p2 = parseInt(parts[1], 10);
-                        const p3 = parseInt(parts[2], 10);
-                        if (p1 > 1000) {
-                            dateObj = new Date(p1, p2 - 1, p3);
-                        } else {
-                            dateObj = new Date(p3, p2 - 1, p1);
-                        }
-                    }
+        // Click security badge widget to toggle ledger clearing configurations
+        lockStatus.addEventListener('click', () => {
+            if(!sessionIsUnlocked) {
+                let verification = prompt("Enter Administrative Security PIN to unlock ledger clearing functions:");
+                if(verification === "1234") { 
+                    sessionIsUnlocked = true;
+                    lockStatus.className = "security-lock-status status-unlocked";
+                    lockStatus.innerHTML = '<i class="fa-solid fa-lock-open"></i> <span>LEDGER WIPEOUT ALLOWED</span>';
                 } else {
-                    // Try direct Date construction for string representations (e.g. "August 2026", "12 May 2004")
-                    const parsedDirect = new Date(strVal);
-                    if (!isNaN(parsedDirect.getTime())) {
-                        dateObj = parsedDirect;
-                    }
+                    alert("Invalid Admin PIN. Access Denied.");
                 }
-            }
-
-            if (!dateObj || isNaN(dateObj.getTime())) {
-                return { isValid: false, formatted: strVal, errorReason: 'Malformed date format' };
-            }
-
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            const now = new Date();
-
-            // Reject impossible dates and future Date of Births
-            if (!isDOJ && dateObj > now) {
-                return { isValid: false, formatted: strVal, errorReason: 'Future Date of Birth is impossible' };
-            }
-
-            if (year < 1920 || year > 2035) {
-                return { isValid: false, formatted: strVal, errorReason: 'Year out of valid range' };
-            }
-
-            if (isDOJ) {
-                // Display DOJ as MMM YYYY (e.g., Aug 2026)
-                const monthName = MONTH_NAMES[dateObj.getMonth()];
-                return { isValid: true, formatted: `${monthName} ${year}` };
             } else {
-                // Display DOB as DD/MM/YYYY
-                return { isValid: true, formatted: `${day}/${month}/${year}` };
-            }
-        }
-
-        // --- 2. PHONE NUMBER VALIDATION ENGINE ---
-        function processPhoneNumber(rawVal) {
-            if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
-                return { isValid: false, digits: '', errorReason: 'Phone number missing' };
-            }
-
-            let strVal = String(rawVal).trim();
-            // Extract numeric digits only
-            const digitsOnly = strVal.replace(/\D/g, '');
-
-            // For Indian numbers: expect 10 digits (or 12 if including '91' country prefix)
-            if (digitsOnly.length === 10) {
-                return { isValid: true, digits: digitsOnly, original: strVal };
-            } else if (digitsOnly.length === 12 && digitsOnly.startsWith('91')) {
-                return { isValid: true, digits: digitsOnly.slice(2), original: strVal };
-            } else {
-                return { isValid: false, digits: digitsOnly, errorReason: `Contains ${digitsOnly.length} digits (10 required)` };
-            }
-        }
-
-        // --- 3. BATCH DATA VALIDATION ENGINE ---
-        function runMasterValidation(dataset) {
-            validationDiagnostics = [];
-            validatedRecords = [];
-
-            const idTracker = new Map(); // Tracks duplicate Student IDs and their respective row indices
-
-            // Step A: Map Student ID duplicates
-            dataset.forEach((row, index) => {
-                const excelRow = index + 2; // Row number in spreadsheet (accounting for header)
-                const rawId = row['Student ID'] || row['StudentID'] || row['ID'] || row['Enrollment No'] || '';
-                const cleanId = String(rawId).trim().toUpperCase();
-
-                if (cleanId) {
-                    if (!idTracker.has(cleanId)) {
-                        idTracker.set(cleanId, [excelRow]);
-                    } else {
-                        idTracker.get(cleanId).push(excelRow);
-                    }
-                }
-            });
-
-            // Step B: Comprehensive row-by-row field diagnostics
-            let validCount = 0;
-            let errorCount = 0;
-            let warningCount = 0;
-
-            dataset.forEach((row, index) => {
-                const excelRow = index + 2;
-                let rowHasError = false;
-                let rowHasWarning = false;
-
-                // Extract Fields with multi-header alias support
-                const rawId = row['Student ID'] || row['StudentID'] || row['ID'] || row['Enrollment No'] || '';
-                const rawName = row['Full Name'] || row['Student Name'] || row['Name'] || '';
-                const rawCourse = row['Course'] || row['Program'] || 'Bharatanatyam';
-                const rawDOB = row['DOB'] || row['Date of Birth'] || row['Birth Date'];
-                const rawDOJ = row['DOJ'] || row['Date of Joining'] || row['Joining Date'];
-                const rawPhone = row['Phone'] || row['Phone Number'] || row['Mobile'] || row['Contact'];
-                const photoUrl = row['Photo'] || row['Photo URL'] || defaultPhotoBase64;
-
-                const cleanId = String(rawId).trim();
-                const cleanName = String(rawName).trim();
-
-                // Validation 1: Student ID Presence & Uniqueness
-                if (!cleanId) {
-                    rowHasError = true;
-                    validationDiagnostics.push({ row: excelRow, id: 'N/A', field: 'Student ID', type: 'ERROR', msg: 'Missing Student ID' });
-                } else if (idTracker.has(cleanId.toUpperCase()) && idTracker.get(cleanId.toUpperCase()).length > 1) {
-                    rowHasError = true;
-                    const rowsList = idTracker.get(cleanId.toUpperCase()).join(', ');
-                    validationDiagnostics.push({ row: excelRow, id: cleanId, field: 'Student ID', type: 'ERROR', msg: `Duplicate ID found on Excel Rows: [${rowsList}]` });
-                }
-
-                // Validation 2: Missing Student Name
-                if (!cleanName) {
-                    rowHasError = true;
-                    validationDiagnostics.push({ row: excelRow, id: cleanId || 'N/A', field: 'Full Name', type: 'ERROR', msg: 'Student name is missing or contains only spaces' });
-                }
-
-                // Validation 3: Date of Birth Checks
-                const dobResult = processDateValue(rawDOB, false);
-                if (!dobResult.isValid) {
-                    rowHasError = true;
-                    validationDiagnostics.push({ row: excelRow, id: cleanId || 'N/A', field: 'Date of Birth', type: 'ERROR', msg: dobResult.errorReason });
-                }
-
-                // Validation 4: Date of Joining Checks
-                const dojResult = processDateValue(rawDOJ, true);
-                if (!dojResult.isValid) {
-                    rowHasError = true;
-                    validationDiagnostics.push({ row: excelRow, id: cleanId || 'N/A', field: 'Date of Joining', type: 'ERROR', msg: dojResult.errorReason });
-                }
-
-                // Validation 5: Phone Number Rules
-                const phoneResult = processPhoneNumber(rawPhone);
-                if (!phoneResult.isValid) {
-                    rowHasError = true;
-                    validationDiagnostics.push({ row: excelRow, id: cleanId || 'N/A', field: 'Phone Number', type: 'ERROR', msg: phoneResult.errorReason });
-                }
-
-                // Record Assembly
-                const processedRecord = {
-                    excelRow: excelRow,
-                    studentId: cleanId,
-                    studentName: cleanName,
-                    course: String(rawCourse).trim(),
-                    dob: dobResult.formatted,
-                    doj: dojResult.formatted,
-                    phone: phoneResult.isValid ? (phoneResult.original || phoneResult.digits) : String(rawPhone || ''),
-                    photo: photoUrl,
-                    isValid: !rowHasError
-                };
-
-                if (rowHasError) {
-                    errorCount++;
-                } else {
-                    validCount++;
-                }
-
-                validatedRecords.push(processedRecord);
-            });
-
-            // Step C: Render UI Validation Metrics & Report
-            document.getElementById('m_total').innerText = dataset.length;
-            document.getElementById('m_valid').innerText = validCount;
-            document.getElementById('m_errors').innerText = errorCount;
-            document.getElementById('m_warnings').innerText = warningCount;
-            document.getElementById('metricsGrid').style.display = 'grid';
-
-            renderDiagnosticsTable();
-
-            // Enable card generation ONLY if valid records exist
-            btnGenerate.disabled = (validCount === 0);
-            btnPdfBulk.style.display = (validCount > 0) ? 'inline-flex' : 'none';
-
-            return (errorCount === 0);
-        }
-
-        function renderDiagnosticsTable() {
-            const tbody = document.getElementById('reportTableBody');
-            tbody.innerHTML = '';
-
-            if (validationDiagnostics.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--success-green); font-weight:600; padding: 12px;"><i class="fa-solid fa-circle-check"></i> All student records passed validation checks perfectly!</td></tr>`;
-            } else {
-                validationDiagnostics.forEach(diag => {
-                    const tr = document.createElement('tr');
-                    const badgeClass = diag.type === 'ERROR' ? 'bg-red' : 'bg-amber';
-                    tr.innerHTML = `
-                        <td><b>${diag.row}</b></td>
-                        <td>${diag.id}</td>
-                        <td>${diag.field}</td>
-                        <td><span class="badge ${badgeClass}">${diag.type}</span></td>
-                        <td>${diag.msg}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-            document.getElementById('reportContainer').style.display = 'flex';
-        }
-
-        // --- 4. FORM LIVE PREVIEW SYNC ENGINE ---
-        function updateLivePreviewFromForm() {
-            const sId = studentIdEl.value.trim() || 'APA2026000';
-            const sName = studentNameEl.value.trim() || 'STUDENT NAME';
-            const sCourse = courseEl.value.trim() || 'Bharatanatyam';
-            const sDob = dobEl.value.trim() || 'DD/MM/YYYY';
-            const sDoj = dojEl.value.trim() || 'Aug 2026';
-            const sPhone = phoneEl.value.trim() || '+91 00000 00000';
-
-            document.getElementById('preview_id').innerText = sId;
-            document.getElementById('preview_name').innerText = sName;
-            document.getElementById('preview_course').innerText = sCourse;
-            document.getElementById('preview_dob').innerText = sDob;
-            document.getElementById('preview_doj').innerText = sDoj;
-            document.getElementById('preview_phone').innerText = sPhone;
-        }
-
-        // Form Event Listeners for real-time live preview updates
-        [studentIdEl, studentNameEl, courseEl, dobEl, dojEl, phoneEl].forEach(element => {
-            element.addEventListener('input', updateLivePreviewFromForm);
-        });
-
-        // Photo Upload Handler
-        photoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    document.getElementById('cardImg').src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
+                sessionIsUnlocked = false;
+                lockStatus.className = "security-lock-status status-locked";
+                lockStatus.innerHTML = '<i class="fa-solid fa-lock"></i> <span>LEDGER WIPEOUT LOCKED</span>';
             }
         });
 
-        // --- 5. EXCEL & CSV FILE IMPORT HANDLER ---
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        // --- 1. DYNAMIC RECEIPT GENERATION COUNTER ---
+        function updateReceiptNumberSequence() {
+            const currentRecords = JSON.parse(localStorage.getItem('receiptLogs')) || [];
+            const nextSequenceNumber = currentRecords.length + 1;
+            const formattedNumber = String(nextSequenceNumber).padStart(4, '0');
+            document.getElementById('receiptNo').value = `APA-2026-${formattedNumber}`;
+        }
 
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // Parse sheet to JSON array
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        // --- 2. NUMBER TO WORDS TRANSLATION CONVERTER ---
+        function convertNumberToWords(amount) {
+            if (amount === 0) return 'Zero Only';
+            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            
+            if ((amount = amount.toString()).length > 9) return 'Overflow';
+            let n = ('000000000' + amount).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return ''; 
+            
+            let str = '';
+            str += n[1] != 0 ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += n[2] != 0 ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += n[3] != 0 ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += n[4] != 0 ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += n[5] != 0 ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            
+            return str.trim() + ' Only';
+        }
 
-                    if (!jsonRows || jsonRows.length === 0) {
-                        alert('The uploaded file contains no readable data rows.');
-                        return;
-                    }
+        // --- 3. DYNAMIC SANITIZED COUNTRY PHONE VALIDATION ENGINE ---
+        function runLivePhoneVerification() {
+            const rawValue = phoneInput.value;
+            
+            // Strip away formatting definitions (plus signs, spaces, hyphens, brackets) to extract only raw index digits
+            const sanitizedDigits = rawValue.replace(/[\+\s\-\(\)]/g, '');
+            
+            // If completely empty, hide message layer but intercept submit states
+            if (rawValue.trim().length === 0) {
+                phoneError.style.display = 'none';
+                return false;
+            }
 
-                    rawImportedData = jsonRows;
+            // Extract validation length constraints from attributes
+            const selectedOption = countryCodeSelect.options[countryCodeSelect.selectedIndex];
+            const minLength = parseInt(selectedOption.getAttribute('data-min'), 10);
+            const maxLength = parseInt(selectedOption.getAttribute('data-max'), 10);
 
-                    // Populate Dropdown Search Menu
-                    studentSearch.innerHTML = '<option value="">-- Manual Entry / Select Loaded Student --</option>';
-                    rawImportedData.forEach((row, idx) => {
-                        const id = row['Student ID'] || row['StudentID'] || row['ID'] || `REC-${idx+1}`;
-                        const name = row['Full Name'] || row['Student Name'] || row['Name'] || `Student ${idx+1}`;
-                        const opt = document.createElement('option');
-                        opt.value = idx;
-                        opt.innerText = `${id} - ${name}`;
-                        studentSearch.appendChild(opt);
-                    });
+            // Validate numeric structural integrity
+            if (sanitizedDigits.length < minLength || sanitizedDigits.length > maxLength) {
+                phoneError.style.display = 'block';
+                return false;
+            } else {
+                phoneError.style.display = 'none';
+                return true;
+            }
+        }
 
-                    // Automatically Trigger Data Validation
-                    runMasterValidation(rawImportedData);
+        // --- 4. FORM INPUT MASTER VALIDATION ENGINE ---
+        function runReceiptFormValidation() {
+            const name = document.getElementById('name').value.trim();
+            const course = document.getElementById('course').value;
+            const year = document.getElementById('year').value;
+            const paidAmount = document.getElementById('paidAmount').value.trim();
+            const paymentDate = document.getElementById('paymentDate').value.trim();
+            const receiptDate = document.getElementById('receiptDate').value.trim();
+            const installment = document.getElementById('installment').value;
 
-                } catch (err) {
-                    console.error(err);
-                    alert('Error parsing uploaded file. Please verify file syntax.');
-                }
+            // 1. Mandatory Field Presence Check
+            if (!name || !course || !year || !paidAmount || !paymentDate || !receiptDate || !installment) {
+                alert("Please complete all mandatory fields before printing or downloading the receipt.");
+                return false;
+            }
+
+            // 2. Strict global phone verification checkout interceptor
+            if (!runLivePhoneVerification()) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // --- 5. SYNC INTERACTIVE FIELD LAYOUT VALUES TO PURE TEXT PRINT TAGS ---
+        function syncPrintPreviews() {
+            document.getElementById('print_receiptNo').innerText = document.getElementById('receiptNo').value || 'N/A';
+            document.getElementById('print_receiptDate').innerText = document.getElementById('receiptDate').value || 'N/A';
+            document.getElementById('print_name').innerText = document.getElementById('name').value || 'N/A';
+            
+            // Capture typed field layouts safely for document presentation output
+            const rawPhoneValue = phoneInput.value.trim();
+            const selectedPrefix = countryCodeSelect.value;
+            
+            // Clean up to prevent duplicate country prefix if user manually entered it inside the input box
+            let formattedPhoneOutput = rawPhoneValue;
+            if (rawPhoneValue.startsWith(selectedPrefix)) {
+                formattedPhoneOutput = rawPhoneValue.slice(selectedPrefix.length).trim();
+            }
+            
+            const combinedPhone = `${selectedPrefix} ${formattedPhoneOutput}`;
+            document.getElementById('print_phone').innerText = rawPhoneValue ? combinedPhone : 'N/A';
+            
+            document.getElementById('print_course').innerText = document.getElementById('course').value || 'N/A';
+            document.getElementById('print_year').innerText = document.getElementById('year').value || 'N/A';
+            document.getElementById('print_paidAmount').innerText = document.getElementById('paidAmount').value ? '₹ ' + parseFloat(document.getElementById('paidAmount').value).toLocaleString('en-IN') : '₹ 0';
+            document.getElementById('print_words').innerText = document.getElementById('words').value || 'Zero Only';
+            document.getElementById('print_paymentDate').innerText = document.getElementById('paymentDate').value || 'N/A';
+            document.getElementById('print_transactionId').innerText = document.getElementById('transactionId').value || 'N/A';
+            document.getElementById('print_installment').innerText = document.getElementById('installment').value || 'N/A';
+            
+            const remarksContent = document.getElementById('remarks').value.trim();
+            document.getElementById('print_remarks').innerText = remarksContent ? remarksContent : 'No Remarks';
+            
+            const checkedPayment = document.querySelector('input[name="payment"]:checked');
+            document.getElementById('print_paymentMode').innerText = checkedPayment ? checkedPayment.value : 'Cash';
+        }
+
+        // --- 6. ADVANCED COMPREHENSIVE DUPLICATE RECORD IDENTIFIER ---
+        function isDuplicateRecord() {
+            const currentRecords = JSON.parse(localStorage.getItem('receiptLogs')) || [];
+            
+            const activeReceiptNo = document.getElementById('receiptNo').value;
+            const activeName = document.getElementById('name').value.trim().toLowerCase();
+            const activeCourse = document.getElementById('course').value;
+            const activeInstallment = document.getElementById('installment').value;
+            const activePhone = phoneInput.value.replace(/[\+\s\-\(\)]/g, '');
+
+            return currentRecords.some(record => {
+                // Criteria 1: Receipt Number Match
+                const receiptMatch = (record.receiptNo === activeReceiptNo);
+                
+                // Criteria 2: Matching unique student phone payload
+                const phoneMatch = (activePhone && record.phoneRaw === activePhone);
+                
+                // Criteria 3: Duplicate Student Payment Event Match (Same Name + Same Class Track + Same Payment Milestone Stage)
+                const paymentInstanceMatch = (
+                    record.studentName.trim().toLowerCase() === activeName &&
+                    record.course === activeCourse &&
+                    record.installmentStage === activeInstallment
+                );
+
+                return receiptMatch || phoneMatch || paymentInstanceMatch;
+            });
+        }
+
+        // --- 7. DATA LOGGING FOR BATCH TRACKING ---
+        function logReceiptData() {
+            if (isDuplicateRecord()) {
+                return false;
+            }
+
+            const activeReceiptNo = document.getElementById('receiptNo').value;
+            const rawPhoneValue = phoneInput.value.replace(/[\+\s\-\(\)]/g, '');
+
+            const record = {
+                receiptNo: activeReceiptNo,
+                studentName: document.getElementById('name').value || 'N/A',
+                phoneRaw: rawPhoneValue || '',
+                course: document.getElementById('course').value || 'N/A',
+                installmentStage: document.getElementById('installment').value || 'N/A',
+                paidAmount: document.getElementById('paidAmount').value || '0',
+                paymentMode: document.querySelector('input[name="payment"]:checked')?.value || 'Cash'
             };
-            reader.readAsArrayBuffer(file);
+
+            let currentRecords = JSON.parse(localStorage.getItem('receiptLogs')) || [];
+            currentRecords.push(record);
+            localStorage.setItem('receiptLogs', JSON.stringify(currentRecords));
+            
+            updateLiveLedgerDisplay();
+            updateReceiptNumberSequence();
+            return true;
+        }
+
+        function updateLiveLedgerDisplay() {
+            const currentRecords = JSON.parse(localStorage.getItem('receiptLogs')) || [];
+            const tbody = document.getElementById('ledgerBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = currentRecords.length === 0 ? '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No records captured yet.</td></tr>' : '';
+            
+            currentRecords.forEach((rec) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><b>${rec.receiptNo}</b></td><td>${rec.studentName}</td><td>${rec.course}</td><td>₹${parseFloat(rec.paidAmount).toLocaleString('en-IN')}</td><td>${rec.paymentMode}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- SANITATION CAPABILITIES & ACTION FILTERS ---
+        phoneInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9\s\-\(\)\+]/g, '');
+            runLivePhoneVerification();
         });
 
-        // Dropdown menu selection listener
-        studentSearch.addEventListener('change', (e) => {
-            const idx = e.target.value;
-            if (idx === '') return;
-
-            const record = validatedRecords[idx];
-            if (record) {
-                studentIdEl.value = record.studentId;
-                studentNameEl.value = record.studentName;
-                courseEl.value = record.course;
-                dobEl.value = record.dob;
-                dojEl.value = record.doj;
-                phoneEl.value = record.phone;
-                if (record.photo) {
-                    document.getElementById('cardImg').src = record.photo;
-                }
-                updateLivePreviewFromForm();
-            }
+        countryCodeSelect.addEventListener('change', () => {
+            runLivePhoneVerification();
         });
 
-        // --- 6. EXPLICIT BUTTON VALIDATION & GENERATION ACTIONS ---
-        btnValidate.addEventListener('click', () => {
-            if (rawImportedData.length > 0) {
-                const isValid = runMasterValidation(rawImportedData);
-                if (isValid) {
-                    alert('Data validation successful! All records pass compliance standards.');
-                } else {
-                    alert('Validation completed with issues. Please review the detailed exception log below.');
-                }
+        document.getElementById('paidAmount').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val) && val >= 0) {
+                document.getElementById('words').value = convertNumberToWords(val);
             } else {
-                // Validate individual manual entry form
-                const manualRecord = [{
-                    'Student ID': studentIdEl.value,
-                    'Full Name': studentNameEl.value,
-                    'Course': courseEl.value,
-                    'DOB': dobEl.value,
-                    'DOJ': dojEl.value,
-                    'Phone': phoneEl.value
-                }];
-                const isValid = runMasterValidation(manualRecord);
-                if (isValid) {
-                    alert('Manual entry record is fully valid.');
-                }
+                document.getElementById('words').value = '';
             }
         });
 
-        btnGenerate.addEventListener('click', () => {
-            const validOnly = validatedRecords.filter(r => r.isValid);
-            if (validOnly.length === 0) {
-                alert('No valid student records available to generate cards.');
+        // --- 8. INSTANT OPEN DOWNLOAD PDF ENGINE ---
+        downloadBtn.addEventListener('click', async () => {
+            if (!runReceiptFormValidation()) return;
+
+            // Block execution completely if data records flag a system duplicate match
+            if (isDuplicateRecord()) {
+                alert("Duplicate record detected. This payment has already been recorded.");
                 return;
             }
 
-            const bulkContainer = document.getElementById('bulkContainer');
-            bulkContainer.innerHTML = '';
+            syncPrintPreviews();
+            const targetElement = document.getElementById('receiptBlock');
 
-            // Render batch preview grid excluding records with errors
-            validOnly.forEach(rec => {
-                const cardClone = document.getElementById('idCardNode').cloneNode(true);
-                cardClone.removeAttribute('id');
-                
-                cardClone.querySelector('#preview_id').innerText = rec.studentId;
-                cardClone.querySelector('#preview_name').innerText = rec.studentName;
-                cardClone.querySelector('#preview_course').innerText = rec.course;
-                cardClone.querySelector('#preview_dob').innerText = rec.dob;
-                cardClone.querySelector('#preview_doj').innerText = rec.doj;
-                cardClone.querySelector('#preview_phone').innerText = rec.phone;
-                
-                if (rec.photo) {
-                    cardClone.querySelector('.card-photo-box img').src = rec.photo;
-                }
-
-                bulkContainer.appendChild(cardClone);
-            });
-
-            bulkContainer.style.display = 'grid';
-            alert(`Generated ${validOnly.length} ID cards for all validated records. Excluded ${validatedRecords.length - validOnly.length} error records.`);
-        });
-
-        // --- 7. PDF DOWNLOAD & PRINT EXPORT LOGIC ---
-        // Download Single Live Preview PDF
-        document.getElementById('btnPdfSingle').addEventListener('click', async () => {
-            const cardNode = document.getElementById('idCardNode');
             try {
-                const canvas = await html2canvas(cardNode, { scale: 3, useCORS: true, backgroundColor: null });
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', [54, 85.6]); // Standard CR80 Card Dimension
-                pdf.addImage(imgData, 'PNG', 0, 0, 54, 85.6);
+                const inputs = targetElement.querySelectorAll('input, select, textarea, .mode-radio-group, .country-select');
+                const previews = targetElement.querySelectorAll('.print-preview-label');
                 
-                const rawName = studentNameEl.value.trim() || 'Student';
-                const cleanName = rawName.replace(/[^a-zA-Z0-9]/g, '');
-                pdf.save(`${cleanName}_ID_Card.pdf`);
+                inputs.forEach(el => el.style.setProperty('display', 'none', 'important'));
+                previews.forEach(el => el.style.setProperty('display', 'inline-block', 'important'));
+
+                await new Promise(resolve => setTimeout(resolve, 150));
+
+                const canvas = await html2canvas(targetElement, { 
+                    scale: 2.5, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                inputs.forEach(el => el.style.removeProperty('display'));
+                previews.forEach(el => el.style.removeProperty('display'));
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/png');
+                
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const paddingSpace = 10;
+                const useWidth = pdfWidth - (paddingSpace * 2);
+                const pdfHeight = (canvas.height * useWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', paddingSpace, paddingSpace, useWidth, pdfHeight);
+                
+                const rawStudentName = document.getElementById('name').value.trim();
+                const cleanedStudentName = rawStudentName.replace(/[^a-zA-Z0-9]/g, '');
+                const activeReceiptNo = document.getElementById('receiptNo').value;
+                const lastFourDigits = activeReceiptNo.slice(-4);
+                
+                pdf.save(`${cleanedStudentName}_${lastFourDigits}.pdf`);
+
+                logReceiptData();
             } catch (err) {
                 console.error(err);
-                alert('Error generating individual PDF.');
+                alert("PDF rendering framework execution breakdown.");
             }
         });
 
-        // Print Single Live Preview
-        document.getElementById('btnPrintSingle').addEventListener('click', () => {
-            window.print();
-        });
+        // --- 9. PRINT CAPABILITY CONTROLLER ENGINE ---
+        printBtn.addEventListener('click', () => {
+            if (!runReceiptFormValidation()) return;
 
-        // Download Bulk Validated PDF
-        btnPdfBulk.addEventListener('click', async () => {
-            const validOnly = validatedRecords.filter(r => r.isValid);
-            if (validOnly.length === 0) return alert('No valid records to export.');
-
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const bulkContainer = document.getElementById('bulkContainer');
-            const cardNodes = bulkContainer.querySelectorAll('.id-card-wrapper');
-
-            if (cardNodes.length === 0) {
-                alert('Please click "Generate ID Cards" first to assemble the batch collection.');
+            if (isDuplicateRecord()) {
+                alert("Duplicate record detected. This payment has already been recorded.");
                 return;
             }
 
-            for (let i = 0; i < cardNodes.length; i++) {
-                const canvas = await html2canvas(cardNodes[i], { scale: 2.5, useCORS: true });
-                const imgData = canvas.toDataURL('image/png');
-                
-                if (i > 0) pdf.addPage();
-                // Render centered on A4
-                pdf.addImage(imgData, 'PNG', 55, 40, 100, 156.25);
-            }
-
-            pdf.save('Validated_Alagappa_ID_Cards_Batch.pdf');
+            syncPrintPreviews();
+            logReceiptData();
+            setTimeout(() => {
+                window.print();
+            }, 150);
         });
 
+        // --- 10. BATCH LEDGER EXPORT LOGIC & PIN SECURED WIPE HOOK ---
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            const currentRecords = JSON.parse(localStorage.getItem('receiptLogs')) || [];
+            if (currentRecords.length === 0) return alert("There are no captured ledger logs available to compile!");
+            
+            let csv = "Receipt No,Student Name,Course,Amount Paid,Payment Mode\n";
+            currentRecords.forEach(r => {
+                csv += `"${r.receiptNo}","${r.studentName}","${r.course}","${r.paidAmount}","${r.paymentMode}"\n`;
+            });
+            
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = "Academy_Batch_Ledger_Records.csv";
+            link.click();
+            
+            setTimeout(() => {
+                if (confirm("Do you want to clear and wipe out the ledger database tables?")) {
+                    if (!sessionIsUnlocked) {
+                        alert("Action Blocked: Dropping batch data tables requires security authorization. Click the security status badge at the top to clear.");
+                    } else {
+                        localStorage.removeItem('receiptLogs');
+                        updateLiveLedgerDisplay();
+                        updateReceiptNumberSequence();
+                        alert("Database records dropped successfully.");
+                    }
+                }
+            }, 300);
+        });
+
+        // --- 11. STRUCTURAL ENTRY FIELD RESET ---
+        document.getElementById('clearForm').addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear the active form inputs?")) {
+                document.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (el.type === 'radio') {
+                        if (el.value === 'Cash') el.checked = true;
+                    } else {
+                        if (el.id !== 'receiptNo' && el.id !== 'receiptDate') {
+                            el.value = '';
+                        }
+                    }
+                });
+                countryCodeSelect.value = "+91";
+                phoneError.style.display = 'none';
+                document.getElementById('paymentDate').value = dateString;
+                updateReceiptNumberSequence();
+            }
+        });
+
+        // Bootstrapping Initial Sequence Metrics
+        updateLiveLedgerDisplay();
+        updateReceiptNumberSequence();
     });
 </script>
 </body>
