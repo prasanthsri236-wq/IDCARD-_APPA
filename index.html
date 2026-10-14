@@ -432,8 +432,17 @@
       max-width: 1400px;
       margin: 0 auto;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .footer-top {
+      display: flex;
       align-items: center;
       justify-content: space-between;
+      width: 100%;
       gap: 16px;
     }
 
@@ -462,6 +471,11 @@
     .footer-copy {
       font-size: 0.75rem;
       font-weight: 600;
+      color: #94A3B8;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
+      width: 100%;
+      letter-spacing: 0.3px;
     }
 
     /* RESPONSIVE DESIGN */
@@ -494,7 +508,7 @@
         transform-origin: center center;
       }
 
-      .footer-container {
+      .footer-top {
         flex-direction: column;
         text-align: center;
         gap: 10px;
@@ -676,12 +690,15 @@
   <!-- FOOTER -->
   <footer class="app-footer">
     <div class="footer-container">
-      <img src="./logo2%20-%20Copy.png" alt="APAA Secondary Logo" class="footer-logo" />
-      <div class="footer-info">
-        <div class="footer-title">ALAGAPPA PERFORMING ARTS ACADEMY</div>
-        <div class="footer-sub">Student ID Card Management System</div>
+      <div class="footer-top">
+        <img src="./logo2%20-%20Copy.png" alt="APAA Secondary Logo" class="footer-logo" />
+        <div class="footer-info">
+          <div class="footer-title">ALAGAPPA PERFORMING ARTS ACADEMY</div>
+          <div class="footer-sub">Student ID Card Management System</div>
+        </div>
+        <div style="width: 32px;"></div>
       </div>
-      <div class="footer-copy">&copy; 2026</div>
+      <div class="footer-copy">&copy; 2026 Easwaran Prasanth. All Rights Reserved.</div>
     </div>
   </footer>
 
